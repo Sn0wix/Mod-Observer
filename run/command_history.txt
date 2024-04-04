@@ -1,6 +1,0 @@
-/give Player306 minecraft:command_block
-/time set day
-/deop Player306
-/gamerule doDaylightCycle false
-/gamerule doWeatherCycle false
-/login heslo

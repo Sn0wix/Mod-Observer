@@ -1,0 +1,6 @@
+name: ModObserverPlugin
+version: '${project.version}'
+main: net.sn0wix_.modObserverPlugin.ModObserverPlugin
+api-version: '1.20'
+authors: [Sn0wix_]
+description: Checks if the player has installed only whitelisted mods. Requires ModObserver to be installed on the client.

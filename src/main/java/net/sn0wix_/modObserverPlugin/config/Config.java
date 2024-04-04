@@ -6,7 +6,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import java.util.List;
 
 public class Config {
-    //Add optiongs: enableCommandConfiguration, clearJoinAndLeaveMessages
     public static Mode MODE;
     public static List<String> WHITELISTED_MODS;
     public static List<String> BLACKLISTED_MODS;

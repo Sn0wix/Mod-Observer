@@ -15,6 +15,7 @@ public final class ModObserverPlugin extends JavaPlugin {
     public static final String MOD_ID = "mod_observer";
 
     //TODO command configuring
+    //TODO add config optiongs: enableCommandConfiguration, clearJoinAndLeaveMessages
     @Override
     public void onEnable() {
         //Initialize logger

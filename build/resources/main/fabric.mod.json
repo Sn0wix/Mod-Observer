@@ -1,0 +1,28 @@
+{
+	"schemaVersion": 1,
+	"id": "mod_observer",
+	"version": "1.0.0",
+	"name": "Mod Observer",
+	"description": "Monitors what mods are loaded and upon joining a server, tells, what mods are loaded.",
+	"authors": [
+		"Sn0wix_"
+	],
+	"contact": {
+		"homepage": "",
+		"sources": ""
+	},
+	"license": "All rights reserved",
+	"icon": "assets/mod_observer/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"net.sn0wix_.ModObserver"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.15.7",
+		"minecraft": "~1.20.4",
+		"java": ">=17",
+		"fabric-api": "*"
+	}
+}

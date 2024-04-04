@@ -19,7 +19,6 @@ public class ModObserver implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("mod_observer");
     public static final Identifier MODS_FOR_APPROVAL_PACKET = new Identifier(MOD_ID, "mods_for_approval");
 
-    //test
     @Override
     public void onInitializeClient() {
         ClientConfigurationConnectionEvents.INIT.register((handler, client) -> ClientConfigurationNetworking.send(MODS_FOR_APPROVAL_PACKET, getModsBuf()));

@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 public final class ModObserverPlugin extends JavaPlugin {
     public static Logger LOGGER;
+    //asdf
     public static FileConfiguration CONFIG;
     public static final String MOD_ID = "mod_observer";
 

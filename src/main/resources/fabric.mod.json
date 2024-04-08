@@ -3,7 +3,7 @@
 	"id": "mod_observer",
 	"version": "${version}",
 	"name": "Mod Observer",
-	"description": "Monitors what mods are loaded and upon joining a server, tells, what mods are loaded.",
+	"description": "Observers, what mods are loaded and tells the server upon joining.",
 	"authors": [
 		"Sn0wix_"
 	],
@@ -13,9 +13,9 @@
 	},
 	"license": "All rights reserved",
 	"icon": "assets/mod_observer/icon.png",
-	"environment": "client",
+	"environment": "*",
 	"entrypoints": {
-		"client": [
+		"main": [
 			"net.sn0wix_.ModObserver"
 		]
 	},

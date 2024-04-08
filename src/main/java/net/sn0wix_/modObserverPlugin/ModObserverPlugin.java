@@ -1,5 +1,6 @@
 package net.sn0wix_.modObserverPlugin;
 
+import net.sn0wix_.modObserverPlugin.commands.ConfigurationCommand;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.listeners.Events;
 import net.sn0wix_.modObserverPlugin.networking.ModMessagingHandler;
@@ -24,6 +25,13 @@ public final class ModObserverPlugin extends JavaPlugin {
 
         //Register listeners
         getServer().getPluginManager().registerEvents(new Events(), this);
+
+        //Commands
+        try {
+            getCommand("modObserver").setExecutor(new ConfigurationCommand());
+        } catch (NullPointerException e) {
+            LOGGER.warning("Could not register command interface. Configuration must be done directly in the config file.");
+        }
 
         //Plugin messaging
         getServer().getMessenger().registerIncomingPluginChannel(this, ModMessagingHandler.MODS_FOR_APPROVAL_CHANNEL, ModMessagingHandler::receive);
@@ -96,8 +104,8 @@ public final class ModObserverPlugin extends JavaPlugin {
                 }
             }
 
-           missingRequiredMods.addAll(Config.REQUIRED_MODS);
-           missingRequiredMods.removeAll(receivedRequiredMods);
+            missingRequiredMods.addAll(Config.REQUIRED_MODS);
+            missingRequiredMods.removeAll(receivedRequiredMods);
         }
 
         return missingRequiredMods;

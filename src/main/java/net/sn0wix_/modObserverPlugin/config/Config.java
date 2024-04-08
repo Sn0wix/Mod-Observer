@@ -7,8 +7,10 @@ import java.util.List;
 
 public class Config {
     public static Mode MODE;
+    public static List<String> REQUIRED_MODS;
     public static List<String> WHITELISTED_MODS;
     public static List<String> BLACKLISTED_MODS;
+    public static String REQUIRED_MODS_MESSAGE;
     public static String PROHIBITED_MODS_FOUND_MESSAGE;
     public static String MOD_OBSERVER_REQUIRED_MESSAGE;
     public static List<String> IGNORED_PLAYERS;
@@ -20,8 +22,10 @@ public class Config {
             "Having issues? try adding \"mod_observer\" to the whitelist.");*/
 
     private static final String MODE_PATH = "mode";
+    private static final String REQUIRED_MODS_PATH = "required_mods";
     private static final String WHITELISTED_MODS_PATH = "whitelisted_mods";
     private static final String BLACKLISTED_MODS_PATH = "blacklisted_mods";
+    private static final String REQUIRED_MODS_MESSAGE_PATH = "required_mods_message";
     private static final String PROHIBITED_MODS_FOUND_MESSAGE_PATH = "prohibited_mods_found_message";
     private static final String MOD_OBSERVER_REQUIRED_MESSAGE_PATH = "mod_observer_required_message";
     private static final String IGNORED_PLAYERS_PATH = "ignored_players";
@@ -40,9 +44,10 @@ public class Config {
             ModObserverPlugin.LOGGER.warning("Found illegal property value, mode: " + mode + ", setting mode to \"whitelist\"");
         }
 
-
+        REQUIRED_MODS = config.getStringList(REQUIRED_MODS_PATH);
         WHITELISTED_MODS = config.getStringList(WHITELISTED_MODS_PATH);
         BLACKLISTED_MODS = config.getStringList(BLACKLISTED_MODS_PATH);
+        REQUIRED_MODS_MESSAGE = config.getString(REQUIRED_MODS_MESSAGE_PATH);
         PROHIBITED_MODS_FOUND_MESSAGE = config.getString(PROHIBITED_MODS_FOUND_MESSAGE_PATH);
         MOD_OBSERVER_REQUIRED_MESSAGE = config.getString(MOD_OBSERVER_REQUIRED_MESSAGE_PATH);
         IGNORED_PLAYERS = config.getStringList(IGNORED_PLAYERS_PATH);
@@ -51,8 +56,10 @@ public class Config {
 
     public static void saveValues(FileConfiguration config) {
         config.set(MODE_PATH, MODE.getName());
+        config.set(REQUIRED_MODS_PATH, REQUIRED_MODS);
         config.set(WHITELISTED_MODS_PATH, WHITELISTED_MODS);
         config.set(BLACKLISTED_MODS_PATH, BLACKLISTED_MODS);
+        config.set(REQUIRED_MODS_MESSAGE_PATH, REQUIRED_MODS_MESSAGE);
         config.set(PROHIBITED_MODS_FOUND_MESSAGE_PATH, PROHIBITED_MODS_FOUND_MESSAGE);
         config.set(MOD_OBSERVER_REQUIRED_MESSAGE_PATH, MOD_OBSERVER_REQUIRED_MESSAGE);
         config.set(IGNORED_PLAYERS_PATH, IGNORED_PLAYERS);

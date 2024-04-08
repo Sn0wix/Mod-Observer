@@ -1,12 +1,20 @@
-#Can have values: whitelist, which will allow only the whitelisted mods, or blacklist, which will allow everything else, except the blacklisted mods
+#Can have values: "whitelist", which will allow only the whitelisted mods, or "blacklist", which will allow everything else, except the blacklisted mods
 mode: "whitelist"
 
-#Whitelist for mods, use modid of the mod, otherwise it won't work. What is modid? https://fabricmc.net/wiki/tutorial:terms
-#Having issues? try adding "mod_observer"
+
+#Mods that the user must have installed. You can just leave this empty.
+required_mods:
+
+#Whitelist for mods, use modid of the mod. What is modid? https://fabricmc.net/wiki/tutorial:terms
+#The default whitelist has all the mods, that are needed for ModObserver to work. If you deleted the list by accident, delete the config file and it will regenerate them.
 whitelisted_mods:
-- fabric-convention-tags-v1
-- modmenu
+- mod_observer
+- minecraft
+- java
+- mixinextras
+- fabricloader
 - fabric-api
+- fabric-convention-tags-v1
 - fabric-keybindings-v0
 - fabric-entity-events-v1
 - fabric-dimensions-v1
@@ -14,10 +22,8 @@ whitelisted_mods:
 - fabric-message-api-v1
 - fabric-content-registries-v0
 - fabric-resource-conditions-api-v1
-- mixinextras
 - fabric-command-api-v1
 - fabric-game-rule-api-v1
-- java
 - fabric-item-api-v1
 - fabric-crash-report-info-v1
 - fabric-mining-level-api-v1
@@ -30,7 +36,6 @@ whitelisted_mods:
 - fabric-renderer-indigo
 - fabric-screen-handler-api-v1
 - fabric-api-base
-- mod_observer
 - fabric-api-lookup-api-v1
 - fabric-loot-api-v2
 - fabric-command-api-v2
@@ -38,7 +43,6 @@ whitelisted_mods:
 - fabric-events-lifecycle-v0
 - fabric-lifecycle-events-v1
 - fabric-particles-v1
-- fabricloader
 - fabric-blockrenderlayer-v1
 - fabric-data-generation-api-v1
 - fabric-commands-v0
@@ -52,7 +56,6 @@ whitelisted_mods:
 - fabric-sound-api-v1
 - fabric-data-attachment-api-v1
 - fabric-renderer-api-v1
-- minecraft
 - fabric-key-binding-api-v1
 - fabric-object-builder-api-v1
 - fabric-client-tags-api-v1
@@ -63,13 +66,19 @@ whitelisted_mods:
 - fabric-models-v0
 - fabric-containers-v0
 
-#The same as whitelisted mods
+#Black list for mods.
 blacklisted_mods:
 
-#This message will be the kick message if the player has prohibited mods
-prohibited_mods_found_message: "You can not join this server, because you have <$MODS$> installed!"
 
+#Message that is sent when player doesn't have required mods.
+required_mods_message: "This server requires you to install <$MODS$>"
+
+#This message will be the kick message if the player has prohibited mods
+prohibited_mods_found_message: "You can not join this server, because you have installed <$MODS$>"
+
+#Message that will show up, if the player tries to connect without ModObserver
 mod_observer_required_message: "This server requires you to install ModObserver."
 
-#Players that bypass the mod check, use player names, not uuids
+
+#Players that bypass the mod check. Use player names, not uuids.
 ignored_players:

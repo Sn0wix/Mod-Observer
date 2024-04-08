@@ -11,6 +11,17 @@ public class IncomingPlayers {
      */
     private static final ArrayList<IncomingPlayer> PLAYERS = new ArrayList<>();
 
+    public static boolean containsPlayer(String playerName) {
+        AtomicBoolean bl = new AtomicBoolean(false);
+        PLAYERS.forEach(incomingPlayer -> {
+            if (incomingPlayer.getName().equals(playerName)) {
+                bl.set(true);
+            }
+        });
+
+        return bl.get();
+    }
+
     public static void removePlayer(String playerName) {
         PLAYERS.removeIf(player -> player.getName().equals(playerName));
     }
@@ -57,28 +68,55 @@ public class IncomingPlayers {
         return bl.get();
     }
 
-    public static String getNonApprovedMods(String playerName) {
-        AtomicReference<List<String>> modsList = new AtomicReference<>();
+    public static String getMissingRequiredMods(String playerName) {
+        AtomicReference<List<String>> modsList = new AtomicReference<>(new ArrayList<>());
         PLAYERS.forEach(incomingPlayer -> {
             if (incomingPlayer.getName().equals(playerName)) {
                 modsList.set(incomingPlayer.getNonApprovedMods());
             }
         });
 
-        StringBuilder builder = new StringBuilder();
-
-        //TODO fix ", " at the end
-        modsList.get().forEach(modId -> builder.append(modId).append(", "));
-
-        return builder.toString();
+        return getModString(modsList.get());
     }
 
-    public static void addNonApprovedMod(String playerName, String modid) {
+    public static void addMissingRequiredMod(String playerName, String modid) {
         PLAYERS.forEach(incomingPlayer -> {
             if (incomingPlayer.getName().equals(playerName)) {
                 incomingPlayer.addNonApprovedMod(modid);
             }
         });
+    }
+
+    public static String getNonApprovedMods(String playerName) {
+        AtomicReference<List<String>> modsList = new AtomicReference<>();
+        PLAYERS.forEach(incomingPlayer -> {
+            if (incomingPlayer.getName().equals(playerName)) {
+                modsList.set(incomingPlayer.getMissingRequiredMods());
+            }
+        });
+
+        return getModString(modsList.get());
+    }
+
+    public static void addNonApprovedMod(String playerName, String modid) {
+        PLAYERS.forEach(incomingPlayer -> {
+            if (incomingPlayer.getName().equals(playerName)) {
+                incomingPlayer.addMissingRequiredMod(modid);
+            }
+        });
+    }
+
+
+    private static String getModString(List<String> modsList) {
+        StringBuilder builder = new StringBuilder();
+
+        if (!modsList.isEmpty()) {
+            for (int i = 0; i < modsList.size(); i++) {
+                builder.append(modsList.get(i)).append(i != modsList.size() - 1 ? ", " : "");
+            }
+        }
+
+        return builder.toString();
     }
 
 
@@ -87,6 +125,7 @@ public class IncomingPlayers {
         private boolean isApproved = false;
         private boolean hasSendPacket = false;
         private final ArrayList<String> notApprovedMods = new ArrayList<>();
+        private final ArrayList<String> missingRequiredMods = new ArrayList<>();
 
         public IncomingPlayer(String name) {
             this.name = name;
@@ -98,6 +137,14 @@ public class IncomingPlayers {
 
         public boolean hasSendPacket() {
             return hasSendPacket;
+        }
+
+        public void addMissingRequiredMod(String modid) {
+            missingRequiredMods.add(modid);
+        }
+
+        public List<String> getMissingRequiredMods() {
+            return missingRequiredMods;
         }
 
         public void addNonApprovedMod(String modid) {

@@ -4,3 +4,9 @@ main: net.sn0wix_.modObserverPlugin.ModObserverPlugin
 api-version: '1.20'
 authors: [Sn0wix_]
 description: Checks if the player has installed only permitted mods. Requires ModObserver to be installed on the client.
+
+commands:
+  modObserver:
+    description: Lets you config plugin ModObserver
+    usage: Usage XD
+    permission: op

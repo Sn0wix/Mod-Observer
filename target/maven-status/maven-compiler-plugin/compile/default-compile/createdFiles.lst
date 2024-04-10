@@ -1,7 +1,11 @@
+net\sn0wix_\modObserverPlugin\commands\ModObserverCommandArg.class
 net\sn0wix_\modObserverPlugin\listeners\Events.class
+net\sn0wix_\modObserverPlugin\commands\ModObserverCommandArgs.class
+net\sn0wix_\modObserverPlugin\config\Config$Mode.class
+net\sn0wix_\modObserverPlugin\commands\ConfigurationCommand.class
+net\sn0wix_\modObserverPlugin\IncomingPlayers$IncomingPlayer.class
+net\sn0wix_\modObserverPlugin\commands\ModObserverCommandArg$ModObserverCommandExecutor.class
 net\sn0wix_\modObserverPlugin\config\Config.class
 net\sn0wix_\modObserverPlugin\networking\ModMessagingHandler.class
-net\sn0wix_\modObserverPlugin\config\Config$Mode.class
 net\sn0wix_\modObserverPlugin\IncomingPlayers.class
-net\sn0wix_\modObserverPlugin\IncomingPlayers$IncomingPlayer.class
 net\sn0wix_\modObserverPlugin\ModObserverPlugin.class

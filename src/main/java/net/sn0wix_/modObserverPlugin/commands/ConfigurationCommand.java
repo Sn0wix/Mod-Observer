@@ -14,7 +14,6 @@ public class ConfigurationCommand implements CommandExecutor, TabCompleter {
     public static final String COMMAND = "modObserver";
     public static final String USAGE = "modObserver usage";
 
-    //TODO usage
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         if (args.length == 0) {
@@ -25,35 +24,28 @@ public class ConfigurationCommand implements CommandExecutor, TabCompleter {
         AtomicBoolean wasSuccessful = new AtomicBoolean(false);
 
         ModObserverCommandArgs.COMMAND_ARGS.forEach(arg -> {
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            System.out.println(arg.getCommand());
-            System.out.println("might return");
             if (!arg.getCommand().equals(args[0])) return;
             wasSuccessful.set(true);
 
             AtomicReference<ModObserverCommandArg> currentSubArg = new AtomicReference<>(arg);
             for (int currentDepth = 0; currentDepth < args.length; currentDepth++) {
-                System.out.println("----------------------------------------------------------");
-                System.out.println("SubCommand: " + currentSubArg.get().getCommand());
-                System.out.println("SubSubCommands: " + currentSubArg.get().getSubCommands());
-                System.out.println("Current depth: " + currentDepth);
                 //Command executing
                 if (currentSubArg.get().getSubCommands().isEmpty()) {
-                    System.out.println("Is empty and executing");
                     currentSubArg.get().execute(commandSender, command, label, args);
                     break;
                 } else {
-                    System.out.println("Is NOT empty, getting new one");
                     //Next subCommand setting
-                    int finalCurrentDepth = currentDepth;
-                    arg.getSubCommands().forEach(subCommand -> {
-                        System.out.println("SubCommand: " + subCommand.getCommand());
-                        System.out.println("args: " + args[finalCurrentDepth + 1]);
-                        if (subCommand.getCommand().equals(args[finalCurrentDepth + 1])) {
-                            System.out.println("Successful SubCommand: " + subCommand.getCommand());
-                            currentSubArg.set(subCommand);
-                        }
-                    });
+                    try {
+                        int finalCurrentDepth = currentDepth + 1;
+                        arg.getSubCommands().forEach(subCommand -> {
+                            if (subCommand.getCommand().equals(args[finalCurrentDepth])) {
+                                currentSubArg.set(subCommand);
+                            }
+                        });
+                    } catch (IndexOutOfBoundsException e) {
+                        currentSubArg.get().execute(commandSender, command, label, args);
+                        break;
+                    }
                 }
             }
         });

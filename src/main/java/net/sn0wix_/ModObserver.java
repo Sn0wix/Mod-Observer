@@ -10,10 +10,7 @@ import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 public class ModObserver implements ModInitializer {
@@ -21,10 +18,13 @@ public class ModObserver implements ModInitializer {
     public static final String MOD_ID = "mod_observer";
     public static final Logger LOGGER = LoggerFactory.getLogger("mod_observer");
     public static Identifier MODS_FOR_APPROVAL_PACKET = new Identifier(MOD_ID, "mods_for_approval");
+    public static Identifier MOD_REQUEST_PACKET = new Identifier(MOD_ID, "request_mods");
 
     @Override
     public void onInitialize() {
         ClientConfigurationConnectionEvents.INIT.register((handler, client) -> ClientConfigurationNetworking.send(MODS_FOR_APPROVAL_PACKET, getModsBuf()));
+
+        ClientPlayNetworking.registerReceiver(MOD_REQUEST_PACKET, (client, handler, buf, responseSender) -> client.execute(() -> ClientConfigurationNetworking.send(MODS_FOR_APPROVAL_PACKET, getModsBuf())));
     }
 
     private static PacketByteBuf getModsBuf() {
@@ -47,12 +47,5 @@ public class ModObserver implements ModInitializer {
             mods.add(modContainer.getMetadata().getId());
         }
         return mods;
-    }
-
-    public static String encrypt(String strToEncrypt, String secret) throws Exception {
-        SecretKeySpec secretKey = new SecretKeySpec(secret.getBytes(), "AES");
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-        return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes()));
     }
 }

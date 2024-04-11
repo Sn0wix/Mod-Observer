@@ -3,7 +3,7 @@ package net.sn0wix_.modObserverPlugin;
 import net.sn0wix_.modObserverPlugin.commands.ConfigurationCommand;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.listeners.Events;
-import net.sn0wix_.modObserverPlugin.networking.ModMessagingHandler;
+import net.sn0wix_.modObserverPlugin.networking.PacketHandler;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -34,7 +34,8 @@ public final class ModObserverPlugin extends JavaPlugin {
         }
 
         //Plugin messaging
-        getServer().getMessenger().registerIncomingPluginChannel(this, ModMessagingHandler.MODS_FOR_APPROVAL_CHANNEL, ModMessagingHandler::receive);
+        getServer().getMessenger().registerIncomingPluginChannel(this, PacketHandler.MODS_FOR_APPROVAL_CHANNEL, PacketHandler::receive);
+        getServer().getMessenger().registerOutgoingPluginChannel(this, PacketHandler.MOD_REQUEST_PACKET);
 
         //Config
         CONFIG = getConfig();
@@ -50,7 +51,7 @@ public final class ModObserverPlugin extends JavaPlugin {
         saveConfig();
 
         //Plugin messaging
-        getServer().getMessenger().unregisterIncomingPluginChannel(this, ModMessagingHandler.MODS_FOR_APPROVAL_CHANNEL);
+        getServer().getMessenger().unregisterIncomingPluginChannel(this, PacketHandler.MODS_FOR_APPROVAL_CHANNEL);
     }
 
 

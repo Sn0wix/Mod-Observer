@@ -1,6 +1,5 @@
 package net.sn0wix_.modObserverPlugin.commands;
 
-import com.sun.tools.javac.Main;
 import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import org.bukkit.ChatColor;
@@ -40,7 +39,7 @@ public class ModObserverCommandArgs {
                         sender.sendMessage("Mode was set to whitelist.");
                     })
             ), (sender, command, label, args) -> sender.sendMessage(ChatColor.DARK_RED + "Use blacklist or whitelist.")),
-            new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Mode was set to: " + Config.MODE.getName()))
+            new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Current mode is: " + Config.MODE.getName()))
     ), (sender, command, label, args) -> sender.sendMessage(ChatColor.DARK_RED + "Usage: /modObserver mode show/switch whitelist/blacklist")));
 
 

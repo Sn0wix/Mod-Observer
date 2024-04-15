@@ -21,63 +21,72 @@ public class ConfigurationCommand implements CommandExecutor, TabCompleter {
             System.out.println("Help message no args");
             return false;
         }
-        AtomicBoolean wasSuccessful = new AtomicBoolean(false);
 
         ModObserverCommandArgs.COMMAND_ARGS.forEach(arg -> {
             if (!arg.getCommand().equals(args[0])) return;
-            wasSuccessful.set(true);
 
-            AtomicReference<ModObserverCommandArg> currentSubArg = new AtomicReference<>(arg);
-            for (int currentDepth = 0; currentDepth < args.length; currentDepth++) {
-                //Command executing
-                if (currentSubArg.get().getSubCommands().isEmpty()) {
-                    currentSubArg.get().execute(commandSender, command, label, args);
-                    break;
-                } else {
-                    //Next subCommand setting
-                    try {
-                        int finalCurrentDepth = currentDepth + 1;
-                        arg.getSubCommands().forEach(subCommand -> {
-                            if (subCommand.getCommand().equals(args[finalCurrentDepth])) {
-                                currentSubArg.set(subCommand);
-                            }
-                        });
-                    } catch (IndexOutOfBoundsException e) {
-                        currentSubArg.get().execute(commandSender, command, label, args);
-                        break;
-                    }
-                }
-            }
+
         });
 
-        return wasSuccessful.get();
+        return true;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String label, String[] args) {
         ArrayList<String> subCommands = new ArrayList<>();
+        int depth = args.length - 1;
 
-        ModObserverCommandArgs.COMMAND_ARGS.forEach(arg -> {
-            AtomicReference<ModObserverCommandArg> currentSubArg = new AtomicReference<>(arg);
-            for (int currentDepth = 0; currentDepth < args.length; currentDepth++) {
-                //Command listing
-                if (arg.getSubCommands().isEmpty()) {
-                    currentSubArg.get().getSubCommands().forEach(subCommand -> {
-                        subCommands.add(subCommand.getCommand());
-                    });
-                    break;
-                } else {
-                    //Next subCommand setting
-                    int finalCurrentDepth = currentDepth;
-                    arg.getSubCommands().forEach(subCommand -> {
-                        if (subCommand.getCommand().equals(args[finalCurrentDepth])) {
-                            currentSubArg.set(subCommand);
-                        }
-                    });
+        if (depth > 0) {
+            ModObserverCommandArgs.COMMAND_ARGS.forEach(arg -> {
+                if (!arg.getCommand().equals(args[0])) return;
+
+                AtomicReference<ModObserverCommandArg> currentSubArg = new AtomicReference<>(arg);
+
+                for (int i = 0; i < depth; i++) {
+                    if (i == depth - 1) {
+                        currentSubArg.get().getSubCommands().forEach(subCommand -> {
+                            subCommands.add(subCommand.getCommand());
+                        });
+                    }
+
+                    if (!currentSubArg.get().getSubCommands().isEmpty()) {
+                        int finalI = i;
+                        currentSubArg.get().getSubCommands().forEach(subCommand -> {
+                            if (subCommand.getCommand().equals(args[finalI])) {
+                                currentSubArg.set(subCommand);
+                            }
+                        });
+                    }
                 }
-            }
-        });
+
+            });
+        } else {
+            ModObserverCommandArgs.COMMAND_ARGS.forEach(arg -> {
+                subCommands.add(arg.getCommand());
+            });
+        }
 
         return subCommands.isEmpty() ? null : subCommands;
     }
+
+    /*AtomicReference<ModObserverCommandArg> currentSubArg = new AtomicReference<>(arg);
+            for (int currentDepth = 0; currentDepth < args.length; currentDepth++) {
+        System.out.println("inside for, depth " + currentDepth);
+        System.out.println("Current subArg" + currentSubArg.get().getCommand());
+
+        //Command listing
+        if (!currentSubArg.get().getSubCommands().isEmpty()) {
+            currentSubArg.get().getSubCommands().forEach(subCommand -> {
+                subCommands.add(subCommand.getCommand());
+            });
+        } else {
+            //Next subCommand setting
+            int finalCurrentDepth = currentDepth;
+            arg.getSubCommands().forEach(subCommand -> {
+                if (subCommand.getCommand().equals(args[finalCurrentDepth])) {
+                    currentSubArg.set(subCommand);
+                }
+            });
+        }
+    }*/
 }

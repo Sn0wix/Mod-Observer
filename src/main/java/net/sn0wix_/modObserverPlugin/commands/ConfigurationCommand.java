@@ -11,82 +11,80 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ConfigurationCommand implements CommandExecutor, TabCompleter {
-    public static final String COMMAND = "modObserver";
-    public static final String USAGE = "modObserver usage";
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         if (args.length == 0) {
             ModObserverCommandArgs.HELP.execute(commandSender, command, label, args);
-            System.out.println("Help message no args");
-            return false;
+            return true;
         }
+        System.out.println("_______________________________________________________________________");
 
+        AtomicBoolean foundArg = new AtomicBoolean(false);
         ModObserverCommandArgs.COMMAND_ARGS.forEach(arg -> {
             if (!arg.getCommand().equals(args[0])) return;
+            System.out.println("Found arg: " + arg.getCommand());
+            foundArg.set(true);
 
-
+            AtomicReference<ModObserverCommandArg> currentSubArg = new AtomicReference<>(arg);
+            System.out.println("setting current subArg");
+            for (int i = 0; i < args.length; i++) {
+                if (currentSubArg.get().getSubCommands().isEmpty()) {
+                    System.out.println("Sub arg " + currentSubArg.get().getCommand() + " is empty, EXECUTING");
+                    currentSubArg.get().execute(commandSender, command, label, args);
+                    //breaking in case there are any other arguments after the last sub command
+                    break;
+                } else {
+                    //try, in case sender messed something up
+                    try {
+                        System.out.println("Sub arg " + currentSubArg.get().getCommand() + " is not empty, GETTING next subArg.");
+                        int finalI = i + 1;
+                        currentSubArg.get().getSubCommands().forEach(subArg -> {
+                            System.out.println("Testing subArg " + subArg.getCommand() + " with " + args[finalI]);
+                            if (subArg.getCommand().equals(args[finalI])) {
+                                System.out.println("SubArg PASSED");
+                                currentSubArg.set(subArg);
+                            }
+                        });
+                    } catch (IndexOutOfBoundsException e) {
+                        //yep, sender messed something up
+                        System.out.println("Was not successful, executing usage for " + currentSubArg.get().getCommand());
+                        currentSubArg.get().execute(commandSender, command, label, args);
+                    }
+                }
+            }
         });
 
-        return true;
+        return foundArg.get();
     }
+
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String label, String[] args) {
         ArrayList<String> subCommands = new ArrayList<>();
-        int depth = args.length - 1;
+        //fix
+        ModObserverCommandArgs.COMMAND_ARGS.forEach(arg -> {
+            if (!arg.getCommand().equals(args[0])) return;
+            AtomicReference<ModObserverCommandArg> currentSubArg = new AtomicReference<>(arg);
 
-        if (depth > 0) {
-            ModObserverCommandArgs.COMMAND_ARGS.forEach(arg -> {
-                if (!arg.getCommand().equals(args[0])) return;
-
-                AtomicReference<ModObserverCommandArg> currentSubArg = new AtomicReference<>(arg);
-
-                for (int i = 0; i < depth; i++) {
-                    if (i == depth - 1) {
-                        currentSubArg.get().getSubCommands().forEach(subCommand -> {
-                            subCommands.add(subCommand.getCommand());
-                        });
+            for (int i = 0; i < args.length; i++) {
+                int finalI = i;
+                AtomicBoolean wasSuccessful = new AtomicBoolean(false);
+                currentSubArg.get().getSubCommands().forEach(subCommand -> {
+                    if (args[finalI].equals(subCommand.getCommand())) {
+                        currentSubArg.set(subCommand);
+                        wasSuccessful.set(true);
                     }
+                });
 
-                    if (!currentSubArg.get().getSubCommands().isEmpty()) {
-                        int finalI = i;
-                        currentSubArg.get().getSubCommands().forEach(subCommand -> {
-                            if (subCommand.getCommand().equals(args[finalI])) {
-                                currentSubArg.set(subCommand);
-                            }
-                        });
-                    }
+                if (!wasSuccessful.get()) {
+                    currentSubArg.get().getSubCommands().forEach(subCommand -> {
+                        subCommands.add(subCommand.getCommand());
+                    });
                 }
-
-            });
-        } else {
-            ModObserverCommandArgs.COMMAND_ARGS.forEach(arg -> {
-                subCommands.add(arg.getCommand());
-            });
-        }
+            }
+        });
 
         return subCommands.isEmpty() ? null : subCommands;
     }
-
-    /*AtomicReference<ModObserverCommandArg> currentSubArg = new AtomicReference<>(arg);
-            for (int currentDepth = 0; currentDepth < args.length; currentDepth++) {
-        System.out.println("inside for, depth " + currentDepth);
-        System.out.println("Current subArg" + currentSubArg.get().getCommand());
-
-        //Command listing
-        if (!currentSubArg.get().getSubCommands().isEmpty()) {
-            currentSubArg.get().getSubCommands().forEach(subCommand -> {
-                subCommands.add(subCommand.getCommand());
-            });
-        } else {
-            //Next subCommand setting
-            int finalCurrentDepth = currentDepth;
-            arg.getSubCommands().forEach(subCommand -> {
-                if (subCommand.getCommand().equals(args[finalCurrentDepth])) {
-                    currentSubArg.set(subCommand);
-                }
-            });
-        }
-    }*/
 }

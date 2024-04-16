@@ -15,7 +15,7 @@
 	"icon": "assets/mod_observer/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"main": [
+		"client": [
 			"net.sn0wix_.ModObserver"
 		]
 	},

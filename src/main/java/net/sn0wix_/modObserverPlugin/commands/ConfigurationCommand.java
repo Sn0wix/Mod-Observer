@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -18,37 +19,29 @@ public class ConfigurationCommand implements CommandExecutor, TabCompleter {
             ModObserverCommandArgs.HELP.execute(commandSender, command, label, args);
             return true;
         }
-        System.out.println("_______________________________________________________________________");
 
         AtomicBoolean foundArg = new AtomicBoolean(false);
-        ModObserverCommandArgs.COMMAND_ARGS.forEach(arg -> {
+        ModObserverCommandArgs.getRegisteredCommands().forEach(arg -> {
             if (!arg.getCommand().equals(args[0])) return;
-            System.out.println("Found arg: " + arg.getCommand());
             foundArg.set(true);
 
             AtomicReference<ModObserverCommandArg> currentSubArg = new AtomicReference<>(arg);
-            System.out.println("setting current subArg");
             for (int i = 0; i < args.length; i++) {
                 if (currentSubArg.get().getSubCommands().isEmpty()) {
-                    System.out.println("Sub arg " + currentSubArg.get().getCommand() + " is empty, EXECUTING");
                     currentSubArg.get().execute(commandSender, command, label, args);
                     //breaking in case there are any other arguments after the last sub command
                     break;
                 } else {
                     //try, in case sender messed something up
                     try {
-                        System.out.println("Sub arg " + currentSubArg.get().getCommand() + " is not empty, GETTING next subArg.");
                         int finalI = i + 1;
                         currentSubArg.get().getSubCommands().forEach(subArg -> {
-                            System.out.println("Testing subArg " + subArg.getCommand() + " with " + args[finalI]);
                             if (subArg.getCommand().equals(args[finalI])) {
-                                System.out.println("SubArg PASSED");
                                 currentSubArg.set(subArg);
                             }
                         });
                     } catch (IndexOutOfBoundsException e) {
                         //yep, sender messed something up
-                        System.out.println("Was not successful, executing usage for " + currentSubArg.get().getCommand());
                         currentSubArg.get().execute(commandSender, command, label, args);
                     }
                 }
@@ -61,30 +54,47 @@ public class ConfigurationCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String label, String[] args) {
-        ArrayList<String> subCommands = new ArrayList<>();
-        //fix
-        ModObserverCommandArgs.COMMAND_ARGS.forEach(arg -> {
-            if (!arg.getCommand().equals(args[0])) return;
-            AtomicReference<ModObserverCommandArg> currentSubArg = new AtomicReference<>(arg);
+        ArrayList<String> subCommandsStrings = new ArrayList<>();
+        AtomicReference<ModObserverCommandArg> lastArg = new AtomicReference<>(null);
 
-            for (int i = 0; i < args.length; i++) {
-                int finalI = i;
-                AtomicBoolean wasSuccessful = new AtomicBoolean(false);
-                currentSubArg.get().getSubCommands().forEach(subCommand -> {
-                    if (args[finalI].equals(subCommand.getCommand())) {
-                        currentSubArg.set(subCommand);
-                        wasSuccessful.set(true);
+        for (int i = 0; i < args.length; i++) {
+            String currentArgS = args[i];
+
+            if (lastArg.get() == null) {
+                ModObserverCommandArgs.getRegisteredCommands().forEach(registeredCommand -> {
+                    if (currentArgS.equals(registeredCommand.getCommand())) {
+                        lastArg.set(registeredCommand);
                     }
                 });
 
-                if (!wasSuccessful.get()) {
-                    currentSubArg.get().getSubCommands().forEach(subCommand -> {
-                        subCommands.add(subCommand.getCommand());
-                    });
+                if (lastArg.get() == null) {
+                    ModObserverCommandArgs.getRegisteredCommands().forEach(registeredCommand -> subCommandsStrings.add(registeredCommand.getCommand()));
+                }
+            } else {
+                if (!lastArg.get().getSubCommands().isEmpty()) {
+                    ArrayList<String> lastArgSubCommands = new ArrayList<>();
+                    lastArg.get().getSubCommands().forEach(subCmd -> lastArgSubCommands.add(subCmd.getCommand()));
+
+                    try {
+                        if (lastArgSubCommands.contains(args[i])) {
+                            int finalI = i;
+                            lastArg.get().getSubCommands().forEach(subCommand -> {
+                                if (subCommand.getCommand().equals(args[finalI])) {
+                                    lastArg.set(subCommand);
+                                }
+                            });
+                        } else {
+                            if (args.length <= i + 1) {
+                                lastArg.get().getSubCommands().forEach(subCommand -> subCommandsStrings.add(subCommand.getCommand()));
+                            }
+
+                            break;
+                        }
+                    } catch (IndexOutOfBoundsException ignored) {}
                 }
             }
-        });
+        }
 
-        return subCommands.isEmpty() ? null : subCommands;
+        return subCommandsStrings;
     }
 }

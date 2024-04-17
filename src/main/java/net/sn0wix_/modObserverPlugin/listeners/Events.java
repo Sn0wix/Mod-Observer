@@ -2,8 +2,6 @@ package net.sn0wix_.modObserverPlugin.listeners;
 
 import net.sn0wix_.modObserverPlugin.IncomingPlayers;
 import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
-import net.sn0wix_.modObserverPlugin.commands.ModObserverCommandArg;
-import net.sn0wix_.modObserverPlugin.commands.ModObserverCommandArgs;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

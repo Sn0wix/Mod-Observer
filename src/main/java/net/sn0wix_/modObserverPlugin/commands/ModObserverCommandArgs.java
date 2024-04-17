@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ModObserverCommandArgs {
-    public static final List<ModObserverCommandArg> COMMAND_ARGS = new ArrayList<>();
+    private static final List<ModObserverCommandArg> REGISTERED_COMMANDS = new ArrayList<>();
+
 
     //Help
     public static final ModObserverCommandArg HELP = registerCommandArg(new ModObserverCommandArg("help", ((sender, command, label, args) -> sender.sendMessage("Insert help message here."))));
@@ -32,11 +33,11 @@ public class ModObserverCommandArgs {
             new ModObserverCommandArg("switch", List.of(
                     new ModObserverCommandArg("blacklist", (sender, command, label, args) -> {
                         Config.MODE = Config.Mode.BLACKLIST;
-                        sender.sendMessage("Mode was set to blacklist.");
+                        sender.sendMessage("Mode was set to: blacklist");
                     }),
                     new ModObserverCommandArg("whitelist", (sender, command, label, args) -> {
                         Config.MODE = Config.Mode.WHITELIST;
-                        sender.sendMessage("Mode was set to whitelist.");
+                        sender.sendMessage("Mode was set to: whitelist");
                     })
             ), (sender, command, label, args) -> sender.sendMessage(ChatColor.DARK_RED + "Use blacklist or whitelist.")),
             new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Current mode is: " + Config.MODE.getName()))
@@ -128,7 +129,11 @@ public class ModObserverCommandArgs {
 
 
     public static ModObserverCommandArg registerCommandArg(ModObserverCommandArg arg) {
-        COMMAND_ARGS.add(arg);
+        REGISTERED_COMMANDS.add(arg);
         return arg;
+    }
+
+    public static List<ModObserverCommandArg> getRegisteredCommands() {
+        return List.copyOf(REGISTERED_COMMANDS);
     }
 }

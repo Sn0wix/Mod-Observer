@@ -4,6 +4,7 @@ import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
 import net.sn0wix_.modObserverPlugin.commands.ModObserverCommandArgs;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Config {
@@ -14,7 +15,7 @@ public class Config {
     public static String REQUIRED_MODS_MESSAGE;
     public static String PROHIBITED_MODS_FOUND_MESSAGE;
     public static String MOD_OBSERVER_REQUIRED_MESSAGE;
-    public static List<String> IGNORED_PLAYERS;
+    public static ArrayList<String> IGNORED_PLAYERS;
     /*public static List<String> COMMENTS = List.of(
             "mode: Can have values: whitelist, which will allow only the whitelisted mods, or blacklist, which will allow everything else, except the blacklisted mods.",
             "prohibited_mods_found_message: This message will be the kick message if the player has prohibited mods.",
@@ -51,7 +52,7 @@ public class Config {
         REQUIRED_MODS_MESSAGE = config.getString(REQUIRED_MODS_MESSAGE_PATH);
         PROHIBITED_MODS_FOUND_MESSAGE = config.getString(PROHIBITED_MODS_FOUND_MESSAGE_PATH);
         MOD_OBSERVER_REQUIRED_MESSAGE = config.getString(MOD_OBSERVER_REQUIRED_MESSAGE_PATH);
-        IGNORED_PLAYERS = config.getStringList(IGNORED_PLAYERS_PATH);
+        IGNORED_PLAYERS = (ArrayList<String>) config.getStringList(IGNORED_PLAYERS_PATH);
         saveValues(ModObserverPlugin.CONFIG);
     }
 

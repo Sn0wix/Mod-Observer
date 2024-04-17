@@ -6,7 +6,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,7 +27,14 @@ public class ConfigurationCommand implements CommandExecutor, TabCompleter {
             AtomicReference<ModObserverCommandArg> currentSubArg = new AtomicReference<>(arg);
             for (int i = 0; i < args.length; i++) {
                 if (currentSubArg.get().getSubCommands().isEmpty()) {
-                    currentSubArg.get().execute(commandSender, command, label, args);
+                    //executing
+                    int k = i + 1;
+                    String[] argsAfterLastCommand = new String[args.length - k];
+                    for (int j = 0; j < args.length - k; j++) {
+                        argsAfterLastCommand[j] = args[k + j];
+                    }
+                    currentSubArg.get().execute(commandSender, command, label, argsAfterLastCommand);
+
                     //breaking in case there are any other arguments after the last sub command
                     break;
                 } else {
@@ -42,7 +48,9 @@ public class ConfigurationCommand implements CommandExecutor, TabCompleter {
                         });
                     } catch (IndexOutOfBoundsException e) {
                         //yep, sender messed something up
-                        currentSubArg.get().execute(commandSender, command, label, args);
+                        String[] argsAfterLastCommand = new String[args.length - i];
+                        System.arraycopy(args, i, argsAfterLastCommand, 0, args.length - i);
+                        currentSubArg.get().execute(commandSender, command, label, argsAfterLastCommand);
                     }
                 }
             }
@@ -87,10 +95,15 @@ public class ConfigurationCommand implements CommandExecutor, TabCompleter {
                             if (args.length <= i + 1) {
                                 lastArg.get().getSubCommands().forEach(subCommand -> subCommandsStrings.add(subCommand.getCommand()));
                             }
-
                             break;
                         }
-                    } catch (IndexOutOfBoundsException ignored) {}
+                    } catch (IndexOutOfBoundsException ignored) {
+                    }
+                } else {
+                    String[] argsAfterLastCommand = new String[args.length - i];
+                    System.arraycopy(args, i, argsAfterLastCommand, 0, args.length - i);
+                    subCommandsStrings.addAll(lastArg.get().onTabCompleted(commandSender, command, label, argsAfterLastCommand));
+                    break;
                 }
             }
         }

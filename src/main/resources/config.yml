@@ -1,14 +1,13 @@
 #Can have values: "whitelist", which will allow only the whitelisted mods, or "blacklist", which will allow everything else, except the blacklisted mods.
 mode: "whitelist"
 
-
 #Mods that the user must have installed. You can just leave this empty.
 required_mods:
 
 #Whitelist for mods, use modid of the mod. 
-What is modid? https://fabricmc.net/wiki/tutorial:terms
-The default whitelist has all the mods, that are needed for ModObserver to work. 
-If you deleted the list by accident, delete the config file and it will regenerate itself with default values.
+#What is modid? https://fabricmc.net/wiki/tutorial:terms
+#The default whitelist has all the mods, that are needed for ModObserver to work.
+#If you deleted the list by accident, delete the config file, and it will regenerate itself with default values.
 whitelisted_mods:
 - mod_observer
 - minecraft

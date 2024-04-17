@@ -1,5 +1,6 @@
 package net.sn0wix_.modObserverPlugin.commands;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -7,21 +8,28 @@ import org.bukkit.command.CommandSender;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ConfirmCommand implements CommandExecutor {
     private static final ArrayList<PendingConfirmPlayers> CONFIRM_COMMAND_PLAYERS = new ArrayList<>();
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
+        AtomicBoolean wasSuccessful = new AtomicBoolean(false);
         CONFIRM_COMMAND_PLAYERS.forEach(pendingConfirmPlayer -> {
             if (pendingConfirmPlayer.getPlayerName().equals(commandSender.getName())) {
+                wasSuccessful.set(true);
                 if (pendingConfirmPlayer.checkForValidResponseTime()) {
                     pendingConfirmPlayer.execute(commandSender, command, s, strings);
                 } else {
-                    commandSender.sendMessage("You don't have anything to confirm.");
+                    commandSender.sendMessage(ChatColor.RED + "You confirmed the command too late.");
                 }
             }
         });
+
+        if (!wasSuccessful.get()) {
+            commandSender.sendMessage("There is nothing to be confirmed.");
+        }
 
         Iterator<PendingConfirmPlayers> iterator = CONFIRM_COMMAND_PLAYERS.stream().iterator();
 

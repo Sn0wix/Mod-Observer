@@ -7,6 +7,6 @@ description: Checks if the player has installed only permitted mods. Requires Mo
 
 commands:
   modObserver:
-    description: Lets you config plugin ModObserver
-    usage: Usage XD
+    description: Lets you config ModObserver plugin.
+    usage: /modobserver {value}...
     permission: op

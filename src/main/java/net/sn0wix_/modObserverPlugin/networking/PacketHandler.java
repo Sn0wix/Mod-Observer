@@ -3,10 +3,12 @@ package net.sn0wix_.modObserverPlugin.networking;
 import net.sn0wix_.modObserverPlugin.IncomingPlayers;
 import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
 import net.sn0wix_.modObserverPlugin.Util;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class PacketHandler {
     public static final String MOD_REQUEST_CHANNEL = ModObserverPlugin.MOD_ID + ":request_mods";
@@ -28,7 +30,13 @@ public class PacketHandler {
         String delimiter = ",";
         String[] modids = concatenatedString.split(delimiter);
 
-        //This response is not from joining player
+        //Checking for possible cheaters
+        if (modids.length == 0) {
+            ModObserverPlugin.LOGGER.info("Suspicious activity from " + player.getName() + ". When asked for mods, the response was empty. Kicking the player.");
+            player.kickPlayer("ModObserver didn't respond correctly, try reinstalling it.");
+        }
+
+        //Check, if the response is from a joining player
         if (Util.PLAYERS_WAITING_FOR_RESPONSE.containsKey(player.getName())) {
             Util.PLAYERS_WAITING_FOR_RESPONSE.get(player.getName()).execute(modids);
             return;
@@ -38,10 +46,11 @@ public class PacketHandler {
         ArrayList<String> missingRequiredMods = Util.getMissingRequiredMods(modids);
 
         boolean shouldBeKicked = false;
+        boolean hasOnlyAllowedMods = false;
 
         //checking for non-approved mods
         if (notApprovedMods.isEmpty()) {
-            IncomingPlayers.setApproved(player.getName());
+            hasOnlyAllowedMods = true;
         } else {
             notApprovedMods.forEach(modid -> IncomingPlayers.addNonApprovedMod(player.getName(), modid));
             shouldBeKicked = true;
@@ -51,6 +60,8 @@ public class PacketHandler {
         if (!missingRequiredMods.isEmpty()) {
             missingRequiredMods.forEach(modid -> IncomingPlayers.addMissingRequiredMod(player.getName(), modid));
             shouldBeKicked = true;
+        } else if (hasOnlyAllowedMods) {
+            IncomingPlayers.setApproved(player.getName());
         }
 
         if (shouldBeKicked) {

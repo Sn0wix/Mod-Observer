@@ -56,24 +56,13 @@ public class Util {
                 }
             }
         }
+
         return notApprovedMods;
     }
 
     public static ArrayList<String> getMissingRequiredMods(String[] modids) {
-        ArrayList<String> missingRequiredMods = new ArrayList<>();
-        ArrayList<String> receivedRequiredMods = new ArrayList<>();
-
-        if (!Config.REQUIRED_MODS.isEmpty()) {
-            for (String modid : modids) {
-                if (Config.REQUIRED_MODS.contains(modid)) {
-                    return receivedRequiredMods;
-                }
-            }
-
-            missingRequiredMods.addAll(Config.REQUIRED_MODS);
-            missingRequiredMods.removeAll(receivedRequiredMods);
-        }
-
+        ArrayList<String> missingRequiredMods = new ArrayList<>(List.copyOf(Config.REQUIRED_MODS));
+        missingRequiredMods.removeAll(List.of(modids));
         return missingRequiredMods;
     }
 }

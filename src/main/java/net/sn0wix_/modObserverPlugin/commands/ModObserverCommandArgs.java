@@ -82,19 +82,12 @@ public class ModObserverCommandArgs {
                         sender.sendMessage("Whitelist was cleared.");
                     }),
             new ModObserverCommandArg("addAll", (sender, command, label, args) -> {
-                //TODO fix
                 if (args.length == 0) {
-                    sender.sendMessage(ChatColor.RED + "You need to pass player who's mods you want to add.");
+                    sender.sendMessage(ChatColor.RED + "You need to pass in the player who's mods you want to add.");
                 } else if (Bukkit.getPlayerExact(args[0]) != null) {
                     PacketHandler.send(ModObserverPlugin.PLUGIN, Objects.requireNonNull(Bukkit.getPlayerExact(args[0])), new byte[0]);
                     sender.sendMessage("Waiting for response from " + args[0]);
                     Util.PLAYERS_WAITING_FOR_RESPONSE.put(args[0], modids -> {
-                        if (modids.length == 0) {
-                            ModObserverPlugin.LOGGER.info("Suspicious activity from " + args[0] + ". Kicking the player.");
-                            ModObserverPlugin.LOGGER.info("Suspicious activity from " + args[0] + ". Kicking the player.");
-                            Objects.requireNonNull(Bukkit.getPlayerExact(args[0])).kickPlayer("ModObserver didn't respond correctly, try reinstalling it.");
-                        }
-
                         Config.WHITELISTED_MODS.removeAll(List.of(modids));
                         Config.WHITELISTED_MODS.addAll(List.of(modids));
                         sender.sendMessage("Added all mods provided by " + args[0] + " which are: " + Arrays.toString(modids));
@@ -124,7 +117,6 @@ public class ModObserverCommandArgs {
                     sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"remove\"");
                 }
             }),
-            //TODO add all
             new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Blacklisted mods: " + Config.BLACKLISTED_MODS)),
             new ConfirmCommandArg("clear", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to clear the blacklist? All the entries in this list will be removed!\nProceed with /modobserverconfirm or by repeating the command.",
                     (sender, command, label, args) -> {
@@ -134,9 +126,69 @@ public class ModObserverCommandArgs {
                             iterator.remove();
                         }
                         sender.sendMessage("Blacklist was cleared.");
-                    })
+                    }),
+            new ModObserverCommandArg("addAll", (sender, command, label, args) -> {
+                if (args.length == 0) {
+                    sender.sendMessage(ChatColor.RED + "You need to pass in the player who's mods you want to add.");
+                } else if (Bukkit.getPlayerExact(args[0]) != null) {
+                    PacketHandler.send(ModObserverPlugin.PLUGIN, Objects.requireNonNull(Bukkit.getPlayerExact(args[0])), new byte[0]);
+                    sender.sendMessage("Waiting for response from " + args[0]);
+                    Util.PLAYERS_WAITING_FOR_RESPONSE.put(args[0], modids -> {
+                        Config.BLACKLISTED_MODS.removeAll(List.of(modids));
+                        Config.BLACKLISTED_MODS.addAll(List.of(modids));
+                        sender.sendMessage("Added all mods provided by " + args[0] + " which are: " + Arrays.toString(modids));
+                    });
+                } else {
+                    sender.sendMessage(ChatColor.RED + "Player " + args[0] + " is not online!");
+                }
+            })
     ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver blacklist show/add modid modid .../remove modid modid ...")));
 
+
+    //Required mods
+    public static final ModObserverCommandArg REQUIRED_MODS = registerCommandArg(new ModObserverCommandArg("requiredMods", List.of(
+            new ModObserverCommandArg("add", (sender, command, label, args) -> {
+                if (args.length > 0) {
+                    Config.REQUIRED_MODS.addAll(List.of(args));
+                    sender.sendMessage("Required mods added: " + Arrays.toString(args));
+                } else {
+                    sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"add\"");
+                }
+            }),
+            new ModObserverCommandArg("remove", (sender, command, label, args) -> {
+                if (args.length > 0) {
+                    Config.REQUIRED_MODS.removeAll(List.of(args));
+                    sender.sendMessage("Required mods removed: " + Arrays.toString(args));
+                } else {
+                    sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"remove\"");
+                }
+            }),
+            new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Required mods: " + Config.REQUIRED_MODS)),
+            new ConfirmCommandArg("clear", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to clear Required mods list? All the entries in this list will be removed!\nProceed with /modobserverconfirm or by repeating the command.",
+                    (sender, command, label, args) -> {
+                        Iterator<String> iterator = Config.REQUIRED_MODS.listIterator();
+                        while (iterator.hasNext()) {
+                            iterator.next();
+                            iterator.remove();
+                        }
+                        sender.sendMessage("Required mods list was cleared.");
+                    }),
+            new ModObserverCommandArg("addAll", (sender, command, label, args) -> {
+                if (args.length == 0) {
+                    sender.sendMessage(ChatColor.RED + "You need to pass in the player who's mods you want to add.");
+                } else if (Bukkit.getPlayerExact(args[0]) != null) {
+                    PacketHandler.send(ModObserverPlugin.PLUGIN, Objects.requireNonNull(Bukkit.getPlayerExact(args[0])), new byte[0]);
+                    sender.sendMessage("Waiting for response from " + args[0]);
+                    Util.PLAYERS_WAITING_FOR_RESPONSE.put(args[0], modids -> {
+                        Config.REQUIRED_MODS.removeAll(List.of(modids));
+                        Config.REQUIRED_MODS.addAll(List.of(modids));
+                        sender.sendMessage("Added all mods provided by " + args[0] + " which are: " + Arrays.toString(modids));
+                    });
+                } else {
+                    sender.sendMessage(ChatColor.RED + "Player " + args[0] + " is not online!");
+                }
+            })
+    ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver requiredMods show/add modid modid .../remove modid modid ...")));
 
     //Ignored players
     public static final ModObserverCommandArg IGNORED_PLAYERS = registerCommandArg(new ModObserverCommandArg("ignoredPlayers", List.of(

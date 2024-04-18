@@ -2,17 +2,18 @@ package net.sn0wix_.modObserverPlugin.networking;
 
 import net.sn0wix_.modObserverPlugin.IncomingPlayers;
 import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
+import net.sn0wix_.modObserverPlugin.Util;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 
 public class PacketHandler {
-    public static final String MOD_REQUEST_PACKET = ModObserverPlugin.MOD_ID + ":request_mods";
+    public static final String MOD_REQUEST_CHANNEL = ModObserverPlugin.MOD_ID + ":request_mods";
     public static final String MODS_FOR_APPROVAL_CHANNEL = ModObserverPlugin.MOD_ID + ":mods_for_approval";
 
     public static void send(Plugin plugin, Player player, byte[] byteArray) {
-        player.sendPluginMessage(plugin, MOD_REQUEST_PACKET, byteArray);
+        player.sendPluginMessage(plugin, MOD_REQUEST_CHANNEL, byteArray);
     }
 
 
@@ -27,8 +28,8 @@ public class PacketHandler {
         String delimiter = ",";
         String[] modids = concatenatedString.split(delimiter);
 
-        ArrayList<String> notApprovedMods = ModObserverPlugin.getNonApprovedMods(modids);
-        ArrayList<String> missingRequiredMods = ModObserverPlugin.getMissingRequiredMods(modids);
+        ArrayList<String> notApprovedMods = Util.getNonApprovedMods(modids);
+        ArrayList<String> missingRequiredMods = Util.getMissingRequiredMods(modids);
 
         boolean shouldBeKicked = false;
 
@@ -47,7 +48,7 @@ public class PacketHandler {
         }
 
         if (shouldBeKicked) {
-            ModObserverPlugin.checkPlayer(player);
+            Util.checkPlayer(player);
         }
     }
 }

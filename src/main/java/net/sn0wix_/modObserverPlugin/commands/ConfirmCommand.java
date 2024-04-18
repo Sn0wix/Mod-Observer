@@ -5,37 +5,49 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import java.time.Instant;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ConfirmCommand implements CommandExecutor {
-    private static final ArrayList<PendingConfirmPlayers> CONFIRM_COMMAND_PLAYERS = new ArrayList<>();
+    private static final ArrayList<ConfirmCommandArg> CONFIRM_COMMAND_SENDERS = new ArrayList<>();
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        AtomicBoolean wasSuccessful = new AtomicBoolean(false);
-        CONFIRM_COMMAND_PLAYERS.forEach(pendingConfirmPlayer -> {
-            if (pendingConfirmPlayer.getPlayerName().equals(commandSender.getName())) {
-                wasSuccessful.set(true);
-                if (pendingConfirmPlayer.checkForValidResponseTime()) {
-                    pendingConfirmPlayer.execute(commandSender, command, s, strings);
+        Iterator<ConfirmCommandArg> iterator = CONFIRM_COMMAND_SENDERS.listIterator();
+
+        if (CONFIRM_COMMAND_SENDERS.isEmpty()) {
+            commandSender.sendMessage(ChatColor.RED + "There is nothing to be confirmed.");
+            return true;
+        }
+
+        while (iterator.hasNext()) {
+            ConfirmCommandArg confirmCommandArg = iterator.next();
+
+            if (confirmCommandArg.getSender().equals(commandSender.getName())) {
+                if (confirmCommandArg.checkForValidResponseTime()) {
+                    confirmCommandArg.execute(commandSender, command, s, strings);
                 } else {
                     commandSender.sendMessage(ChatColor.RED + "You confirmed the command too late.");
                 }
+                try {
+                    iterator.remove();
+                }catch (ConcurrentModificationException ignored) {}
+
+
+                break;
             }
-        });
 
-        if (!wasSuccessful.get()) {
-            commandSender.sendMessage("There is nothing to be confirmed.");
-        }
-
-        Iterator<PendingConfirmPlayers> iterator = CONFIRM_COMMAND_PLAYERS.stream().iterator();
-
-        while (iterator.hasNext()) {
-            if (!iterator.next().checkForValidResponseTime()) {
+            if (!confirmCommandArg.checkForValidResponseTime()) {
                 iterator.remove();
+            }
+
+            if (!iterator.hasNext()) {
+                commandSender.sendMessage(ChatColor.RED + "There is nothing to be confirmed.");
+                break;
             }
         }
 
@@ -43,37 +55,53 @@ public class ConfirmCommand implements CommandExecutor {
     }
 
 
-    public static void addPlayerToList(String name, int timeToReact, ModObserverCommandArg.ModObserverCommandExecutor executor) {
-        CONFIRM_COMMAND_PLAYERS.add(new PendingConfirmPlayers(name, Instant.now().getEpochSecond(), timeToReact, executor));
+    public static void addSenderToQueue(ConfirmCommandArg sender) {
+        CONFIRM_COMMAND_SENDERS.add(sender);
     }
 
-    public static void removePlayer(String name) {
-        CONFIRM_COMMAND_PLAYERS.removeIf(pendingConfirmPlayer -> pendingConfirmPlayer.getPlayerName().equals(name));
+    public static boolean containsSender(String name) {
+        AtomicBoolean bl = new AtomicBoolean(false);
+
+        CONFIRM_COMMAND_SENDERS.forEach(confirmCommandArg -> {
+            if (confirmCommandArg.getSender().equals(name)) {
+                bl.set(true);
+            }
+        });
+
+        return bl.get();
     }
 
-    public static class PendingConfirmPlayers {
-        private final long timeOfParentExecution;
-        private final int timeToReact;
-        private final String playerName;
-        private final ModObserverCommandArg.ModObserverCommandExecutor executor;
+    public static boolean isLate(String name) {
+        AtomicBoolean bl = new AtomicBoolean(false);
+        CONFIRM_COMMAND_SENDERS.forEach(confirmCommandArg -> {
+            if (confirmCommandArg.getSender().equals(name) && !confirmCommandArg.checkForValidResponseTime()) {
+                bl.set(true);
+            }
+        });
+        return bl.get();
+    }
 
-        public PendingConfirmPlayers(String playerName, long timeOfParentExecution, int timeToReact, ModObserverCommandArg.ModObserverCommandExecutor executor) {
-            this.timeOfParentExecution = timeOfParentExecution;
-            this.timeToReact = timeToReact;
-            this.playerName = playerName;
-            this.executor = executor;
-        }
+    public static void remove(String name) {
+        AtomicReference<ConfirmCommandArg> senderToRemove = new AtomicReference<>(null);
+        CONFIRM_COMMAND_SENDERS.forEach(confirmCommandArg -> {
+            if (confirmCommandArg.getSender().equals(name)) {
+                senderToRemove.set(confirmCommandArg);
+            }
+        });
 
-        public boolean checkForValidResponseTime() {
-            return Instant.now().getEpochSecond() - timeToReact <= timeOfParentExecution;
+        if (senderToRemove.get() != null) {
+            CONFIRM_COMMAND_SENDERS.remove(senderToRemove.get());
         }
+    }
 
-        public void execute(CommandSender sender, Command command, String label, String[] args) {
-            executor.execute(sender, command, label, args);
-        }
+    public static int getRemainingTime(String name) {
+        AtomicInteger i = new AtomicInteger(0);
+        CONFIRM_COMMAND_SENDERS.forEach(confirmCommandArg -> {
+            if (confirmCommandArg.getSender().equals(name)) {
+                i.set(confirmCommandArg.getRemainingTime());
+            }
+        });
 
-        public String getPlayerName() {
-            return playerName;
-        }
+        return i.get();
     }
 }

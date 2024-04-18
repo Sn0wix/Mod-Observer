@@ -8,6 +8,7 @@ import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class ModObserverCommandArgs {
@@ -24,7 +25,11 @@ public class ModObserverCommandArgs {
                 Config.loadValues(ModObserverPlugin.CONFIG);
                 sender.sendMessage("Config was reloaded.");
             }),
-            new ModObserverCommandArg("reset", (sender, command, label, args) -> sender.sendMessage(ChatColor.DARK_RED + "Are you sure you want to reset config settings? Proceed with /modObserverConfirm."))
+            new ConfirmCommandArg("reset", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to reset config settings?\nProceed with /modObserverConfirm or by repeating the command.",
+                    (sender, command, label, args) -> {
+                        //TODO
+                        sender.sendMessage("Config was reseted.");
+                    })
     ), ((sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "Usage: /modObserver config reload/save/reset"))));
 
 
@@ -66,8 +71,17 @@ public class ModObserverCommandArgs {
             new ModObserverCommandArg("addDefaults", (sender, command, label, args) -> {
                 //TODO
                 sender.sendMessage("Added default entries to whitelist. TODO");
-            })
-            //TODO add all, clear - yes, no
+            }),
+            new ConfirmCommandArg("clear", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to clear the whitelist? All the entries in this list will be removed!\nProceed with /modobserverconfirm or by repeating the command.",
+                    (sender, command, label, args) -> {
+                        Iterator<String> iterator = Config.WHITELISTED_MODS.listIterator();
+                        while (iterator.hasNext()) {
+                            iterator.next();
+                            iterator.remove();
+                        }
+                        sender.sendMessage("Whitelist was cleared.");
+                    })
+            //TODO add all
     ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver whitelist show/add modid modid .../remove modid modid ...")));
 
 
@@ -88,8 +102,18 @@ public class ModObserverCommandArgs {
                 } else {
                     sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"remove\"");
                 }
-            }), //TODO add all, clear - yes, no
-            new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Blacklisted mods: " + Config.BLACKLISTED_MODS))
+            }),
+            //TODO add all
+            new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Blacklisted mods: " + Config.BLACKLISTED_MODS)),
+            new ConfirmCommandArg("clear", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to clear the blacklist? All the entries in this list will be removed!\nProceed with /modobserverconfirm or by repeating the command.",
+                    (sender, command, label, args) -> {
+                        Iterator<String> iterator = Config.BLACKLISTED_MODS.listIterator();
+                        while (iterator.hasNext()) {
+                            iterator.next();
+                            iterator.remove();
+                        }
+                        sender.sendMessage("Blacklist was cleared.");
+                    })
     ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver blacklist show/add modid modid .../remove modid modid ...")));
 
 
@@ -125,8 +149,15 @@ public class ModObserverCommandArgs {
                 Bukkit.getOnlinePlayers().forEach(player -> Config.IGNORED_PLAYERS.remove(player.getName()));
                 sender.sendMessage("Removed all online players from ignored players list.");
             }),
-            //TODO
-            new ModObserverCommandArg("clear", (sender, command, label, args) -> sender.sendMessage(ChatColor.DARK_RED + "TODO Are you sure you want to reset ignored players list? Proceed with /modobserverconfirm."))
+            new ConfirmCommandArg("clear", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to clear Ignored players list? All the entries in this list will be removed!\nProceed with /modobserverconfirm or by repeating the command.",
+                    (sender, command, label, args) -> {
+                        Iterator<String> iterator = Config.IGNORED_PLAYERS.listIterator();
+                        while (iterator.hasNext()) {
+                            iterator.next();
+                            iterator.remove();
+                        }
+                        sender.sendMessage("Ignored players list was cleared.");
+                    })
     ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver ignoredPlayers show/add playername playername .../remove playername playername .../addAll/removeAll/reset")));
 
 

@@ -1,7 +1,6 @@
 package net.sn0wix_.modObserverPlugin.config;
 
 import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
-import net.sn0wix_.modObserverPlugin.commands.ModObserverCommandArgs;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;

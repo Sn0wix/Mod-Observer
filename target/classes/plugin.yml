@@ -10,3 +10,7 @@ commands:
     description: Lets you config ModObserver plugin.
     usage: /modobserver {value}...
     permission: op
+  modObserverConfirm:
+    description: Confirms ModObserver commands that require this.
+    usage: /modobserverconfirm
+    permission: op

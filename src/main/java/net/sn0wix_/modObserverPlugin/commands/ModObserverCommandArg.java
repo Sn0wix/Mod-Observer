@@ -14,6 +14,7 @@ public class ModObserverCommandArg {
     private final ModObserverCommandExecutor executor;
     private Optional<ModObserverCommandTabCompleter> tabCompleter = Optional.empty();
 
+
     public ModObserverCommandArg(String command, List<ModObserverCommandArg> subCommands, ModObserverCommandExecutor executor) {
         this.command = command;
         this.subCommands = subCommands;

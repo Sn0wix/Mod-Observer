@@ -1,7 +1,7 @@
 package net.sn0wix_.modObserverPlugin.listeners;
 
 import net.sn0wix_.modObserverPlugin.IncomingPlayers;
-import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
+import net.sn0wix_.modObserverPlugin.Util;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,7 +10,7 @@ import org.bukkit.event.player.*;
 public class Events implements Listener {
     @EventHandler
     public void joinEvent(PlayerJoinEvent event) {
-        if (!ModObserverPlugin.checkPlayer(event.getPlayer())) {
+        if (!Util.checkPlayer(event.getPlayer())) {
             event.setJoinMessage("");
         } else {
             IncomingPlayers.removePlayer(event.getPlayer().getName());

@@ -25,7 +25,7 @@ public class ModObserver implements ClientModInitializer {
     public void onInitializeClient() {
         ClientConfigurationConnectionEvents.INIT.register((handler, client) -> ClientConfigurationNetworking.send(MODS_FOR_APPROVAL_PACKET, getModsBuf()));
 
-        ClientPlayNetworking.registerGlobalReceiver(MOD_REQUEST_PACKET, (client, handler, buf, responseSender) -> client.execute(() -> ClientConfigurationNetworking.send(MODS_FOR_APPROVAL_PACKET, getModsBuf())));
+        ClientPlayNetworking.registerGlobalReceiver(MOD_REQUEST_PACKET, (client, handler, buf, responseSender) -> client.execute(() -> ClientPlayNetworking.send(MODS_FOR_APPROVAL_PACKET, getModsBuf())));
     }
 
     private static PacketByteBuf getModsBuf() {

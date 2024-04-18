@@ -1,14 +1,19 @@
 package net.sn0wix_.modObserverPlugin;
 
 import net.sn0wix_.modObserverPlugin.config.Config;
+import net.sn0wix_.modObserverPlugin.networking.PacketHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Util {
     //Players
+    public static HashMap<String, PacketHandler.ResponseHandler> PLAYERS_WAITING_FOR_RESPONSE = new HashMap<>();
+
+
     public static List<String> getAllOnlinePlayers() {
         ArrayList<String> players = new ArrayList<>();
         Bukkit.getOnlinePlayers().forEach(player -> players.add(player.getName()));

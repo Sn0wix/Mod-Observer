@@ -31,6 +31,34 @@ public class Config {
     private static final String MOD_OBSERVER_REQUIRED_MESSAGE_PATH = "mod_observer_required_message";
     private static final String IGNORED_PLAYERS_PATH = "ignored_players";
 
+    public static void loadDefaults(FileConfiguration config) {
+        String mode = config.getString(MODE_PATH);
+
+        for (Mode value : Mode.values()) {
+            if (mode != null && mode.equals(value.getName())) {
+                MODE = value;
+            }
+        }
+
+        if (MODE == null) {
+            MODE = Mode.WHITELIST;
+            ModObserverPlugin.LOGGER.warning("Found illegal property value, mode: " + mode + ", setting mode to \"whitelist\"");
+        }
+        try {
+            REQUIRED_MODS = config.getDefaults().getStringList(REQUIRED_MODS_PATH);
+            WHITELISTED_MODS = config.getDefaults().getStringList(WHITELISTED_MODS_PATH);
+            BLACKLISTED_MODS = config.getDefaults().getStringList(BLACKLISTED_MODS_PATH);
+            REQUIRED_MODS_MESSAGE = config.getDefaults().getString(REQUIRED_MODS_MESSAGE_PATH);
+            PROHIBITED_MODS_FOUND_MESSAGE = config.getDefaults().getString(PROHIBITED_MODS_FOUND_MESSAGE_PATH);
+            MOD_OBSERVER_REQUIRED_MESSAGE = config.getDefaults().getString(MOD_OBSERVER_REQUIRED_MESSAGE_PATH);
+            IGNORED_PLAYERS = (ArrayList<String>) config.getDefaults().getStringList(IGNORED_PLAYERS_PATH);
+        } catch (NullPointerException e) {
+            ModObserverPlugin.LOGGER.warning("Can not load config defaults! Try deleting current config file to load them. If the issue persists, download the plugin again.");
+        }
+
+        saveValues(ModObserverPlugin.CONFIG);
+    }
+
     public static void loadValues(FileConfiguration config) {
         String mode = config.getString(MODE_PATH);
 
@@ -64,6 +92,15 @@ public class Config {
         config.set(PROHIBITED_MODS_FOUND_MESSAGE_PATH, PROHIBITED_MODS_FOUND_MESSAGE);
         config.set(MOD_OBSERVER_REQUIRED_MESSAGE_PATH, MOD_OBSERVER_REQUIRED_MESSAGE);
         config.set(IGNORED_PLAYERS_PATH, IGNORED_PLAYERS);
+    }
+
+    public static List<String> getDefaultWhitelist(FileConfiguration configuration) {
+        try {
+            return configuration.getDefaults().getStringList(WHITELISTED_MODS_PATH);
+        } catch (NullPointerException e) {
+            ModObserverPlugin.LOGGER.warning("Could not load default whitelist!");
+            return null;
+        }
     }
 
     /*public static void addComments(FileConfiguration config) {

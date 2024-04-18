@@ -6,11 +6,13 @@ import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.listeners.Events;
 import net.sn0wix_.modObserverPlugin.networking.PacketHandler;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
 
 public final class ModObserverPlugin extends JavaPlugin {
+    public static Plugin PLUGIN;
     public static Logger LOGGER;
     public static FileConfiguration CONFIG;
     public static final String MOD_ID = "mod_observer";
@@ -21,6 +23,9 @@ public final class ModObserverPlugin extends JavaPlugin {
     public void onEnable() {
         //Initialize logger
         LOGGER = getServer().getLogger();
+
+        //Initialize plugin
+        PLUGIN = this;
 
         //Register listeners
         getServer().getPluginManager().registerEvents(new Events(), this);

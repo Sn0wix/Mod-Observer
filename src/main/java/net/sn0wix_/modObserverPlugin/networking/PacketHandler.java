@@ -28,6 +28,12 @@ public class PacketHandler {
         String delimiter = ",";
         String[] modids = concatenatedString.split(delimiter);
 
+        //This response is not from joining player
+        if (Util.PLAYERS_WAITING_FOR_RESPONSE.containsKey(player.getName())) {
+            Util.PLAYERS_WAITING_FOR_RESPONSE.get(player.getName()).execute(modids);
+            return;
+        }
+
         ArrayList<String> notApprovedMods = Util.getNonApprovedMods(modids);
         ArrayList<String> missingRequiredMods = Util.getMissingRequiredMods(modids);
 
@@ -50,5 +56,10 @@ public class PacketHandler {
         if (shouldBeKicked) {
             Util.checkPlayer(player);
         }
+    }
+
+    @FunctionalInterface
+    public interface ResponseHandler {
+        void execute(String[] modids);
     }
 }

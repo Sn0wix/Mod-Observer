@@ -3,13 +3,11 @@ package net.sn0wix_.modObserverPlugin.commands;
 import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
 import net.sn0wix_.modObserverPlugin.Util;
 import net.sn0wix_.modObserverPlugin.config.Config;
+import net.sn0wix_.modObserverPlugin.networking.PacketHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class ModObserverCommandArgs {
     private static final List<ModObserverCommandArg> REGISTERED_COMMANDS = new ArrayList<>();
@@ -27,7 +25,7 @@ public class ModObserverCommandArgs {
             }),
             new ConfirmCommandArg("reset", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to reset config settings?\nProceed with /modObserverConfirm or by repeating the command.",
                     (sender, command, label, args) -> {
-                        //TODO
+                        Config.loadDefaults(ModObserverPlugin.CONFIG);
                         sender.sendMessage("Config was reseted.");
                     })
     ), ((sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "Usage: /modObserver config reload/save/reset"))));
@@ -69,8 +67,10 @@ public class ModObserverCommandArgs {
             }), //add all, clear - yes, no
             new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Whitelisted mods: " + Config.WHITELISTED_MODS)),
             new ModObserverCommandArg("addDefaults", (sender, command, label, args) -> {
-                //TODO
-                sender.sendMessage("Added default entries to whitelist. TODO");
+                List<String> modsToAdd = List.copyOf(Objects.requireNonNull(Config.getDefaultWhitelist(ModObserverPlugin.CONFIG)));
+                Config.WHITELISTED_MODS.removeAll(modsToAdd);
+                Config.WHITELISTED_MODS.addAll(modsToAdd);
+                sender.sendMessage("Added default entries to whitelist.");
             }),
             new ConfirmCommandArg("clear", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to clear the whitelist? All the entries in this list will be removed!\nProceed with /modobserverconfirm or by repeating the command.",
                     (sender, command, label, args) -> {
@@ -80,8 +80,29 @@ public class ModObserverCommandArgs {
                             iterator.remove();
                         }
                         sender.sendMessage("Whitelist was cleared.");
-                    })
-            //TODO add all
+                    }),
+            new ModObserverCommandArg("addAll", (sender, command, label, args) -> {
+                //TODO fix
+                if (args.length == 0) {
+                    sender.sendMessage(ChatColor.RED + "You need to pass player who's mods you want to add.");
+                } else if (Bukkit.getPlayerExact(args[0]) != null) {
+                    PacketHandler.send(ModObserverPlugin.PLUGIN, Objects.requireNonNull(Bukkit.getPlayerExact(args[0])), new byte[0]);
+                    sender.sendMessage("Waiting for response from " + args[0]);
+                    Util.PLAYERS_WAITING_FOR_RESPONSE.put(args[0], modids -> {
+                        if (modids.length == 0) {
+                            ModObserverPlugin.LOGGER.info("Suspicious activity from " + args[0] + ". Kicking the player.");
+                            ModObserverPlugin.LOGGER.info("Suspicious activity from " + args[0] + ". Kicking the player.");
+                            Objects.requireNonNull(Bukkit.getPlayerExact(args[0])).kickPlayer("ModObserver didn't respond correctly, try reinstalling it.");
+                        }
+
+                        Config.WHITELISTED_MODS.removeAll(List.of(modids));
+                        Config.WHITELISTED_MODS.addAll(List.of(modids));
+                        sender.sendMessage("Added all mods provided by " + args[0] + " which are: " + Arrays.toString(modids));
+                    });
+                } else {
+                    sender.sendMessage(ChatColor.RED + "Player " + args[0] + " is not online!");
+                }
+            }, (commandSender, command, label, argsAfterLastCommand) -> Util.getAllOnlinePlayers())
     ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver whitelist show/add modid modid .../remove modid modid ...")));
 
 

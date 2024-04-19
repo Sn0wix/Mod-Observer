@@ -1,59 +1,12 @@
 package net.sn0wix_.modObserverPlugin.commands;
 
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ConfirmCommand implements CommandExecutor {
+public class ConfirmCommand {
     private static final ArrayList<ConfirmCommandArg> CONFIRM_COMMAND_SENDERS = new ArrayList<>();
-
-    @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        Iterator<ConfirmCommandArg> iterator = CONFIRM_COMMAND_SENDERS.listIterator();
-
-        if (CONFIRM_COMMAND_SENDERS.isEmpty()) {
-            commandSender.sendMessage(ChatColor.RED + "There is nothing to be confirmed.");
-            return true;
-        }
-
-        while (iterator.hasNext()) {
-            ConfirmCommandArg confirmCommandArg = iterator.next();
-
-            if (confirmCommandArg.getSender().equals(commandSender.getName())) {
-                if (confirmCommandArg.checkForValidResponseTime()) {
-                    confirmCommandArg.execute(commandSender, command, s, strings);
-                } else {
-                    commandSender.sendMessage(ChatColor.RED + "You confirmed the command too late.");
-                }
-                try {
-                    iterator.remove();
-                }catch (ConcurrentModificationException ignored) {}
-
-
-                break;
-            }
-
-            if (!confirmCommandArg.checkForValidResponseTime()) {
-                iterator.remove();
-            }
-
-            if (!iterator.hasNext()) {
-                commandSender.sendMessage(ChatColor.RED + "There is nothing to be confirmed.");
-                break;
-            }
-        }
-
-        return true;
-    }
-
 
     public static void addSenderToQueue(ConfirmCommandArg sender) {
         CONFIRM_COMMAND_SENDERS.add(sender);

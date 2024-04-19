@@ -71,7 +71,7 @@ whitelisted_mods:
 blacklisted_mods:
 
 
-#Message that is sent when player doesn't have required mods. Use <$MODS$> where you want the list to be added.
+#Message that is sent when player doesn't have required mods. Use <$MODS$> where you want the list of mods to be added.
 required_mods_message: "This server requires you to install <$MODS$>"
 
 #This message will be the kick message if the player has prohibited mods
@@ -83,3 +83,6 @@ mod_observer_required_message: "This server requires you to install ModObserver.
 
 #Players that bypass the mod check. Use player names, not uuids.
 ignored_players:
+
+#You can turn off commands used to configure this plugin
+allow_command_interface: true

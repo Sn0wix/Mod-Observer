@@ -39,6 +39,7 @@ public class PacketHandler {
         //Check, if the response is from a joining player
         if (Util.PLAYERS_WAITING_FOR_RESPONSE.containsKey(player.getName())) {
             Util.PLAYERS_WAITING_FOR_RESPONSE.get(player.getName()).execute(modids);
+            Util.PLAYERS_WAITING_FOR_RESPONSE.remove(player.getName());
             return;
         }
 

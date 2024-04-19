@@ -1,7 +1,6 @@
 package net.sn0wix_.modObserverPlugin;
 
 import net.sn0wix_.modObserverPlugin.commands.ConfigurationCommand;
-import net.sn0wix_.modObserverPlugin.commands.ConfirmCommand;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.listeners.Events;
 import net.sn0wix_.modObserverPlugin.networking.PacketHandler;
@@ -22,31 +21,37 @@ public final class ModObserverPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         //Initialize logger
-        LOGGER = getServer().getLogger();
+        LOGGER = getLogger();
 
         //Initialize plugin
         PLUGIN = this;
-
-        //Register listeners
-        getServer().getPluginManager().registerEvents(new Events(), this);
-
-        //Commands
-        try {
-            getCommand("modObserver").setExecutor(new ConfigurationCommand());
-            getCommand("modObserverConfirm").setExecutor(new ConfirmCommand());
-        } catch (NullPointerException e) {
-            LOGGER.warning("Could not register command interface. Configuration must be done directly in the config file.");
-        }
-
-        //Plugin messaging
-        getServer().getMessenger().registerIncomingPluginChannel(this, PacketHandler.MODS_FOR_APPROVAL_CHANNEL, PacketHandler::receive);
-        getServer().getMessenger().registerOutgoingPluginChannel(this, PacketHandler.MOD_REQUEST_CHANNEL);
 
         //Config
         CONFIG = getConfig();
 
         Config.loadValues(CONFIG);
         saveConfig();
+
+        //Register listeners
+        getServer().getPluginManager().registerEvents(new Events(), this);
+
+        //Commands
+        if (Config.ALLOW_COMMAND_INTERFACE) {
+            try {
+                getCommand("modObserver").setExecutor(new ConfigurationCommand());
+            } catch (NullPointerException e) {
+                LOGGER.warning("Could not register command interface. Configuration must be done directly in the config file.");
+            }
+        }
+
+        //Plugin messaging
+        getServer().getMessenger().registerIncomingPluginChannel(this, PacketHandler.MODS_FOR_APPROVAL_CHANNEL, PacketHandler::receive);
+        getServer().getMessenger().registerOutgoingPluginChannel(this, PacketHandler.MOD_REQUEST_CHANNEL);
+
+        //Messages to the console
+        LOGGER.info("ModObserverPlugin initialized!");
+        LOGGER.info("You can use command /modobserver to configure it, or you can do it manually in the config file.");
+        LOGGER.info("Plugin was made by Sn0wix_");
     }
 
     @Override
@@ -58,5 +63,6 @@ public final class ModObserverPlugin extends JavaPlugin {
         //Plugin messaging
         getServer().getMessenger().unregisterIncomingPluginChannel(this, PacketHandler.MODS_FOR_APPROVAL_CHANNEL);
         getServer().getMessenger().unregisterOutgoingPluginChannel(this, PacketHandler.MOD_REQUEST_CHANNEL);
+        LOGGER.info("ModObserverPlugin disabled!");
     }
 }

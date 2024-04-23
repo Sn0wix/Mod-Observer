@@ -17,6 +17,9 @@ public class ModObserverCommandArgs {
     public static final ModObserverCommandArg HELP = registerCommandArg(new ModObserverCommandArg("help", ((sender, command, label, args) -> sender.sendMessage("Insert help message here."))));
 
 
+    public static final ModObserverCommandArg CHECK_PLAYER = registerCommandArg(new ModObserverCommandArg("checkPlayer", List.of(),
+            (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "Usage: /modObserver checkPlayer kick/dontKick <playername>")));
+
     //Config
     public static final ModObserverCommandArg CONFIG = registerCommandArg(new ModObserverCommandArg("config", List.of(
             new ModObserverCommandArg("reload", (sender, command, label, args) -> {

@@ -1,3 +1,6 @@
+#EDIT THIS FILE ONLY IF THE SERVER IS NOT RUNNING, OTHERWISE ALL CHANGES WILL BE LOST!
+#USE /modobserver TO CONFIGURE THE PLUGIN IN-GAME
+
 #Can have values: "whitelist", which will allow only the whitelisted mods, or "blacklist", which will allow everything else, except the blacklisted mods.
 mode: "whitelist"
 
@@ -78,11 +81,12 @@ required_mods_message: "This server requires you to install <$MODS$>"
 prohibited_mods_found_message: "You can not join this server, because you have installed <$MODS$>"
 
 #Message that will show up, if the player tries to connect without ModObserver
-mod_observer_required_message: "This server requires you to install ModObserver."
+mod_observer_required_message: "This server requires you to install ModObserver. Get it on:\n§6§lCurseforge: curseforge.com/minecraft/mc-mods/mod-observer§r\n§2§lModrinth: modrinth.com/mod/mod-observer"
 
 
 #Players that bypass the mod check. Use player names, not uuids.
 ignored_players:
 
 #You can turn off commands used to configure this plugin
+#If you turn this off, /modobserver will still show up in the commands list, but it won't do anything
 allow_command_interface: true

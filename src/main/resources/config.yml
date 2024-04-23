@@ -75,14 +75,13 @@ blacklisted_mods:
 
 
 #Message that is sent when player doesn't have required mods. Use <$MODS$> where you want the list of mods to be added.
-#If you want to add a link here, do it like this: [Click me!](https://your_link_here). This applies to all messages.
 required_mods_message: "This server requires you to install <$MODS$>"
 
 #This message will be the kick message if the player has prohibited mods
 prohibited_mods_found_message: "You can not join this server, because you have installed <$MODS$>"
 
 #Message that will show up, if the player tries to connect without ModObserver
-mod_observer_required_message: "This server requires you to install ModObserver.\n Get it on [§1§nCurseforge](https://www.curseforge.com/minecraft/mc-mods/mod-observer)§r or on [§1§nModrinth](https://modrinth.com/mod/mod-observer)"
+mod_observer_required_message: "This server requires you to install ModObserver. Get it on:\n§6§lCurseforge: curseforge.com/minecraft/mc-mods/mod-observer§r\n§2§lModrinth: modrinth.com/mod/mod-observer"
 
 
 #Players that bypass the mod check. Use player names, not uuids.

@@ -91,7 +91,7 @@ public class Config {
         config.setComments(WHITELISTED_MODS_PATH, List.of("Whitelist for mods, use modid of the mod.", "What is modid? https://fabricmc.net/wiki/tutorial:terms",
                 "The default whitelist has all the mods, that are needed for ModObserver to work.", "If you deleted these mods, you can use /modobserver whitelist addDefaults to add them back."));
         config.setComments(BLACKLISTED_MODS_PATH, List.of("Blacklist for mods."));
-        config.setComments(REQUIRED_MODS_MESSAGE, List.of("Message that is sent when player doesn't have required mods. Use <$MODS$> where you want the list to be added.", "If you want to add a link here, do it like this: [Click me!](https://your_link_here). This applies to all messages."));
+        config.setComments(REQUIRED_MODS_MESSAGE, List.of("Message that is sent when player doesn't have required mods. Use <$MODS$> where you want the list to be added."));
         config.setComments(PROHIBITED_MODS_FOUND_MESSAGE_PATH, List.of("This message will be the kick message if the player has prohibited mods."));
         config.setComments(MOD_OBSERVER_REQUIRED_MESSAGE, List.of("Message that will show up, if the player tries to connect without ModObserver."));
         config.setComments(IGNORED_PLAYERS_PATH, List.of("Players that bypass the mod check. Use player names, not uuids."));
@@ -116,44 +116,6 @@ public class Config {
             ModObserverPlugin.LOGGER.warning("Could not load default whitelist!");
             return null;
         }
-    }
-
-    //TODO
-    //https://www.spigotmc.org/wiki/the-chat-component-api/
-    public static String parseMessage(String message) {
-        //check if the string contains links
-        if (message.contains("](")) {
-            HashMap<String, String> links = new HashMap<>(1);
-            StringBuilder text = new StringBuilder();
-            boolean hasText = false;
-            boolean hasLink = false;
-            boolean shouldHadLink = false;
-            boolean isLinkFinished = false;
-
-            for (int i = 0; i < message.length(); i++) {
-                char s = message.charAt(i);
-
-                if (s == '[') {
-                    hasText = true;
-                    continue;
-                }
-                if (s == ']') {
-                    hasText = false;
-                    shouldHadLink = true;
-                    continue;
-                }
-                if (hasText) {
-                    text.append(s);
-                }
-                if (shouldHadLink && s == '(') {
-
-                } else {
-                    text = new StringBuilder();
-                }
-            }
-        }
-
-        return message;
     }
 
     public enum Mode {

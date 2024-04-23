@@ -4,9 +4,11 @@ import net.sn0wix_.modObserverPlugin.commands.ConfigurationCommand;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.listeners.Events;
 import net.sn0wix_.modObserverPlugin.networking.PacketHandler;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.logging.Logger;
 
@@ -16,8 +18,6 @@ public final class ModObserverPlugin extends JavaPlugin {
     public static FileConfiguration CONFIG;
     public static final String MOD_ID = "mod_observer";
 
-    //TODO command configuring
-    //TODO add config optiongs: enableCommandConfiguration
     @Override
     public void onEnable() {
         //Initialize logger
@@ -51,7 +51,6 @@ public final class ModObserverPlugin extends JavaPlugin {
         //Messages to the console
         LOGGER.info("ModObserverPlugin initialized!");
         LOGGER.info("You can use command /modobserver to configure it, or you can do it manually in the config file.");
-        LOGGER.info("Plugin was made by Sn0wix_");
     }
 
     @Override

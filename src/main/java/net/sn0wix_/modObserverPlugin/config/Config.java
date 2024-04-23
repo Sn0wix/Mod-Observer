@@ -119,6 +119,7 @@ public class Config {
     }
 
     //TODO
+    //https://www.spigotmc.org/wiki/the-chat-component-api/
     public static String parseMessage(String message) {
         //check if the string contains links
         if (message.contains("](")) {

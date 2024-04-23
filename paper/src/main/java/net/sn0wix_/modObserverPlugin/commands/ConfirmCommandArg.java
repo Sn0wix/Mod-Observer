@@ -1,8 +1,5 @@
 package net.sn0wix_.modObserverPlugin.commands;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -33,7 +30,7 @@ public class ConfirmCommandArg extends ModObserverCommandArg {
                 if (ConfirmCommand.isLate(sender.getName())) {
                     ConfirmCommand.remove(sender.getName());
                 } else {
-                    sender.sendMessage(Component.text(NamedTextColor.RED.value() + "You have already a command to confirm. Please wait for: " + ConfirmCommand.getRemainingTime(sender.getName()) + "s"));
+                    sender.sendMessage(ChatColor.RED + "You have already a command to confirm. Please wait for: " + ConfirmCommand.getRemainingTime(sender.getName()) + "s");
                     return;
                 }
             }

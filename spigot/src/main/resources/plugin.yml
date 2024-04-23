@@ -1,0 +1,12 @@
+name: ModObserverPlugin
+version: '${project.version}'
+main: net.sn0wix_.modObserverPlugin.ModObserverPlugin
+api-version: '1.20'
+authors: [Sn0wix_]
+description: Checks if the player has installed only permitted mods. Requires ModObserver to be installed on the client.
+
+commands:
+  modObserver:
+    description: Lets you config ModObserver plugin.
+    usage: /modobserver {value}...
+    permission: op

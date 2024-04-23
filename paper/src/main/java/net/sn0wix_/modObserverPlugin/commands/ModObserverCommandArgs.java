@@ -1,12 +1,11 @@
 package net.sn0wix_.modObserverPlugin.commands;
 
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
 import net.sn0wix_.modObserverPlugin.Util;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.networking.PacketHandler;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 
 import java.util.*;
 
@@ -24,12 +23,12 @@ public class ModObserverCommandArgs {
                 Config.loadValues(ModObserverPlugin.CONFIG);
                 sender.sendMessage("Config was reloaded.");
             }),
-            new ConfirmCommandArg("reset", 10, NamedTextColor.DARK_RED + "" + TextDecoration.BOLD + "Are you sure you want to reset config settings?\nProceed with by repeating the command.",
+            new ConfirmCommandArg("reset", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to reset config settings?\nProceed with by repeating the command.",
                     (sender, command, label, args) -> {
                         Config.loadDefaults(ModObserverPlugin.CONFIG);
                         sender.sendMessage("Config was reseted.");
                     })
-    ), ((sender, command, label, args) -> sender.sendMessage(NamedTextColor.RED + "Usage: /modObserver config reload/save/reset"))));
+    ), ((sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "Usage: /modObserver config reload/save/reset"))));
 
 
     //Mode
@@ -43,9 +42,9 @@ public class ModObserverCommandArgs {
                         Config.MODE = Config.Mode.WHITELIST;
                         sender.sendMessage("Current mode was set to: whitelist");
                     })
-            ), (sender, command, label, args) -> sender.sendMessage(NamedTextColor.RED + "Use blacklist or whitelist.")),
+            ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "Use blacklist or whitelist.")),
             new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Current mode is: " + Config.MODE.getName()))
-    ), (sender, command, label, args) -> sender.sendMessage(NamedTextColor.RED + "Usage: /modObserver mode show/switch whitelist/blacklist")));
+    ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "Usage: /modObserver mode show/switch whitelist/blacklist")));
 
 
     //Whitelist
@@ -55,7 +54,7 @@ public class ModObserverCommandArgs {
                     Config.WHITELISTED_MODS.addAll(List.of(args));
                     sender.sendMessage("Mods added to whitelist: " + Arrays.toString(args));
                 } else {
-                    sender.sendMessage(NamedTextColor.RED + "You need to add at least one value after \"add\"");
+                    sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"add\"");
                 }
             }),
             new ModObserverCommandArg("remove", (sender, command, label, args) -> {
@@ -63,7 +62,7 @@ public class ModObserverCommandArgs {
                     Config.WHITELISTED_MODS.removeAll(List.of(args));
                     sender.sendMessage("Mods removed from whitelist: " + Arrays.toString(args));
                 } else {
-                    sender.sendMessage(NamedTextColor.RED + "You need to add at least one value after \"remove\"");
+                    sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"remove\"");
                 }
             }), //add all, clear - yes, no
             new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Whitelisted mods: " + Config.WHITELISTED_MODS)),
@@ -73,7 +72,7 @@ public class ModObserverCommandArgs {
                 Config.WHITELISTED_MODS.addAll(modsToAdd);
                 sender.sendMessage("Added default entries to whitelist.");
             }),
-            new ConfirmCommandArg("clear", 10, NamedTextColor.DARK_RED + "" + TextDecoration.BOLD + "Are you sure you want to clear the whitelist? All the entries in this list will be removed!\nProceed or by repeating the command.",
+            new ConfirmCommandArg("clear", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to clear the whitelist? All the entries in this list will be removed!\nProceed or by repeating the command.",
                     (sender, command, label, args) -> {
                         Iterator<String> iterator = Config.WHITELISTED_MODS.listIterator();
                         while (iterator.hasNext()) {
@@ -84,7 +83,7 @@ public class ModObserverCommandArgs {
                     }),
             new ModObserverCommandArg("addAll", (sender, command, label, args) -> {
                 if (args.length == 0) {
-                    sender.sendMessage(NamedTextColor.RED + "You need to pass in the player who's mods you want to add.");
+                    sender.sendMessage(ChatColor.RED + "You need to pass in the player who's mods you want to add.");
                 } else if (Bukkit.getPlayerExact(args[0]) != null) {
                     PacketHandler.send(ModObserverPlugin.PLUGIN, Objects.requireNonNull(Bukkit.getPlayerExact(args[0])), new byte[0]);
                     sender.sendMessage("Waiting for response from " + args[0]);
@@ -94,10 +93,10 @@ public class ModObserverCommandArgs {
                         sender.sendMessage("Added all mods provided by " + args[0] + " which are: " + Arrays.toString(modids));
                     });
                 } else {
-                    sender.sendMessage(NamedTextColor.RED + "Player " + args[0] + " is not online!");
+                    sender.sendMessage(ChatColor.RED + "Player " + args[0] + " is not online!");
                 }
             }, (commandSender, command, label, argsAfterLastCommand) -> Util.getAllOnlinePlayers())
-    ), (sender, command, label, args) -> sender.sendMessage(NamedTextColor.RED + "/modObserver whitelist show/add modid modid .../remove modid modid ...")));
+    ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver whitelist show/add modid modid .../remove modid modid ...")));
 
 
     //Blacklist
@@ -107,7 +106,7 @@ public class ModObserverCommandArgs {
                     Config.BLACKLISTED_MODS.addAll(List.of(args));
                     sender.sendMessage("Mods added to blacklist: " + Arrays.toString(args));
                 } else {
-                    sender.sendMessage(NamedTextColor.RED + "You need to add at least one value after \"add\"");
+                    sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"add\"");
                 }
             }),
             new ModObserverCommandArg("remove", (sender, command, label, args) -> {
@@ -115,11 +114,11 @@ public class ModObserverCommandArgs {
                     Config.BLACKLISTED_MODS.removeAll(List.of(args));
                     sender.sendMessage("Mods removed from blacklist: " + Arrays.toString(args));
                 } else {
-                    sender.sendMessage(NamedTextColor.RED + "You need to add at least one value after \"remove\"");
+                    sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"remove\"");
                 }
             }),
             new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Blacklisted mods: " + Config.BLACKLISTED_MODS)),
-            new ConfirmCommandArg("clear", 10, NamedTextColor.DARK_RED + "" + TextDecoration.BOLD + "Are you sure you want to clear the blacklist? All the entries in this list will be removed!\nProceed with by repeating the command.",
+            new ConfirmCommandArg("clear", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to clear the blacklist? All the entries in this list will be removed!\nProceed with by repeating the command.",
                     (sender, command, label, args) -> {
                         Iterator<String> iterator = Config.BLACKLISTED_MODS.listIterator();
                         while (iterator.hasNext()) {
@@ -130,7 +129,7 @@ public class ModObserverCommandArgs {
                     }),
             new ModObserverCommandArg("addAll", (sender, command, label, args) -> {
                 if (args.length == 0) {
-                    sender.sendMessage(NamedTextColor.RED + "You need to pass in the player who's mods you want to add.");
+                    sender.sendMessage(ChatColor.RED + "You need to pass in the player who's mods you want to add.");
                 } else if (Bukkit.getPlayerExact(args[0]) != null) {
                     PacketHandler.send(ModObserverPlugin.PLUGIN, Objects.requireNonNull(Bukkit.getPlayerExact(args[0])), new byte[0]);
                     sender.sendMessage("Waiting for response from " + args[0]);
@@ -140,10 +139,10 @@ public class ModObserverCommandArgs {
                         sender.sendMessage("Added all mods provided by " + args[0] + " which are: " + Arrays.toString(modids));
                     });
                 } else {
-                    sender.sendMessage(NamedTextColor.RED + "Player " + args[0] + " is not online!");
+                    sender.sendMessage(ChatColor.RED + "Player " + args[0] + " is not online!");
                 }
             })
-    ), (sender, command, label, args) -> sender.sendMessage(NamedTextColor.RED + "/modObserver blacklist show/add modid modid .../remove modid modid ...")));
+    ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver blacklist show/add modid modid .../remove modid modid ...")));
 
 
     //Required mods
@@ -153,7 +152,7 @@ public class ModObserverCommandArgs {
                     Config.REQUIRED_MODS.addAll(List.of(args));
                     sender.sendMessage("Required mods added: " + Arrays.toString(args));
                 } else {
-                    sender.sendMessage(NamedTextColor.RED + "You need to add at least one value after \"add\"");
+                    sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"add\"");
                 }
             }),
             new ModObserverCommandArg("remove", (sender, command, label, args) -> {
@@ -161,11 +160,11 @@ public class ModObserverCommandArgs {
                     Config.REQUIRED_MODS.removeAll(List.of(args));
                     sender.sendMessage("Required mods removed: " + Arrays.toString(args));
                 } else {
-                    sender.sendMessage(NamedTextColor.RED + "You need to add at least one value after \"remove\"");
+                    sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"remove\"");
                 }
             }),
             new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Required mods: " + Config.REQUIRED_MODS)),
-            new ConfirmCommandArg("clear", 10, NamedTextColor.DARK_RED + "" + TextDecoration.BOLD + "Are you sure you want to clear Required mods list? All the entries in this list will be removed!\nProceed by repeating the command.",
+            new ConfirmCommandArg("clear", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to clear Required mods list? All the entries in this list will be removed!\nProceed by repeating the command.",
                     (sender, command, label, args) -> {
                         Iterator<String> iterator = Config.REQUIRED_MODS.listIterator();
                         while (iterator.hasNext()) {
@@ -176,7 +175,7 @@ public class ModObserverCommandArgs {
                     }),
             new ModObserverCommandArg("addAll", (sender, command, label, args) -> {
                 if (args.length == 0) {
-                    sender.sendMessage(NamedTextColor.RED + "You need to pass in the player who's mods you want to add.");
+                    sender.sendMessage(ChatColor.RED + "You need to pass in the player who's mods you want to add.");
                 } else if (Bukkit.getPlayerExact(args[0]) != null) {
                     PacketHandler.send(ModObserverPlugin.PLUGIN, Objects.requireNonNull(Bukkit.getPlayerExact(args[0])), new byte[0]);
                     sender.sendMessage("Waiting for response from " + args[0]);
@@ -186,10 +185,10 @@ public class ModObserverCommandArgs {
                         sender.sendMessage("Added all mods provided by " + args[0] + " which are: " + Arrays.toString(modids));
                     });
                 } else {
-                    sender.sendMessage(NamedTextColor.RED.value() + "Player " + args[0] + " is not online!");
+                    sender.sendMessage(ChatColor.RED + "Player " + args[0] + " is not online!");
                 }
             })
-    ), (sender, command, label, args) -> sender.sendMessage(NamedTextColor.RED.value() + "/modObserver requiredMods show/add modid modid .../remove modid modid ...")));
+    ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver requiredMods show/add modid modid .../remove modid modid ...")));
 
     //Ignored players
     public static final ModObserverCommandArg IGNORED_PLAYERS = registerCommandArg(new ModObserverCommandArg("ignoredPlayers", List.of(
@@ -198,7 +197,7 @@ public class ModObserverCommandArgs {
                     Config.IGNORED_PLAYERS.addAll(List.of(args));
                     sender.sendMessage("Added ignored players: " + Arrays.toString(args));
                 } else {
-                    sender.sendMessage(NamedTextColor.RED + "You need to add at least one value after \"add\"");
+                    sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"add\"");
                 }
             }, (commandSender, command, label, argsAfterLastCommand) -> Util.getAllOnlinePlayers()),
             new ModObserverCommandArg("remove", (sender, command, label, args) -> {
@@ -206,7 +205,7 @@ public class ModObserverCommandArgs {
                     Config.IGNORED_PLAYERS.removeAll(List.of(args));
                     sender.sendMessage("Removed ignored players: " + Arrays.toString(args));
                 } else {
-                    sender.sendMessage(NamedTextColor.RED + "You need to add at least one value after \"remove\"");
+                    sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"remove\"");
                 }
             }, (commandSender, command, label, argsAfterLastCommand) -> Util.getAllOnlinePlayers()), //add all, clear - yes, no
             new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Ignored players list: " + Config.IGNORED_PLAYERS)),
@@ -223,7 +222,7 @@ public class ModObserverCommandArgs {
                 Bukkit.getOnlinePlayers().forEach(player -> Config.IGNORED_PLAYERS.remove(player.getName()));
                 sender.sendMessage("Removed all online players from ignored players list.");
             }),
-            new ConfirmCommandArg("clear", 10, NamedTextColor.DARK_RED + "" + TextDecoration.BOLD + "Are you sure you want to clear Ignored players list? All the entries in this list will be removed!\nProceed by repeating the command.",
+            new ConfirmCommandArg("clear", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to clear Ignored players list? All the entries in this list will be removed!\nProceed by repeating the command.",
                     (sender, command, label, args) -> {
                         Iterator<String> iterator = Config.IGNORED_PLAYERS.listIterator();
                         while (iterator.hasNext()) {
@@ -232,7 +231,7 @@ public class ModObserverCommandArgs {
                         }
                         sender.sendMessage("Ignored players list was cleared.");
                     })
-    ), (sender, command, label, args) -> sender.sendMessage(NamedTextColor.RED + "/modObserver ignoredPlayers show/add playername playername .../remove playername playername .../addAll/removeAll/reset")));
+    ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver ignoredPlayers show/add playername playername .../remove playername playername .../addAll/removeAll/reset")));
 
 
     public static ModObserverCommandArg registerCommandArg(ModObserverCommandArg arg) {

@@ -51,6 +51,7 @@ public final class ModObserverPlugin extends JavaPlugin {
         //Messages to the console
         LOGGER.info("ModObserverPlugin initialized!");
         LOGGER.info("You can use command /modobserver to configure it, or you can do it manually in the config file.");
+        LOGGER.info("Plugin was made by Sn0wix_");
     }
 
     @Override

@@ -1,16 +1,9 @@
 package net.sn0wix_.modObserverPlugin.config;
 
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.hover.content.Text;
 import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Config {
@@ -122,78 +115,6 @@ public class Config {
             return null;
         }
     }
-//["","This server requires you to install ModObserver.","Get it on ",{"text":"Curseforge","underlined":true,"color":"blue","clickEvent":{"action":"open_url","value":"https://www.curseforge.com/"},"hoverEvent":{"action":"show_text","contents":["Curseforge"]}}," or on ",{"text":"Modrinth","color":"blue","clickEvent":{"action":"open_url","value":"https://modrinth.com/"},"hoverEvent":{"action":"show_text","contents":["Modrinth"]}}]
-    //TODO
-    //https://www.spigotmc.org/wiki/the-chat-component-api/
-
-
-    /*public static ComponentBuilder parseLinks(String message) {
-        ComponentBuilder component = new ComponentBuilder();
-
-        //check if the string contains links
-        if (message.contains("](")) {
-            StringBuilder text = new StringBuilder();
-            StringBuilder link = new StringBuilder();
-            boolean hasText = false;
-            boolean hasLink = false;
-            boolean shouldHaveLink = false;
-
-            for (int i = 0; i < message.length(); i++) {
-                char c = message.charAt(i);
-
-                if (c == '[') {
-                    hasText = true;
-                    continue;
-                }
-                if (c == ']' && hasText) {
-                    hasText = false;
-                    shouldHaveLink = true;
-                    continue;
-                }
-
-                if (shouldHaveLink && c == '(') {
-                    hasLink = true;
-                    shouldHaveLink = false;
-                    continue;
-                } else if (shouldHaveLink) {
-                    text = new StringBuilder();
-                    shouldHaveLink = false;
-                    continue;
-                }
-
-                if (hasLink && c == ')') {
-                    //HERE
-                    component.append(text.toString())
-                            .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(text.toString())))
-                            .event(new ClickEvent(ClickEvent.Action.OPEN_URL, link.toString()));
-
-                    hasLink = false;
-                    link = new StringBuilder();
-                    text = new StringBuilder();
-                    continue;
-                }
-
-                if (hasText) {
-                    text.append(c);
-                    continue;
-                }
-
-                if (hasLink) {
-                    link.append(c);
-                    continue;
-                }
-                component.append(String.valueOf(c));
-            }
-        } else {
-            return component.append(message);
-        }
-
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            player.spigot().sendMessage(component.build());
-        });
-
-        return component;
-    }*/
 
     public enum Mode {
         WHITELIST("whitelist"),

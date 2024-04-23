@@ -25,6 +25,7 @@ public class Util {
         if (!IncomingPlayers.isApproved(player.getName())) {
             if (!IncomingPlayers.hasSendPacket(player.getName())) {
                 player.kickPlayer(Config.MOD_OBSERVER_REQUIRED_MESSAGE);
+                Bukkit.getOnlinePlayers().forEach(player1 -> player1.sendMessage(Config.MOD_OBSERVER_REQUIRED_MESSAGE));
                 bl = false;
             } else if (!IncomingPlayers.getNonApprovedMods(player.getName()).isEmpty()) {
                 player.kickPlayer(Config.PROHIBITED_MODS_FOUND_MESSAGE.replace("<$MODS$>", IncomingPlayers.getNonApprovedMods(player.getName())));

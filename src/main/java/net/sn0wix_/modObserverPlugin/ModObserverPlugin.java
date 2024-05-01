@@ -4,12 +4,14 @@ import net.sn0wix_.modObserverPlugin.commands.ConfigurationCommand;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.listeners.Events;
 import net.sn0wix_.modObserverPlugin.networking.PacketHandler;
-import org.bukkit.Bukkit;
+import net.sn0wix_.modObserverPlugin.players.WaitingForResponsePlayers;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 public final class ModObserverPlugin extends JavaPlugin {
@@ -35,6 +37,16 @@ public final class ModObserverPlugin extends JavaPlugin {
         //Register listeners
         getServer().getPluginManager().registerEvents(new Events(), this);
 
+        //Response timer
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!WaitingForResponsePlayers.isEmpty()) {
+                    WaitingForResponsePlayers.checkForTimedOuts().forEach(player -> player.getSender().sendMessage(ChatColor.RED + "Request has timed out!"));
+                }
+            }
+        }.runTaskTimer(this, 69, 20);
+
         //Commands
         if (Config.ALLOW_COMMAND_INTERFACE) {
             try {
@@ -51,6 +63,7 @@ public final class ModObserverPlugin extends JavaPlugin {
         //Messages to the console
         LOGGER.info("ModObserverPlugin initialized!");
         LOGGER.info("You can use command /modobserver to configure it, or you can do it manually in the config file.");
+        LOGGER.info("If this plugin gives you errors when someone is kicked, ignore them.");
     }
 
     @Override

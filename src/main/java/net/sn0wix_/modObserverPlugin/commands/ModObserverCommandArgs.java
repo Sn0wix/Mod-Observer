@@ -4,6 +4,7 @@ import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
 import net.sn0wix_.modObserverPlugin.Util;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.networking.PacketHandler;
+import net.sn0wix_.modObserverPlugin.players.WaitingForResponsePlayers;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
@@ -14,6 +15,7 @@ public class ModObserverCommandArgs {
 
 
     //Help
+    //TODO write help message
     public static final ModObserverCommandArg HELP = registerCommandArg(new ModObserverCommandArg("help", ((sender, command, label, args) -> sender.sendMessage("Insert help message here."))));
 
 
@@ -90,11 +92,11 @@ public class ModObserverCommandArgs {
                 } else if (Bukkit.getPlayerExact(args[0]) != null) {
                     PacketHandler.send(ModObserverPlugin.PLUGIN, Objects.requireNonNull(Bukkit.getPlayerExact(args[0])), new byte[0]);
                     sender.sendMessage("Waiting for response from " + args[0]);
-                    Util.PLAYERS_WAITING_FOR_RESPONSE.put(args[0], modids -> {
+                    WaitingForResponsePlayers.addPlayer(new WaitingForResponsePlayers.WaitingForResponsePlayer(Bukkit.getPlayerExact(args[0]).getName(), sender, modids -> {
                         Config.WHITELISTED_MODS.removeAll(List.of(modids));
                         Config.WHITELISTED_MODS.addAll(List.of(modids));
                         sender.sendMessage("Added all mods provided by " + args[0] + " which are: " + Arrays.toString(modids));
-                    });
+                    }));
                 } else {
                     sender.sendMessage(ChatColor.RED + "Player " + args[0] + " is not online!");
                 }
@@ -136,15 +138,15 @@ public class ModObserverCommandArgs {
                 } else if (Bukkit.getPlayerExact(args[0]) != null) {
                     PacketHandler.send(ModObserverPlugin.PLUGIN, Objects.requireNonNull(Bukkit.getPlayerExact(args[0])), new byte[0]);
                     sender.sendMessage("Waiting for response from " + args[0]);
-                    Util.PLAYERS_WAITING_FOR_RESPONSE.put(args[0], modids -> {
+                    WaitingForResponsePlayers.addPlayer(new WaitingForResponsePlayers.WaitingForResponsePlayer(Bukkit.getPlayerExact(args[0]).getName(), sender, modids -> {
                         Config.BLACKLISTED_MODS.removeAll(List.of(modids));
                         Config.BLACKLISTED_MODS.addAll(List.of(modids));
                         sender.sendMessage("Added all mods provided by " + args[0] + " which are: " + Arrays.toString(modids));
-                    });
+                    }));
                 } else {
                     sender.sendMessage(ChatColor.RED + "Player " + args[0] + " is not online!");
                 }
-            })
+            }, (commandSender, command, label, argsAfterLastCommand) -> Util.getAllOnlinePlayers())
     ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver blacklist show/add modid modid .../remove modid modid ...")));
 
 
@@ -182,15 +184,15 @@ public class ModObserverCommandArgs {
                 } else if (Bukkit.getPlayerExact(args[0]) != null) {
                     PacketHandler.send(ModObserverPlugin.PLUGIN, Objects.requireNonNull(Bukkit.getPlayerExact(args[0])), new byte[0]);
                     sender.sendMessage("Waiting for response from " + args[0]);
-                    Util.PLAYERS_WAITING_FOR_RESPONSE.put(args[0], modids -> {
+                    WaitingForResponsePlayers.addPlayer(new WaitingForResponsePlayers.WaitingForResponsePlayer(Bukkit.getPlayerExact(args[0]).getName(), sender, modids -> {
                         Config.REQUIRED_MODS.removeAll(List.of(modids));
                         Config.REQUIRED_MODS.addAll(List.of(modids));
                         sender.sendMessage("Added all mods provided by " + args[0] + " which are: " + Arrays.toString(modids));
-                    });
+                    }));
                 } else {
                     sender.sendMessage(ChatColor.RED + "Player " + args[0] + " is not online!");
                 }
-            })
+            }, (commandSender, command, label, argsAfterLastCommand) -> Util.getAllOnlinePlayers())
     ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver requiredMods show/add modid modid .../remove modid modid ...")));
 
     //Ignored players

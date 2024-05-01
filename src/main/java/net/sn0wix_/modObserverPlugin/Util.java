@@ -1,41 +1,58 @@
 package net.sn0wix_.modObserverPlugin;
 
 import net.sn0wix_.modObserverPlugin.config.Config;
-import net.sn0wix_.modObserverPlugin.networking.PacketHandler;
+import net.sn0wix_.modObserverPlugin.players.IncomingPlayers;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class Util {
     //Players
-    public static HashMap<String, PacketHandler.ResponseHandler> PLAYERS_WAITING_FOR_RESPONSE = new HashMap<>();
-
-
     public static List<String> getAllOnlinePlayers() {
         ArrayList<String> players = new ArrayList<>();
         Bukkit.getOnlinePlayers().forEach(player -> players.add(player.getName()));
         return players;
     }
 
-    public static boolean checkPlayer(Player player) {
-        boolean bl = true;
+    public static boolean checkPlayer(String playerName, String[] modids, boolean kick) {
+        if (Config.IGNORED_PLAYERS.contains(playerName)) return true;
+        if (!getNonApprovedMods(modids).isEmpty()) {
+            if (kick) {
+                Objects.requireNonNull(Bukkit.getPlayerExact(playerName))
+                        .kickPlayer(Config.PROHIBITED_MODS_FOUND_MESSAGE.replace("<$MODS$>", IncomingPlayers.getNonApprovedMods(playerName)));
+            }
+            return false;
+        }
+
+        if (!getMissingRequiredMods(modids).isEmpty()) {
+            if (kick) {
+                Objects.requireNonNull(Bukkit.getPlayerExact(playerName))
+                        .kickPlayer(Config.REQUIRED_MODS_MESSAGE.replace("<$MODS$>", IncomingPlayers.getMissingRequiredMods(playerName)));
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean checkIncomingPlayer(Player player) {
         if (!IncomingPlayers.isApproved(player.getName())) {
             if (!IncomingPlayers.hasSendPacket(player.getName())) {
                 player.kickPlayer(Config.MOD_OBSERVER_REQUIRED_MESSAGE);
-                bl = false;
+                return false;
             } else if (!IncomingPlayers.getNonApprovedMods(player.getName()).isEmpty()) {
                 player.kickPlayer(Config.PROHIBITED_MODS_FOUND_MESSAGE.replace("<$MODS$>", IncomingPlayers.getNonApprovedMods(player.getName())));
-                bl = false;
+                return false;
             } else if (!IncomingPlayers.getMissingRequiredMods(player.getName()).isEmpty()) {
                 player.kickPlayer(Config.REQUIRED_MODS_MESSAGE.replace("<$MODS$>", IncomingPlayers.getMissingRequiredMods(player.getName())));
-                bl = false;
+                return false;
             }
         }
 
-        return bl;
+        return true;
     }
 
 

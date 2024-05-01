@@ -1,4 +1,4 @@
-package net.sn0wix_.modObserverPlugin;
+package net.sn0wix_.modObserverPlugin.players;
 
 import java.util.ArrayList;
 import java.util.List;

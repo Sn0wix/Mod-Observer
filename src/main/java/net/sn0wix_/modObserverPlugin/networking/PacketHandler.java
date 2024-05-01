@@ -1,14 +1,13 @@
 package net.sn0wix_.modObserverPlugin.networking;
 
-import net.sn0wix_.modObserverPlugin.IncomingPlayers;
+import net.sn0wix_.modObserverPlugin.players.IncomingPlayers;
 import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
 import net.sn0wix_.modObserverPlugin.Util;
-import org.bukkit.Bukkit;
+import net.sn0wix_.modObserverPlugin.players.WaitingForResponsePlayers;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class PacketHandler {
     public static final String MOD_REQUEST_CHANNEL = ModObserverPlugin.MOD_ID + ":request_mods";
@@ -37,36 +36,39 @@ public class PacketHandler {
         }
 
         //Check, if the response is from a joining player
-        if (Util.PLAYERS_WAITING_FOR_RESPONSE.containsKey(player.getName())) {
-            Util.PLAYERS_WAITING_FOR_RESPONSE.get(player.getName()).execute(modids);
-            Util.PLAYERS_WAITING_FOR_RESPONSE.remove(player.getName());
+        if (WaitingForResponsePlayers.containsPlayer(player.getName())) {
+            WaitingForResponsePlayers.handlePacket(player.getName(), modids);
+            WaitingForResponsePlayers.removePlayer(player.getName());
             return;
         }
 
-        ArrayList<String> notApprovedMods = Util.getNonApprovedMods(modids);
-        ArrayList<String> missingRequiredMods = Util.getMissingRequiredMods(modids);
+        if (IncomingPlayers.containsPlayer(player.getName())) {
 
-        boolean shouldBeKicked = false;
-        boolean hasOnlyAllowedMods = false;
+            ArrayList<String> notApprovedMods = Util.getNonApprovedMods(modids);
+            ArrayList<String> missingRequiredMods = Util.getMissingRequiredMods(modids);
 
-        //checking for non-approved mods
-        if (notApprovedMods.isEmpty()) {
-            hasOnlyAllowedMods = true;
-        } else {
-            notApprovedMods.forEach(modid -> IncomingPlayers.addNonApprovedMod(player.getName(), modid));
-            shouldBeKicked = true;
-        }
+            boolean shouldBeKicked = false;
+            boolean hasOnlyAllowedMods = false;
 
-        //checking for missing required mods
-        if (!missingRequiredMods.isEmpty()) {
-            missingRequiredMods.forEach(modid -> IncomingPlayers.addMissingRequiredMod(player.getName(), modid));
-            shouldBeKicked = true;
-        } else if (hasOnlyAllowedMods) {
-            IncomingPlayers.setApproved(player.getName());
-        }
+            //checking for non-approved mods
+            if (notApprovedMods.isEmpty()) {
+                hasOnlyAllowedMods = true;
+            } else {
+                notApprovedMods.forEach(modid -> IncomingPlayers.addNonApprovedMod(player.getName(), modid));
+                shouldBeKicked = true;
+            }
 
-        if (shouldBeKicked) {
-            Util.checkPlayer(player);
+            //checking for missing required mods
+            if (!missingRequiredMods.isEmpty()) {
+                missingRequiredMods.forEach(modid -> IncomingPlayers.addMissingRequiredMod(player.getName(), modid));
+                shouldBeKicked = true;
+            } else if (hasOnlyAllowedMods) {
+                IncomingPlayers.setApproved(player.getName());
+            }
+
+            if (shouldBeKicked) {
+                Util.checkIncomingPlayer(player);
+            }
         }
     }
 

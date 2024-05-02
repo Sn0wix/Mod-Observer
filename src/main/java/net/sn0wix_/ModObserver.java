@@ -14,17 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ModObserver implements ClientModInitializer {
-    //TODO fix mod loading?, fix enviroment crash
     public static final String MOD_ID = "mod_observer";
     public static final Logger LOGGER = LoggerFactory.getLogger("mod_observer");
     public static Identifier MODS_FOR_APPROVAL_PACKET = new Identifier(MOD_ID, "mods_for_approval");
     public static Identifier MOD_REQUEST_PACKET = new Identifier(MOD_ID, "request_mods");
 
-
     @Override
     public void onInitializeClient() {
         ClientConfigurationConnectionEvents.INIT.register((handler, client) -> ClientConfigurationNetworking.send(MODS_FOR_APPROVAL_PACKET, getModsBuf()));
-
         ClientPlayNetworking.registerGlobalReceiver(MOD_REQUEST_PACKET, (client, handler, buf, responseSender) -> client.execute(() -> ClientPlayNetworking.send(MODS_FOR_APPROVAL_PACKET, getModsBuf())));
     }
 

@@ -33,7 +33,7 @@ public class Util {
         if (!getNonApprovedMods(modids).isEmpty()) {
             if (kick) {
                 Objects.requireNonNull(Bukkit.getPlayerExact(playerName))
-                        .kickPlayer(Config.PROHIBITED_MODS_FOUND_MESSAGE.replace("<$MODS$>", IncomingPlayers.getNonApprovedMods(playerName)));
+                        .kickPlayer(Config.PROHIBITED_MODS_FOUND_MESSAGE.replace("<$MODS$>", Util.getNonApprovedMods(modids).toString()));
             }
             return false;
         }
@@ -41,7 +41,7 @@ public class Util {
         if (!getMissingRequiredMods(modids).isEmpty()) {
             if (kick) {
                 Objects.requireNonNull(Bukkit.getPlayerExact(playerName))
-                        .kickPlayer(Config.REQUIRED_MODS_MESSAGE.replace("<$MODS$>", IncomingPlayers.getMissingRequiredMods(playerName)));
+                        .kickPlayer(Config.REQUIRED_MODS_MESSAGE.replace("<$MODS$>", Util.getMissingRequiredMods(modids).toString()));
             }
             return false;
         }

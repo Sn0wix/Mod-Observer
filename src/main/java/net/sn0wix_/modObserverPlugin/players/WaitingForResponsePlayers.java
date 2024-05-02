@@ -1,10 +1,13 @@
 package net.sn0wix_.modObserverPlugin.players;
 
+import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
 import net.sn0wix_.modObserverPlugin.networking.PacketHandler;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class WaitingForResponsePlayers {
@@ -12,6 +15,7 @@ public class WaitingForResponsePlayers {
     private static final ArrayList<WaitingForResponsePlayer> PLAYERS = new ArrayList<>();
 
     public static void addPlayer(WaitingForResponsePlayer player) {
+        PacketHandler.send(ModObserverPlugin.PLUGIN, Objects.requireNonNull(Bukkit.getPlayerExact(player.getName())), new byte[0]);
         PLAYERS.add(player);
     }
 
@@ -47,6 +51,7 @@ public class WaitingForResponsePlayers {
         PLAYERS.forEach(player -> {
             if ((Instant.now().getEpochSecond() - player.requestSentAt()) > getResponseDelayInSec()) {
                 players.add(player);
+                player.onTimedOut();
             }
         });
         PLAYERS.removeAll(players);
@@ -66,6 +71,7 @@ public class WaitingForResponsePlayers {
         private final long requestSentAt;
         private final PacketHandler.ResponseHandler handler;
         private final CommandSender sender;
+        private Runnable onTimedOut = null;
 
         public WaitingForResponsePlayer(String name, CommandSender sender, long requestSentAt, PacketHandler.ResponseHandler handler) {
             this.name = name;
@@ -74,11 +80,33 @@ public class WaitingForResponsePlayers {
             this.sender = sender;
         }
 
+        public WaitingForResponsePlayer(String name, long requestSentAt, PacketHandler.ResponseHandler handler, Runnable onTimedOut) {
+            this.name = name;
+            this.requestSentAt = requestSentAt;
+            this.handler = handler;
+            this.sender = null;
+            this.onTimedOut = onTimedOut;
+        }
+
         public WaitingForResponsePlayer(String name, CommandSender sender, PacketHandler.ResponseHandler handler) {
             this.name = name;
             this.requestSentAt = Instant.now().getEpochSecond();
             this.handler = handler;
             this.sender = sender;
+        }
+
+        public WaitingForResponsePlayer(String name, CommandSender sender, PacketHandler.ResponseHandler handler, Runnable onTimedOut) {
+            this.name = name;
+            this.requestSentAt = Instant.now().getEpochSecond();
+            this.handler = handler;
+            this.sender = sender;
+            this.onTimedOut = onTimedOut;
+        }
+
+        public void onTimedOut() {
+            if (onTimedOut != null) {
+                onTimedOut.run();
+            }
         }
 
         public CommandSender getSender() {

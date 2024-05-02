@@ -3,6 +3,8 @@ package net.sn0wix_.modObserverPlugin;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.players.IncomingPlayers;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -17,8 +19,17 @@ public class Util {
         return players;
     }
 
+    public static boolean checkIfOnline(String playername, CommandSender messenger) {
+        if (Bukkit.getPlayerExact(playername) == null) {
+            messenger.sendMessage(ChatColor.RED + playername + " is not online!");
+            return false;
+        }
+        return true;
+    }
+
     public static boolean checkPlayer(String playerName, String[] modids, boolean kick) {
         if (Config.IGNORED_PLAYERS.contains(playerName)) return true;
+        if (modids.length == 0) return false;
         if (!getNonApprovedMods(modids).isEmpty()) {
             if (kick) {
                 Objects.requireNonNull(Bukkit.getPlayerExact(playerName))
@@ -55,6 +66,17 @@ public class Util {
         return true;
     }
 
+    public static void checkForSusActivity(String playerName, String[] modids) {
+        if (modids.length == 0) {
+            ModObserverPlugin.LOGGER.info("Suspicious activity from " + playerName + ". When asked for mods, the response was empty. Kicking the player.");
+            try {
+                Bukkit.getPlayerExact(playerName).kickPlayer("ModObserver didn't respond correctly, try reinstalling it.");
+            } catch (NullPointerException e) {
+                ModObserverPlugin.LOGGER.info("Couldn't kick " + playerName + " because the player is not online!");
+            }
+        }
+    }
+
 
     //Mod checking
     public static ArrayList<String> getNonApprovedMods(String[] modids) {
@@ -81,5 +103,19 @@ public class Util {
         ArrayList<String> missingRequiredMods = new ArrayList<>(List.copyOf(Config.REQUIRED_MODS));
         missingRequiredMods.removeAll(List.of(modids));
         return missingRequiredMods;
+    }
+
+
+    //other
+    public static String getModString(List<String> modsList) {
+        StringBuilder builder = new StringBuilder();
+
+        if (modsList != null && !modsList.isEmpty()) {
+            for (int i = 0; i < modsList.size(); i++) {
+                builder.append(modsList.get(i)).append(i != modsList.size() - 1 ? ", " : "");
+            }
+        }
+
+        return builder.toString();
     }
 }

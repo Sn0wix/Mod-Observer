@@ -1,16 +1,6 @@
-#EDIT THIS FILE ONLY IF THE SERVER IS NOT RUNNING, OTHERWISE ALL CHANGES WILL BE LOST!
-#USE /modobserver TO CONFIGURE THE PLUGIN IN-GAME
-
-#Can have values: "whitelist", which will allow only the whitelisted mods, or "blacklist", which will allow everything else, except the blacklisted mods.
 mode: "whitelist"
-
-#Mods that the user must have installed. You can just leave this empty.
 required_mods:
 
-#Whitelist for mods, use modid of the mod. 
-#What is modid? https://fabricmc.net/wiki/tutorial:terms
-#The default whitelist has all the mods, that are needed for ModObserver to work.
-#If you deleted the list by accident, delete the config file, and it will regenerate itself with default values.
 whitelisted_mods:
 - mod_observer
 - minecraft
@@ -70,23 +60,15 @@ whitelisted_mods:
 - fabric-models-v0
 - fabric-containers-v0
 
-#Blacklist for mods.
 blacklisted_mods:
 
-
-#Message that is sent when player doesn't have required mods. Use <$MODS$> where you want the list of mods to be added.
 required_mods_message: "This server requires you to install <$MODS$>"
-
-#This message will be the kick message if the player has prohibited mods
 prohibited_mods_found_message: "You can not join this server, because you have installed <$MODS$>"
+mod_observer_required_message: "This server requires you to install ModObserver. Get it on:\n §6§lCurseforge: §r§6curseforge.com/minecraft/mc-mods/mod-observer§r\n §2§lModrinth: §r§2modrinth.com/mod/mod-observer"
 
-#Message that will show up, if the player tries to connect without ModObserver
-mod_observer_required_message: "This server requires you to install ModObserver. Get it on:\n§6§lCurseforge: curseforge.com/minecraft/mc-mods/mod-observer§r\n§2§lModrinth: modrinth.com/mod/mod-observer"
-
-
-#Players that bypass the mod check. Use player names, not uuids.
 ignored_players:
 
-#You can turn off commands used to configure this plugin
-#If you turn this off, /modobserver will still show up in the commands list, but it won't do anything
+allow_verification_timer: true
+verification_timer_delay_in_sec: 1800
+
 allow_command_interface: true

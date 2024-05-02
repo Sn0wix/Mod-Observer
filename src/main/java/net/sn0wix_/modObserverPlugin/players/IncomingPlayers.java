@@ -1,5 +1,7 @@
 package net.sn0wix_.modObserverPlugin.players;
 
+import net.sn0wix_.modObserverPlugin.Util;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -76,7 +78,7 @@ public class IncomingPlayers {
             }
         });
 
-        return getModString(modsList.get());
+        return Util.getModString(modsList.get());
     }
 
     public static void addMissingRequiredMod(String playerName, String modid) {
@@ -95,7 +97,7 @@ public class IncomingPlayers {
             }
         });
 
-        return getModString(modsList.get());
+        return Util.getModString(modsList.get());
     }
 
     public static void addNonApprovedMod(String playerName, String modid) {
@@ -106,18 +108,6 @@ public class IncomingPlayers {
         });
     }
 
-
-    private static String getModString(List<String> modsList) {
-        StringBuilder builder = new StringBuilder();
-
-        if (!modsList.isEmpty()) {
-            for (int i = 0; i < modsList.size(); i++) {
-                builder.append(modsList.get(i)).append(i != modsList.size() - 1 ? ", " : "");
-            }
-        }
-
-        return builder.toString();
-    }
 
 
     public static class IncomingPlayer {

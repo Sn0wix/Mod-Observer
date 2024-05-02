@@ -30,12 +30,9 @@ public class PacketHandler {
         String[] modids = concatenatedString.split(delimiter);
 
         //Checking for possible cheaters
-        if (modids.length == 0) {
-            ModObserverPlugin.LOGGER.info("Suspicious activity from " + player.getName() + ". When asked for mods, the response was empty. Kicking the player.");
-            player.kickPlayer("ModObserver didn't respond correctly, try reinstalling it.");
-        }
+        Util.checkForSusActivity(player.getName(), modids);
 
-        //Check, if the response is from a joining player
+        //Checking, if the response is from a joining player
         if (WaitingForResponsePlayers.containsPlayer(player.getName())) {
             WaitingForResponsePlayers.handlePacket(player.getName(), modids);
             WaitingForResponsePlayers.removePlayer(player.getName());

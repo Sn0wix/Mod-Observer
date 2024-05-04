@@ -21,9 +21,9 @@
 	},
 	"depends": {
 		"fabricloader": "*",
-		"minecraft": ">=1.20.2",
+		"minecraft": ">=1.20.2 <=1.20.4",
 		"java": "*",
-		"fabric-api": ">=0.91.6+1.20.2"
+		"fabric-api": "*"
 	},
 	"suggests": {
 		"modmenu": "*"
@@ -32,8 +32,7 @@
 		"modmenu": {
 			"links": {
 				"link.mod_observer.curseforge": "https://curseforge.com/minecraft/mc-mods/miscellaneous-additions",
-				"link.mod_observer.modrinth": "https://modrinth.com/mod/miscellaneous-additions",
-				"link.mod_observer.plugin": "https://alba-rosa.cz"
+				"link.mod_observer.modrinth": "https://modrinth.com/mod/miscellaneous-additions"
 			},
 			"update_checker": true
 		}

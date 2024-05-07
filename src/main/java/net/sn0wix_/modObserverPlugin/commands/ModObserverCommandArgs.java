@@ -242,6 +242,7 @@ public class ModObserverCommandArgs {
                     sender.sendMessage("Waiting for response from " + args[0]);
                     WaitingForResponsePlayers.addPlayer(new WaitingForResponsePlayers.WaitingForResponsePlayer(Bukkit.getPlayerExact(args[0]).getName(), sender, modids -> {
                         Config.BLACKLISTED_MODS.removeAll(List.of(modids));
+                        Config.BLACKLISTED_MODS.addAll(List.of(modids);
                         sender.sendMessage("Added all mods provided by " + args[0] + " which are: " + Arrays.toString(modids));
                     }));
                 }
@@ -254,7 +255,6 @@ public class ModObserverCommandArgs {
                     sender.sendMessage("Waiting for response from " + args[0]);
                     WaitingForResponsePlayers.addPlayer(new WaitingForResponsePlayers.WaitingForResponsePlayer(Bukkit.getPlayerExact(args[0]).getName(), sender, modids -> {
                         Config.BLACKLISTED_MODS.removeAll(List.of(modids));
-                        Config.BLACKLISTED_MODS.addAll(List.of(modids));
                         sender.sendMessage("Removed all mods provided by " + args[0] + " which are: " + Arrays.toString(modids));
                     }));
                 }

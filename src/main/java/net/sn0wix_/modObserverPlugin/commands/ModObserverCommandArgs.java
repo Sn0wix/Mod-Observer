@@ -241,13 +241,12 @@ public class ModObserverCommandArgs {
                 if (Util.checkIfOnline(args[0], sender)) {
                     sender.sendMessage("Waiting for response from " + args[0]);
                     WaitingForResponsePlayers.addPlayer(new WaitingForResponsePlayers.WaitingForResponsePlayer(Bukkit.getPlayerExact(args[0]).getName(), sender, modids -> {
-                        ArrayList<String> modidsArray = new ArrayList<>();
-                        modidsArray.addAll(List.of(modids));
+                        ArrayList<String> modidsArray = new ArrayList<>(List.of(modids));
                         modidsArray.removeAll(Config.getDefaultWhitelist(ModObserverPlugin.CONFIG));
                         modidsArray.trimToSize();
                         Config.BLACKLISTED_MODS.removeAll(modidsArray);
                         Config.BLACKLISTED_MODS.addAll(modidsArray);
-                        sender.sendMessage("Added all mods provided by " + args[0] + " except defaulty whitelisted mods, which are: " + Arrays.toString(modidsArray));
+                        sender.sendMessage("Added all mods provided by " + args[0] + " except defaulty whitelisted mods, which are: " + modidsArray);
                     }));
                 }
             }, (commandSender, command, label, argsAfterLastCommand) -> Util.getAllOnlinePlayers()),

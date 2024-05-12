@@ -33,9 +33,7 @@ public class ModObserver implements ClientModInitializer {
             stringBuilder.append(str).append(",");
         }
 
-
         buf.writeBytes(stringBuilder.toString().getBytes());
-
 
         return buf;
     }

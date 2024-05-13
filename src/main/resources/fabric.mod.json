@@ -3,7 +3,7 @@
 	"id": "mod_observer",
 	"version": "${version}",
 	"name": "Mod Observer",
-	"description": "Observers, what mods are loaded and sends them to the server upon joining.",
+	"description": "Observers, what mods are loaded, and sends them to the server upon joining.",
 	"authors": [
 		"Sn0wix_"
 	],

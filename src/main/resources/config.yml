@@ -68,7 +68,7 @@ mod_observer_required_message: "This server requires you to install ModObserver.
 
 ignored_players:
 
-allow_verification_timer: true
-verification_timer_delay_in_sec: 60
+allow_verification_timer: false
+verification_timer_delay_in_sec: 1800
 
 allow_command_interface: true

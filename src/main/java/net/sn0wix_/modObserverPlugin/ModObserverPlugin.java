@@ -67,7 +67,7 @@ public final class ModObserverPlugin extends JavaPlugin {
 
         //Plugin messaging
         getServer().getMessenger().registerIncomingPluginChannel(this, PacketHandler.MODS_FOR_APPROVAL_CHANNEL, PacketHandler::receive);
-        getServer().getMessenger().registerOutgoingPluginChannel(this, PacketHandler.MOD_REQUEST_CHANNEL);
+        getServer().getMessenger().registerOutgoingPluginChannel(this, PacketHandler.MODS_FOR_APPROVAL_CHANNEL);
 
         //Messages to the console
         LOGGER.info("ModObserver initialized!");
@@ -89,7 +89,7 @@ public final class ModObserverPlugin extends JavaPlugin {
 
         //Plugin messaging
         getServer().getMessenger().unregisterIncomingPluginChannel(this, PacketHandler.MODS_FOR_APPROVAL_CHANNEL);
-        getServer().getMessenger().unregisterOutgoingPluginChannel(this, PacketHandler.MOD_REQUEST_CHANNEL);
+        getServer().getMessenger().unregisterOutgoingPluginChannel(this, PacketHandler.MODS_FOR_APPROVAL_CHANNEL);
         LOGGER.info("ModObserver disabled!");
     }
 }

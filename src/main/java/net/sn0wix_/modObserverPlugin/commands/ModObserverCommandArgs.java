@@ -16,7 +16,6 @@ public class ModObserverCommandArgs {
 
 
     //Help
-    //TODO write help message
     public static final ModObserverCommandArg HELP = registerCommandArg(new ModObserverCommandArg("help", ((sender, command, label, args) ->
             sender.sendMessage("ModObserver is a plugin that controls, which mods are the players using." +
                     "\nYou can configure this plugin with command /modobserver" +

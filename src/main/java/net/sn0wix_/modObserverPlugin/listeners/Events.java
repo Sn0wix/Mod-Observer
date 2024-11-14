@@ -5,11 +5,13 @@ import net.sn0wix_.modObserverPlugin.Util;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.players.OnlinePlayersToCheck;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 
 public class Events implements Listener {
-    @EventHandler
+    //Lowest priority to keep the join message set to ""
+    @EventHandler(priority = EventPriority.LOWEST)
     public void join(PlayerJoinEvent event) {
         if (!Util.checkIncomingPlayer(event.getPlayer())) {
             event.setJoinMessage("");
@@ -32,7 +34,7 @@ public class Events implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void quit(PlayerQuitEvent event) {
         OnlinePlayersToCheck.removePlayer(event.getPlayer().getName());
         if (IncomingPlayers.containsPlayer(event.getPlayer().getName())) {

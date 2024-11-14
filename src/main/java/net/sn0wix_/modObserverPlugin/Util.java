@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class Util {
-    //Players
     public static List<String> getAllOnlinePlayers() {
         ArrayList<String> players = new ArrayList<>();
         Bukkit.getOnlinePlayers().forEach(player -> players.add(player.getName()));

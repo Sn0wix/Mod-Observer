@@ -10,11 +10,10 @@ import org.bukkit.plugin.Plugin;
 import java.util.ArrayList;
 
 public class PacketHandler {
-    public static final String MOD_REQUEST_CHANNEL = ModObserverPlugin.MOD_ID + ":request_mods";
     public static final String MODS_FOR_APPROVAL_CHANNEL = ModObserverPlugin.MOD_ID + ":mods_for_approval";
 
     public static void send(Plugin plugin, Player player, byte[] byteArray) {
-        player.sendPluginMessage(plugin, MOD_REQUEST_CHANNEL, byteArray);
+        player.sendPluginMessage(plugin, MODS_FOR_APPROVAL_CHANNEL, byteArray);
     }
 
 

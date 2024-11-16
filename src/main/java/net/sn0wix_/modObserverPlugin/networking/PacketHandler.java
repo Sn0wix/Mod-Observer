@@ -7,7 +7,17 @@ import net.sn0wix_.modObserverPlugin.players.WaitingForResponsePlayers;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class PacketHandler {
     public static final String MODS_FOR_APPROVAL_CHANNEL = ModObserverPlugin.MOD_ID + ":mods_for_approval";
@@ -17,13 +27,34 @@ public class PacketHandler {
     }
 
 
-    public static void receive(String channel, Player player, byte[] bytes) {
+    public static void receive(String channel, Player player, byte[] payload) {
         if (!channel.equals(MODS_FOR_APPROVAL_CHANNEL)) return;
 
-        IncomingPlayers.setHasSendPacket(player.getName());
-
         //decoding the packet
-        String concatenatedString = new String(bytes);
+        byte[] hash = Arrays.copyOfRange(payload, 0, 32);
+        byte[] encryptedContent = Arrays.copyOfRange(payload, 32, payload.length);
+
+        String concatenatedString;
+        try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(player.getUniqueId().toString().getBytes(StandardCharsets.UTF_8), 0, 16, "AES"));
+            byte[] decryptedData = cipher.doFinal(encryptedContent);
+
+            if (!Arrays.equals(MessageDigest.getInstance("SHA-256").digest(decryptedData), hash)) {
+                ModObserverPlugin.LOGGER.warning("Packet hash mismatch! Packet hash from" + player.getName() + " does not match the expected value. Discarding the packet.");
+                return;
+            }
+
+            concatenatedString = new String(decryptedData);
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException |
+                 BadPaddingException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalBlockSizeException e) {
+            ModObserverPlugin.LOGGER.severe("Wrong data padding in packet sent by " + player.getName());
+            throw new RuntimeException(e);
+        }
+
+        IncomingPlayers.setHasSendPacket(player.getName());
 
         String delimiter = ",";
         String[] modids = concatenatedString.split(delimiter);
@@ -39,7 +70,6 @@ public class PacketHandler {
         }
 
         if (IncomingPlayers.containsPlayer(player.getName())) {
-
             ArrayList<String> notApprovedMods = Util.getNonApprovedMods(modids);
             ArrayList<String> missingRequiredMods = Util.getMissingRequiredMods(modids);
 

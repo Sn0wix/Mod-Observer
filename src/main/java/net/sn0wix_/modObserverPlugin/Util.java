@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -116,5 +117,13 @@ public class Util {
         }
 
         return builder.toString();
+    }
+
+    public static byte[] removePadding(byte[] data, int paddingLength) {
+        return Arrays.copyOfRange(data, 0, data.length - paddingLength);
+    }
+
+    public static byte[] addPadding() {
+        return null;
     }
 }

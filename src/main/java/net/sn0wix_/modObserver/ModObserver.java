@@ -8,17 +8,17 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.networking.v1.*;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
-import net.fabricmc.loader.impl.ModContainerImpl;
-import net.fabricmc.loader.impl.entrypoint.EntrypointStorage;
-import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 
 import javax.crypto.*;
@@ -29,49 +29,63 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ModObserver implements ClientModInitializer {
     public static final String MOD_ID = "mod_observer";
 
     @Override
     public void onInitializeClient() {
-        try {
-            getMods();
-        } catch (TamperingException e) {
-            e.showGui(MinecraftClient.getInstance());
-            return;
-        }
-
         PayloadTypeRegistry.configurationC2S().register(ModsForApprovalPacket.PAYLOAD_ID, ModsForApprovalPacket.CODEC);
         PayloadTypeRegistry.playC2S().register(ModsForApprovalPacket.PAYLOAD_ID, ModsForApprovalPacket.CODEC);
         PayloadTypeRegistry.playS2C().register(ModsForApprovalPacket.PAYLOAD_ID, ModsForApprovalPacket.CODEC);
         ClientPlayNetworking.registerGlobalReceiver(ModsForApprovalPacket.PAYLOAD_ID, (payload, context) -> ClientPlayNetworking.send(new ModsForApprovalPacket()));
 
         ClientConfigurationConnectionEvents.START.register((handler, client) -> ClientConfigurationNetworking.send(new ModsForApprovalPacket()));
+        ClientLifecycleEvents.CLIENT_STARTED.register(minecraftClient -> {
+
+        });
     }
 
-    private static List<String> getMods() throws TamperingException {
-        ArrayList<String> mods = new ArrayList<>(FabricLoader.getInstance().getAllMods().size());
-
-        HashMap<String, EntrypointBuilder> containers = new HashMap<>();
+    public static Set<String> getMods() throws TamperingException {
+        HashMap<String, EntrypointBuilder> containers = new HashMap<>(FabricLoader.getInstance().getAllMods().size());
 
         FabricLoaderImpl.INSTANCE.getModsInternal().forEach(modContainer -> {
             EntrypointBuilder builder = new EntrypointBuilder();
+            builder.addIconPath(modContainer.getMetadata().getIconPath(128));
 
-            modContainer.getMetadata().getMixinConfigs(EnvType.CLIENT).forEach(builder::addClientMixin);
-            modContainer.getMetadata().getMixinConfigs(EnvType.SERVER).forEach(builder::addServerMixin);
+            modContainer.getMetadata().getMixinConfigs(EnvType.CLIENT).forEach(builder::addMixin);
+            modContainer.getMetadata().getMixinConfigs(EnvType.SERVER).forEach(builder::addMixin);
             containers.put(modContainer.getMetadata().getId(), builder);
         });
 
-        for (String string : new String[]{"server", "client", "common"}) {
-            FabricLoader.getInstance().getEntrypointContainers(string, DedicatedServerModInitializer.class).forEach(modContainer -> {
-                EntrypointBuilder builder = containers.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder().addProvider(modContainer.getProvider()) : containers.get(modContainer.getProvider().getMetadata().getId());
+        Class<?>[] classes = new Class<?>[]{DedicatedServerModInitializer.class, ClientModInitializer.class, ModInitializer.class};
+        String[] strings = new String[]{"server", "client", "common"};
+
+        for (int i = 0; i < strings.length; i++) {
+            FabricLoader.getInstance().getEntrypointContainers(strings[i], classes[i]).forEach(modContainer -> {
+                EntrypointBuilder builder = containers.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder() : containers.get(modContainer.getProvider().getMetadata().getId());
                 containers.put(modContainer.getProvider().getMetadata().getId(), builder.addId(modContainer.getEntrypoint().getClass()));
             });
         }
 
+        for (Map.Entry<String, EntrypointBuilder> entry : containers.entrySet()) {
+            EntrypointBuilder builder = entry.getValue();
+            String modid = entry.getKey();
 
-        return mods;
+            if (!builder.getValidId(modid).equals(modid)) {
+                throw new TamperingException(modid, builder.getValidId(modid));
+            }
+
+            if (!builder.icon.isEmpty() && !builder.mixins.isEmpty()) {
+                if (!(builder.icon.contains(modid) || builder.hasMixinsWithId(modid))) {
+                    throw new TamperingException("unknown", modid);
+                }
+            }
+        }
+
+
+        return containers.keySet();
     }
 
 
@@ -85,26 +99,30 @@ public class ModObserver implements ClientModInitializer {
         }
 
         private void write(PacketByteBuf byteBuf) {
-            StringBuilder stringBuilder = new StringBuilder();
-
             try {
+                StringBuilder stringBuilder = new StringBuilder();
+
                 for (String str : ModObserver.getMods()) {
                     stringBuilder.append(str).append(",");
                 }
+
+                try {
+                    byte[] messageContent = stringBuilder.toString().getBytes(StandardCharsets.UTF_8);
+                    Cipher cipher = Cipher.getInstance("AES");
+                    cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(MinecraftClient.getInstance().getGameProfile().getId().toString().getBytes(StandardCharsets.UTF_8), 0, 16, "AES"));
+
+                    byteBuf.writeBytes(MessageDigest.getInstance("SHA-256").digest(messageContent));
+                    byteBuf.writeBytes(cipher.doFinal(messageContent));
+                } catch (NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
+                         BadPaddingException |
+                         NoSuchAlgorithmException e) {
+                    throw new RuntimeException(e);
+                }
             } catch (TamperingException e) {
-                MinecraftClient.getInstance().disconnect();
-            }
-
-            try {
-                byte[] messageContent = stringBuilder.toString().getBytes(StandardCharsets.UTF_8);
-                Cipher cipher = Cipher.getInstance("AES");
-                cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(MinecraftClient.getInstance().getGameProfile().getId().toString().getBytes(StandardCharsets.UTF_8), 0, 16, "AES"));
-
-                byteBuf.writeBytes(MessageDigest.getInstance("SHA-256").digest(messageContent));
-                byteBuf.writeBytes(cipher.doFinal(messageContent));
-            } catch (NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException |
-                     NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
+                MinecraftClient.getInstance().execute(() -> {
+                    MinecraftClient.getInstance().setScreen(e.getScreen());
+                    MinecraftClient.getInstance().disconnect();
+                });
             }
         }
 
@@ -115,29 +133,50 @@ public class ModObserver implements ClientModInitializer {
     }
 
     private static class EntrypointBuilder {
-        private ModContainer provider;
-        private ArrayList<String> clientMixins = new ArrayList<>(1);
-        private ArrayList<String> serverMixins = new ArrayList<>(1);
-        private ArrayList<String> modids = new ArrayList<>(1);
+        private String icon = "";
+        private final Set<String> mixins = new LinkedHashSet<>(1);
+        private final Set<String> modids = new LinkedHashSet<>(1);
 
 
-        private EntrypointBuilder addClientMixin(String mixin) {
-            clientMixins.add(mixin);
+        private EntrypointBuilder addMixin(String mixin) {
+            mixins.add(mixin);
             return this;
         }
 
-        private EntrypointBuilder addServerMixin(String mixin) {
-            serverMixins.add(mixin);
+        private EntrypointBuilder addId(Class<?> main) {
+            if (!getId(main).isEmpty()) {
+                modids.add(getId(main));
+            }
+
             return this;
         }
 
-        private EntrypointBuilder addId(Class main) {
-            modids.add(getId(main));
-            return this;
+        private boolean hasMixinsWithId(String modid) {
+            AtomicInteger ids = new AtomicInteger(0);
+
+            mixins.forEach(mixin -> {
+                if (mixin.contains(modid)) {
+                    ids.getAndIncrement();
+                }
+            });
+
+            return ids.get() > 0;
         }
 
-        private EntrypointBuilder addProvider(ModContainer provider) {
-            this.provider = provider;
+        private String getValidId(String originalId) {
+            if (modids.isEmpty()) {
+                return originalId;
+            }
+
+            if (!modids.contains(originalId)) {
+                return (String) modids.toArray()[0];
+            }
+
+            return originalId;
+        }
+
+        private EntrypointBuilder addIconPath(Optional<String> optional) {
+            this.icon = optional.orElse("");
             return this;
         }
 
@@ -158,29 +197,43 @@ public class ModObserver implements ClientModInitializer {
     }
 
     public static class TamperingException extends Exception {
-        public final String detectedOn;
+        private final String detectedOn;
+        private final String changedId;
 
-        public TamperingException(String detectedOn) {
+        private TamperingException(String changedId, String detectedOn) {
             this.detectedOn = detectedOn;
+            this.changedId = changedId;
         }
 
-        public String getDetectedOn() {
-            return detectedOn;
-        }
-
-        public void showGui(MinecraftClient client) {
-
+        public TamperingErrorScreen getScreen() {
+            return new TamperingErrorScreen(changedId, detectedOn);
         }
     }
 
     public static class TamperingErrorScreen extends Screen {
-        public TamperingErrorScreen(Text title) {
-            super(title);
+        private final String detectedOn;
+        private final String changedId;
+
+        public TamperingErrorScreen(String changedId, String detectedOn) {
+            super(Text.translatable("screen." + MOD_ID + ".tampering_detected"));
+            this.detectedOn = detectedOn;
+            this.changedId = changedId;
+        }
+
+
+        @Override
+        public void init() {
+            this.addDrawableChild(ButtonWidget.builder(Text.translatable("menu.quit"), button -> MinecraftClient.getInstance().scheduleStop()).dimensions((this.width / 2) - 100, (this.height / 2) + (this.height / 4), 200, 20).build());
+            this.addDrawableChild(new TextWidget(this.width, this.height / 2, Text.translatable("screen." + MOD_ID + ".tampering_detected", changedId, detectedOn), MinecraftClient.getInstance().textRenderer));
+        }
+
+        @Override
+        public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+            super.render(context, mouseX, mouseY, delta);
         }
 
         @Override
         public void close() {
-
         }
 
         @Override

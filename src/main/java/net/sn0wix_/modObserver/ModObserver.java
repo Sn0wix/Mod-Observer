@@ -2,11 +2,17 @@ package net.sn0wix_.modObserver;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.networking.v1.*;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.impl.FabricLoaderImpl;
+import net.fabricmc.loader.impl.ModContainerImpl;
+import net.fabricmc.loader.impl.entrypoint.EntrypointStorage;
+import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.network.PacketByteBuf;
@@ -47,41 +53,23 @@ public class ModObserver implements ClientModInitializer {
     private static List<String> getMods() throws TamperingException {
         ArrayList<String> mods = new ArrayList<>(FabricLoader.getInstance().getAllMods().size());
 
-        HashMap<String, EntrypointBuilder> entrypoints = new HashMap<>(FabricLoader.getInstance().getAllMods().size());
-        FabricLoader.getInstance().getEntrypointContainers("main", ModInitializer.class).forEach(modContainer -> {
-            entrypoints.put(modContainer.getProvider().getMetadata().getId(), new EntrypointBuilder().addMain(modContainer.getEntrypoint()).addProvider(modContainer.getProvider()));
+        HashMap<String, EntrypointBuilder> containers = new HashMap<>();
+
+        FabricLoaderImpl.INSTANCE.getModsInternal().forEach(modContainer -> {
+            EntrypointBuilder builder = new EntrypointBuilder();
+
+            modContainer.getMetadata().getMixinConfigs(EnvType.CLIENT).forEach(builder::addClientMixin);
+            modContainer.getMetadata().getMixinConfigs(EnvType.SERVER).forEach(builder::addServerMixin);
+            containers.put(modContainer.getMetadata().getId(), builder);
         });
 
-        FabricLoader.getInstance().getEntrypointContainers("client", ClientModInitializer.class).forEach(modContainer -> {
-            EntrypointBuilder builder = entrypoints.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder().addProvider(modContainer.getProvider()) : entrypoints.get(modContainer.getProvider().getMetadata().getId());
-            entrypoints.put(modContainer.getProvider().getMetadata().getId(), builder.addClient(modContainer.getEntrypoint()));
-        });
+        for (String string : new String[]{"server", "client", "common"}) {
+            FabricLoader.getInstance().getEntrypointContainers(string, DedicatedServerModInitializer.class).forEach(modContainer -> {
+                EntrypointBuilder builder = containers.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder().addProvider(modContainer.getProvider()) : containers.get(modContainer.getProvider().getMetadata().getId());
+                containers.put(modContainer.getProvider().getMetadata().getId(), builder.addId(modContainer.getEntrypoint().getClass()));
+            });
+        }
 
-        FabricLoader.getInstance().getEntrypointContainers("server", DedicatedServerModInitializer.class).forEach(modContainer -> {
-            EntrypointBuilder builder = entrypoints.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder().addProvider(modContainer.getProvider()) : entrypoints.get(modContainer.getProvider().getMetadata().getId());
-            entrypoints.put(modContainer.getProvider().getMetadata().getId(), builder.addServer(modContainer.getEntrypoint()));
-        });
-
-
-        FabricLoader.getInstance().getAllMods().forEach(modContainer -> {
-            if (!entrypoints.containsKey(modContainer.getMetadata().getId())) {
-                entrypoints.put(modContainer.getMetadata().getId(), new EntrypointBuilder().addProvider(modContainer));
-            }
-        });
-
-        entrypoints.forEach((modid, builder) -> {
-            try {
-                System.out.println(builder.getId(builder.main));
-            }catch (NullPointerException ignored) {}
-
-            try {
-                System.out.println(builder.getId(builder.client));
-            }catch (NullPointerException ignored) {}
-
-            try {
-                System.out.println( builder.getId(builder.server));
-            }catch (NullPointerException ignored) {}
-        });
 
         return mods;
     }
@@ -127,24 +115,24 @@ public class ModObserver implements ClientModInitializer {
     }
 
     private static class EntrypointBuilder {
-        private Class main;
-        private Class client;
-        private Class server;
         private ModContainer provider;
+        private ArrayList<String> clientMixins = new ArrayList<>(1);
+        private ArrayList<String> serverMixins = new ArrayList<>(1);
+        private ArrayList<String> modids = new ArrayList<>(1);
 
 
-        private EntrypointBuilder addMain(ModInitializer main) {
-            this.main = main.getClass();
+        private EntrypointBuilder addClientMixin(String mixin) {
+            clientMixins.add(mixin);
             return this;
         }
 
-        private EntrypointBuilder addClient(ClientModInitializer client) {
-            this.client = client.getClass();
+        private EntrypointBuilder addServerMixin(String mixin) {
+            serverMixins.add(mixin);
             return this;
         }
 
-        private EntrypointBuilder addServer(DedicatedServerModInitializer server) {
-            this.server = server.getClass();
+        private EntrypointBuilder addId(Class main) {
+            modids.add(getId(main));
             return this;
         }
 
@@ -152,6 +140,7 @@ public class ModObserver implements ClientModInitializer {
             this.provider = provider;
             return this;
         }
+
 
         private String getId(Class<?> reference) {
             for (int i = 0; i < reference.getDeclaredFields().length; i++) {
@@ -166,34 +155,37 @@ public class ModObserver implements ClientModInitializer {
 
             return "";
         }
-
-        private boolean check(String modid) {
-            int susPoints = 0;
-            String mainId = "";
-
-            return true;
-        }
     }
 
-    private static class TamperingException extends Exception {
-        private final String detectedOn;
+    public static class TamperingException extends Exception {
+        public final String detectedOn;
 
-        private TamperingException(String detectedOn) {
+        public TamperingException(String detectedOn) {
             this.detectedOn = detectedOn;
         }
 
-        private String getDetectedOn() {
+        public String getDetectedOn() {
             return detectedOn;
         }
 
-        private void showGui(MinecraftClient client) {
+        public void showGui(MinecraftClient client) {
 
         }
     }
 
-    private static class TamperingErrorScreen extends Screen {
-        protected TamperingErrorScreen(Text title) {
+    public static class TamperingErrorScreen extends Screen {
+        public TamperingErrorScreen(Text title) {
             super(title);
+        }
+
+        @Override
+        public void close() {
+
+        }
+
+        @Override
+        public boolean shouldCloseOnEsc() {
+            return false;
         }
     }
 }

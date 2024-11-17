@@ -1,39 +1,40 @@
 package net.sn0wix_.modObserver;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.*;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 public class ModObserver implements ClientModInitializer {
-    private static final String MOD_ID = "mod_observer";
+    public static final String MOD_ID = "mod_observer";
 
     @Override
     public void onInitializeClient() {
-        /*try {
+        try {
             getMods();
         } catch (TamperingException e) {
             e.showGui(MinecraftClient.getInstance());
-        }*/
+            return;
+        }
 
         PayloadTypeRegistry.configurationC2S().register(ModsForApprovalPacket.PAYLOAD_ID, ModsForApprovalPacket.CODEC);
         PayloadTypeRegistry.playC2S().register(ModsForApprovalPacket.PAYLOAD_ID, ModsForApprovalPacket.CODEC);
@@ -43,12 +44,44 @@ public class ModObserver implements ClientModInitializer {
         ClientConfigurationConnectionEvents.START.register((handler, client) -> ClientConfigurationNetworking.send(new ModsForApprovalPacket()));
     }
 
-    private static List<String> getMods() {
+    private static List<String> getMods() throws TamperingException {
         ArrayList<String> mods = new ArrayList<>(FabricLoader.getInstance().getAllMods().size());
-        for (ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
-            //TODO check the main classes for MOD_ID and MODID, check the resources location, the main class packages
-            mods.add(modContainer.getMetadata().getId());
-        }
+
+        HashMap<String, EntrypointBuilder> entrypoints = new HashMap<>(FabricLoader.getInstance().getAllMods().size());
+        FabricLoader.getInstance().getEntrypointContainers("main", ModInitializer.class).forEach(modContainer -> {
+            entrypoints.put(modContainer.getProvider().getMetadata().getId(), new EntrypointBuilder().addMain(modContainer.getEntrypoint()).addProvider(modContainer.getProvider()));
+        });
+
+        FabricLoader.getInstance().getEntrypointContainers("client", ClientModInitializer.class).forEach(modContainer -> {
+            EntrypointBuilder builder = entrypoints.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder().addProvider(modContainer.getProvider()) : entrypoints.get(modContainer.getProvider().getMetadata().getId());
+            entrypoints.put(modContainer.getProvider().getMetadata().getId(), builder.addClient(modContainer.getEntrypoint()));
+        });
+
+        FabricLoader.getInstance().getEntrypointContainers("server", DedicatedServerModInitializer.class).forEach(modContainer -> {
+            EntrypointBuilder builder = entrypoints.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder().addProvider(modContainer.getProvider()) : entrypoints.get(modContainer.getProvider().getMetadata().getId());
+            entrypoints.put(modContainer.getProvider().getMetadata().getId(), builder.addServer(modContainer.getEntrypoint()));
+        });
+
+
+        FabricLoader.getInstance().getAllMods().forEach(modContainer -> {
+            if (!entrypoints.containsKey(modContainer.getMetadata().getId())) {
+                entrypoints.put(modContainer.getMetadata().getId(), new EntrypointBuilder().addProvider(modContainer));
+            }
+        });
+
+        entrypoints.forEach((modid, builder) -> {
+            try {
+                System.out.println(builder.getId(builder.main));
+            }catch (NullPointerException ignored) {}
+
+            try {
+                System.out.println(builder.getId(builder.client));
+            }catch (NullPointerException ignored) {}
+
+            try {
+                System.out.println( builder.getId(builder.server));
+            }catch (NullPointerException ignored) {}
+        });
 
         return mods;
     }
@@ -66,9 +99,14 @@ public class ModObserver implements ClientModInitializer {
         private void write(PacketByteBuf byteBuf) {
             StringBuilder stringBuilder = new StringBuilder();
 
-            for (String str : ModObserver.getMods()) {
-                stringBuilder.append(str).append(",");
+            try {
+                for (String str : ModObserver.getMods()) {
+                    stringBuilder.append(str).append(",");
+                }
+            } catch (TamperingException e) {
+                MinecraftClient.getInstance().disconnect();
             }
+
             try {
                 byte[] messageContent = stringBuilder.toString().getBytes(StandardCharsets.UTF_8);
                 Cipher cipher = Cipher.getInstance("AES");
@@ -76,10 +114,8 @@ public class ModObserver implements ClientModInitializer {
 
                 byteBuf.writeBytes(MessageDigest.getInstance("SHA-256").digest(messageContent));
                 byteBuf.writeBytes(cipher.doFinal(messageContent));
-
-                System.out.println(new String(messageContent));
-                System.out.println(byteBuf);
-            } catch (NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | NoSuchAlgorithmException e) {
+            } catch (NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException |
+                     NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -87,6 +123,55 @@ public class ModObserver implements ClientModInitializer {
         @Override
         public Id<? extends CustomPayload> getId() {
             return PAYLOAD_ID;
+        }
+    }
+
+    private static class EntrypointBuilder {
+        private Class main;
+        private Class client;
+        private Class server;
+        private ModContainer provider;
+
+
+        private EntrypointBuilder addMain(ModInitializer main) {
+            this.main = main.getClass();
+            return this;
+        }
+
+        private EntrypointBuilder addClient(ClientModInitializer client) {
+            this.client = client.getClass();
+            return this;
+        }
+
+        private EntrypointBuilder addServer(DedicatedServerModInitializer server) {
+            this.server = server.getClass();
+            return this;
+        }
+
+        private EntrypointBuilder addProvider(ModContainer provider) {
+            this.provider = provider;
+            return this;
+        }
+
+        private String getId(Class<?> reference) {
+            for (int i = 0; i < reference.getDeclaredFields().length; i++) {
+                Field field = reference.getDeclaredFields()[i];
+                try {
+                    if (field.getName().equalsIgnoreCase("modid") || field.getName().equalsIgnoreCase("mod_id")) {
+                        return (String) field.get("");
+                    }
+                } catch (IllegalAccessException | ClassCastException ignored) {
+                }
+            }
+
+            return "";
+        }
+
+        private boolean check(String modid) {
+            int susPoints = 0;
+            String mainId = "";
+
+            return true;
         }
     }
 
@@ -106,5 +191,9 @@ public class ModObserver implements ClientModInitializer {
         }
     }
 
-    //private static class TamperingErrorScreen extends Screen
+    private static class TamperingErrorScreen extends Screen {
+        protected TamperingErrorScreen(Text title) {
+            super(title);
+        }
+    }
 }

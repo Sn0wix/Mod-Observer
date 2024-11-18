@@ -42,9 +42,6 @@ public class ModObserver implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(ModsForApprovalPacket.PAYLOAD_ID, (payload, context) -> ClientPlayNetworking.send(new ModsForApprovalPacket()));
 
         ClientConfigurationConnectionEvents.START.register((handler, client) -> ClientConfigurationNetworking.send(new ModsForApprovalPacket()));
-        ClientLifecycleEvents.CLIENT_STARTED.register(minecraftClient -> {
-
-        });
     }
 
     public static Set<String> getMods() throws TamperingException {
@@ -215,7 +212,7 @@ public class ModObserver implements ClientModInitializer {
         private final String changedId;
 
         public TamperingErrorScreen(String changedId, String detectedOn) {
-            super(Text.translatable("screen." + MOD_ID + ".tampering_detected"));
+            super(Text.translatable("text." + MOD_ID + ".tampering_detected"));
             this.detectedOn = detectedOn;
             this.changedId = changedId;
         }
@@ -223,14 +220,16 @@ public class ModObserver implements ClientModInitializer {
 
         @Override
         public void init() {
-            this.addDrawableChild(ButtonWidget.builder(Text.translatable("menu.quit"), button -> MinecraftClient.getInstance().scheduleStop()).dimensions((this.width / 2) - 100, (this.height / 2) + (this.height / 4), 200, 20).build());
-            this.addDrawableChild(new TextWidget(this.width, this.height / 2, Text.translatable("screen." + MOD_ID + ".tampering_detected", changedId, detectedOn), MinecraftClient.getInstance().textRenderer));
+            int height = this.height / 2;
+            
+            this.addDrawableChild(ButtonWidget.builder(Text.translatable("menu.quit"), button -> MinecraftClient.getInstance().scheduleStop()).dimensions(height - 100, (this.height / 2) + (this.height / 4), 200, 20).build());
+            this.addDrawableChild(new TextWidget(this.width, height, Text.translatable("text." + MOD_ID + ".tampering.detected", changedId), MinecraftClient.getInstance().textRenderer));
+            height = height - 30;
+            this.addDrawableChild(new TextWidget(this.width, height, Text.translatable("text." + MOD_ID + ".tampering.original_id", detectedOn), MinecraftClient.getInstance().textRenderer));
+            height = height - 30;
+            this.addDrawableChild(new TextWidget(this.width, height, Text.translatable("text." + MOD_ID + ".tampering.false_positive", detectedOn), MinecraftClient.getInstance().textRenderer));
         }
 
-        @Override
-        public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-            super.render(context, mouseX, mouseY, delta);
-        }
 
         @Override
         public void close() {

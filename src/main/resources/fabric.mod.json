@@ -35,7 +35,8 @@
 		"modmenu": {
 			"links": {
 				"link.mod_observer.curseforge": "https://curseforge.com/minecraft/mc-mods/mod-observer",
-				"link.mod_observer.modrinth": "https://modrinth.com/mod/mod-observer"
+				"link.mod_observer.modrinth": "https://modrinth.com/mod/mod-observer",
+				"modmenu.discord": "https://discord.gg/nNYHDryaj3"
 			},
 			"update_checker": true
 		}

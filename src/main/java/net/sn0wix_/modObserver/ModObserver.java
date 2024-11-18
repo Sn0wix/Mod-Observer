@@ -4,7 +4,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.networking.v1.*;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
@@ -13,16 +12,19 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.PressableTextWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
+import net.minecraft.util.ColorCode;
 import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
+import javax.swing.text.Style;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -220,16 +222,26 @@ public class ModObserver implements ClientModInitializer {
 
         @Override
         public void init() {
-            int height = this.height / 2;
-            
-            this.addDrawableChild(ButtonWidget.builder(Text.translatable("menu.quit"), button -> MinecraftClient.getInstance().scheduleStop()).dimensions(height - 100, (this.height / 2) + (this.height / 4), 200, 20).build());
-            this.addDrawableChild(new TextWidget(this.width, height, Text.translatable("text." + MOD_ID + ".tampering.detected", changedId), MinecraftClient.getInstance().textRenderer));
-            height = height - 30;
-            this.addDrawableChild(new TextWidget(this.width, height, Text.translatable("text." + MOD_ID + ".tampering.original_id", detectedOn), MinecraftClient.getInstance().textRenderer));
-            height = height - 30;
-            this.addDrawableChild(new TextWidget(this.width, height, Text.translatable("text." + MOD_ID + ".tampering.false_positive", detectedOn), MinecraftClient.getInstance().textRenderer));
-        }
+            int height = (this.height / 2) + (this.height / 4);
+            assert client != null;
 
+            this.addDrawableChild(ButtonWidget.builder(Text.translatable("menu.quit"), button -> client.scheduleStop()).dimensions((this.width / 2) - 100, height, 200, 20).build());
+            height = height + 30;
+            this.addDrawableChild(new TextWidget(this.width, height, Text.translatable("text." + MOD_ID + ".tampering.detected", detectedOn), client.textRenderer));
+            height = height + 30;
+            this.addDrawableChild(new TextWidget(this.width, height, Text.translatable("text." + MOD_ID + ".tampering.original_id", changedId), client.textRenderer));
+            height = height + 30;
+            this.addDrawableChild(new TextWidget(this.width, height, Text.translatable("text." + MOD_ID + ".tampering.false_positive"), client.textRenderer));
+            //this.addDrawableChild(new PressableTextWidget(client.textRenderer.getWidth(Text.translatable("text." + MOD_ID + ".tampering.false_positive")), height, this.width, height, Text.translatable("text." + MOD_ID + ".issue_tracker"), (button -> System.out.println("PRESSED")), client.textRenderer));
+
+
+            /*this.addDrawableChild(new TextWidget(this.width, height, Text.translatable("text." + MOD_ID + ".tampering.false_positive")
+                    .append(Text.translatable("text." + MOD_ID + ".issue_tracker")
+                            .styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://curseforge.com/minecraft/mc-mods/mod-observer/issues")).withUnderline(true)))
+                    .append(Text.translatable("text." + MOD_ID + ".or"))
+                    .append(Text.translatable("text." + MOD_ID + ".discord")
+                            .styled(style -> style.withUnderline(true))).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/nNYHDryaj3"))), client.textRenderer));*/
+        }
 
         @Override
         public void close() {

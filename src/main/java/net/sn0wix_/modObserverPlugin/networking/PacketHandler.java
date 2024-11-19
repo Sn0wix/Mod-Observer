@@ -29,8 +29,8 @@ public class PacketHandler {
 
     public static void receive(String channel, Player player, byte[] payload) {
         if (!channel.equals(MODS_FOR_APPROVAL_CHANNEL)) return;
+        if (Util.checkForSusActivity(player.getName(), payload))return;
 
-        //decoding the packet
         byte[] hash = Arrays.copyOfRange(payload, 0, 32);
         byte[] encryptedContent = Arrays.copyOfRange(payload, 32, payload.length);
 
@@ -54,15 +54,14 @@ public class PacketHandler {
             throw new RuntimeException(e);
         }
 
-        IncomingPlayers.setHasSendPacket(player.getName());
 
         String delimiter = ",";
         String[] modids = concatenatedString.split(delimiter);
 
-        //Checking for possible cheaters
-        Util.checkForSusActivity(player.getName(), modids);
+        if (Util.checkForSusActivity(player.getName(), modids.length == 0 ? new byte[1] : new byte[]{1}))return;
 
-        //Checking, if the response is from a joining player
+        IncomingPlayers.setHasSendPacket(player.getName());
+
         if (WaitingForResponsePlayers.containsPlayer(player.getName())) {
             WaitingForResponsePlayers.handlePacket(player.getName(), modids);
             WaitingForResponsePlayers.removePlayer(player.getName());
@@ -76,7 +75,6 @@ public class PacketHandler {
             boolean shouldBeKicked = false;
             boolean hasOnlyAllowedMods = false;
 
-            //checking for non-approved mods
             if (notApprovedMods.isEmpty()) {
                 hasOnlyAllowedMods = true;
             } else {
@@ -84,7 +82,6 @@ public class PacketHandler {
                 shouldBeKicked = true;
             }
 
-            //checking for missing required mods
             if (!missingRequiredMods.isEmpty()) {
                 missingRequiredMods.forEach(modid -> IncomingPlayers.addMissingRequiredMod(player.getName(), modid));
                 shouldBeKicked = true;

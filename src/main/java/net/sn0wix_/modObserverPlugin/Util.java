@@ -66,15 +66,13 @@ public class Util {
         return true;
     }
 
-    public static void checkForSusActivity(String playerName, String[] modids) {
+    public static boolean checkForSusActivity(String playerName, byte[] modids) {
         if (modids.length == 0) {
             ModObserverPlugin.LOGGER.info("Suspicious activity from " + playerName + ". When asked for mods, the response was empty. Kicking the player.");
-            try {
-                Bukkit.getPlayerExact(playerName).kickPlayer("ModObserver didn't respond correctly, try reinstalling it.");
-            } catch (NullPointerException e) {
-                ModObserverPlugin.LOGGER.info("Couldn't kick " + playerName + " because the player is not online!");
-            }
+            return true;
         }
+
+        return false;
     }
 
 
@@ -117,13 +115,5 @@ public class Util {
         }
 
         return builder.toString();
-    }
-
-    public static byte[] removePadding(byte[] data, int paddingLength) {
-        return Arrays.copyOfRange(data, 0, data.length - paddingLength);
-    }
-
-    public static byte[] addPadding() {
-        return null;
     }
 }

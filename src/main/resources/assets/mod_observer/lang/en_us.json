@@ -3,8 +3,7 @@
   "link.mod_observer.modrinth": "§2§nMondrinth",
   "text.mod_observer.tampering.detected": "§cWARNING: §rModObserver detected tampering with modid \"%s\"!",
   "text.mod_observer.tampering.original_id": "§7The original modid is §r\"%s\"",
-  "text.mod_observer.tampering.false_positive": "§8If this is a false positive, please report it on our ",
-  "text.mod_observer.issue_tracker": "issue tracker",
-  "text.mod_observer.or": "§8 or ",
-  "text.mod_observer.discord": "discord"
+  "text.mod_observer.tampering.false_positive": "§8If this is a false positive, please report it on our issue tracker or discord.",
+  "text.mod_observer.issue_tracker": "Issue Tracker",
+  "text.mod_observer.discord": "Discord"
 }

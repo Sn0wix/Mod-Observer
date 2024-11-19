@@ -1,7 +1,17 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'com.guardsquare:proguard-gradle:7.1.0'
+	}
+}
+
 plugins {
 	id 'fabric-loom' version '1.8-SNAPSHOT'
 	id 'maven-publish'
 }
+
 
 version = project.mod_version
 group = project.maven_group
@@ -16,6 +26,7 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+
 }
 
 dependencies {
@@ -26,7 +37,6 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
 }
 
 processResources {
@@ -73,4 +83,14 @@ publishing {
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
 	}
+}
+
+tasks.register('proguard', JavaExec) {
+	main = 'proguard.ProGuard'
+	classpath = configurations.proguard
+	args = [
+			'@proguard-rules.pro', // Your ProGuard rules file
+			'input.jar',           // Input jar file (your mod)
+			'output.jar'          // Output jar file (obfuscated mod)
+	]
 }

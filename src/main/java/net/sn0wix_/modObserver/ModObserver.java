@@ -28,9 +28,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 public class ModObserver implements ClientModInitializer {
     public static final String MOD_ID = "mod_observer";
+    public static final Logger LOGGER = Logger.getLogger(MOD_ID);
 
     @Override
     public void onInitializeClient() {
@@ -60,7 +62,12 @@ public class ModObserver implements ClientModInitializer {
         for (int i = 0; i < strings.length; i++) {
             FabricLoader.getInstance().getEntrypointContainers(strings[i], classes[i]).forEach(modContainer -> {
                 EntrypointBuilder builder = containers.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder() : containers.get(modContainer.getProvider().getMetadata().getId());
-                containers.put(modContainer.getProvider().getMetadata().getId(), builder.addId(modContainer.getEntrypoint().getClass()));
+                try {
+                    containers.put(modContainer.getProvider().getMetadata().getId(), builder.addId(modContainer.getEntrypoint().getClass()));
+                } catch (Exception e) {
+                    LOGGER.info("You can pretty much ignore this.");
+                    e.printStackTrace();
+                }
             });
         }
 

@@ -1,12 +1,3 @@
-buildscript {
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath 'com.guardsquare:proguard-gradle:7.1.0'
-	}
-}
-
 plugins {
 	id 'fabric-loom' version '1.8-SNAPSHOT'
 	id 'maven-publish'
@@ -83,14 +74,4 @@ publishing {
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
 	}
-}
-
-tasks.register('proguard', JavaExec) {
-	main = 'proguard.ProGuard'
-	classpath = configurations.proguard
-	args = [
-			'@proguard-rules.pro', // Your ProGuard rules file
-			'input.jar',           // Input jar file (your mod)
-			'output.jar'          // Output jar file (obfuscated mod)
-	]
 }

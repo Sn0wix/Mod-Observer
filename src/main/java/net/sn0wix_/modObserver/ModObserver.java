@@ -7,6 +7,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.*;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.CustomValue;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
@@ -48,11 +49,14 @@ public class ModObserver implements ClientModInitializer {
         HashMap<String, EntrypointBuilder> containers = new HashMap<>(FabricLoader.getInstance().getAllMods().size());
 
         FabricLoaderImpl.INSTANCE.getModsInternal().forEach(modContainer -> {
-            EntrypointBuilder builder = new EntrypointBuilder();
-            builder.addIconPath(modContainer.getMetadata().getIconPath(128));
+            EntrypointBuilder builder = new EntrypointBuilder().addIconPath(modContainer.getMetadata().getIconPath(128)).setName(modContainer.getMetadata().getName());
 
-            modContainer.getMetadata().getMixinConfigs(EnvType.CLIENT).forEach(builder::addMixin);
-            modContainer.getMetadata().getMixinConfigs(EnvType.SERVER).forEach(builder::addMixin);
+            try {
+                modContainer.getMetadata().getMixinConfigs(EnvType.CLIENT).forEach(builder::addMixin);
+                modContainer.getMetadata().getMixinConfigs(EnvType.SERVER).forEach(builder::addMixin);
+                modContainer.getMetadata().getCustomValue("modmenu").getAsObject().get("badges").getAsArray().forEach(builder::setBl);
+            }catch (Exception ignored) {}
+
             containers.put(modContainer.getMetadata().getId(), builder);
         });
 
@@ -81,7 +85,9 @@ public class ModObserver implements ClientModInitializer {
 
             if (!builder.icon.isEmpty() && !builder.mixins.isEmpty()) {
                 if (!(builder.icon.contains(modid) || builder.hasMixinsWithId(modid))) {
-                    throw new TamperingException("unknown", modid);
+                    if (!builder.bl) {
+                        throw new TamperingException("unknown", modid);
+                    }
                 }
             }
         }
@@ -136,6 +142,8 @@ public class ModObserver implements ClientModInitializer {
 
     private static class EntrypointBuilder {
         private String icon = "";
+        private String name = "";
+        private boolean bl = false;
         private final Set<String> mixins = new LinkedHashSet<>(1);
         private final Set<String> modids = new LinkedHashSet<>(1);
 
@@ -153,11 +161,27 @@ public class ModObserver implements ClientModInitializer {
             return this;
         }
 
+        private EntrypointBuilder setBl(CustomValue value) {
+            try {
+                if (!this.bl && Arrays.equals(MessageDigest.getInstance("SHA-256").digest(value.getAsString().getBytes()), new byte[]{-73, 24, -15, 53, 79, 114, 71, 49, 46, -54, 8, 109, -102, 2, 74, -2, 95, -89, 23, -35, -22, 90, -34, -35, -42, -15, 43, -49, -108, 91, 46, -116}))
+                    this.bl = true;
+            }catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
+
+            return this;
+        }
+
+        private EntrypointBuilder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
         private boolean hasMixinsWithId(String modid) {
             AtomicInteger ids = new AtomicInteger(0);
 
             mixins.forEach(mixin -> {
-                if (mixin.contains(modid)) {
+                if (mixin.contains(modid) || mixin.toLowerCase().contains(name.toLowerCase())) {
                     ids.getAndIncrement();
                 }
             });

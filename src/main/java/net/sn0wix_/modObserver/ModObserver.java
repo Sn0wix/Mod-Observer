@@ -22,6 +22,7 @@ import net.minecraft.util.Identifier;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -45,7 +46,17 @@ public class ModObserver implements ClientModInitializer {
         ClientConfigurationConnectionEvents.START.register((handler, client) -> ClientConfigurationNetworking.send(new ModsForApprovalPacket()));
     }
 
-    public static Set<String> getMods() throws TamperingException {
+    public static Set<String> getMods() throws TamperingException, IOException {
+        File file = new File(MOD_ID + "_conflicts.txt");
+
+        if (file.exists()) {
+            file.createNewFile();
+        }
+
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+
+
         HashMap<String, EntrypointBuilder> containers = new HashMap<>(FabricLoader.getInstance().getAllMods().size());
 
         FabricLoaderImpl.INSTANCE.getModsInternal().forEach(modContainer -> {
@@ -55,19 +66,28 @@ public class ModObserver implements ClientModInitializer {
                 modContainer.getMetadata().getMixinConfigs(EnvType.CLIENT).forEach(builder::addMixin);
                 modContainer.getMetadata().getMixinConfigs(EnvType.SERVER).forEach(builder::addMixin);
                 modContainer.getMetadata().getCustomValue("modmenu").getAsObject().get("badges").getAsArray().forEach(builder::setBl);
-            }catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
 
             containers.put(modContainer.getMetadata().getId(), builder);
         });
 
         Class<?>[] classes = new Class<?>[]{DedicatedServerModInitializer.class, ClientModInitializer.class, ModInitializer.class};
-        String[] strings = new String[]{"server", "client", "common"};
+        String[] strings = new String[]{"server", "client", "main"};
 
         for (int i = 0; i < strings.length; i++) {
             FabricLoader.getInstance().getEntrypointContainers(strings[i], classes[i]).forEach(modContainer -> {
                 EntrypointBuilder builder = containers.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder() : containers.get(modContainer.getProvider().getMetadata().getId());
+
                 try {
-                    containers.put(modContainer.getProvider().getMetadata().getId(), builder.addId(modContainer.getEntrypoint().getClass()));
+                    builder.addId(modContainer.getEntrypoint().getClass());
+
+                    if (builder.getValidId(modContainer.getProvider().getMetadata().getId()).equals(modContainer.getProvider().getMetadata().getId())) {
+                        containers.put(modContainer.getProvider().getMetadata().getId(), builder);
+                    } else {
+                        containers.remove(modContainer.getProvider().getMetadata().getId());
+                        containers.put(builder.getValidId(""), builder);
+                    }
                 } catch (Exception e) {
                     LOGGER.info("You can pretty much ignore this.");
                     e.printStackTrace();
@@ -79,18 +99,16 @@ public class ModObserver implements ClientModInitializer {
             EntrypointBuilder builder = entry.getValue();
             String modid = entry.getKey();
 
-            if (!builder.getValidId(modid).equals(modid) && !(builder.icon.contains(modid) || builder.hasMixinsWithId(modid))) {
-                throw new TamperingException(modid, builder.getValidId(modid));
-            }
-
-            if (!builder.icon.isEmpty() && !builder.mixins.isEmpty()) {
+            if (!builder.hasModids() && !builder.icon.isEmpty() && !builder.mixins.isEmpty()) {
                 if (!(builder.icon.contains(modid) || builder.hasMixinsWithId(modid))) {
                     if (!builder.bl) {
-                        throw new TamperingException("unknown", modid);
+                        writer.write(modid + ";mixins-" + builder.mixins + ";icon-" + builder.icon + ";name-" + builder.name);
                     }
                 }
             }
         }
+
+        writer.close();
 
 
         return containers.keySet();
@@ -131,6 +149,8 @@ public class ModObserver implements ClientModInitializer {
                     MinecraftClient.getInstance().setScreen(e.getScreen());
                     MinecraftClient.getInstance().disconnect();
                 });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
 
@@ -165,7 +185,7 @@ public class ModObserver implements ClientModInitializer {
             try {
                 if (!this.bl && Arrays.equals(MessageDigest.getInstance("SHA-256").digest(value.getAsString().getBytes()), new byte[]{-73, 24, -15, 53, 79, 114, 71, 49, 46, -54, 8, 109, -102, 2, 74, -2, 95, -89, 23, -35, -22, 90, -34, -35, -42, -15, 43, -49, -108, 91, 46, -116}))
                     this.bl = true;
-            }catch (NoSuchAlgorithmException e) {
+            } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
             }
 
@@ -187,6 +207,10 @@ public class ModObserver implements ClientModInitializer {
             });
 
             return ids.get() > 0;
+        }
+
+        private boolean hasModids() {
+            return !modids.isEmpty();
         }
 
         private String getValidId(String originalId) {
@@ -224,26 +248,22 @@ public class ModObserver implements ClientModInitializer {
 
     public static class TamperingException extends Exception {
         private final String detectedOn;
-        private final String changedId;
 
-        private TamperingException(String changedId, String detectedOn) {
+        private TamperingException(String detectedOn) {
             this.detectedOn = detectedOn;
-            this.changedId = changedId;
         }
 
         public TamperingErrorScreen getScreen() {
-            return new TamperingErrorScreen(changedId, detectedOn);
+            return new TamperingErrorScreen(detectedOn);
         }
     }
 
     public static class TamperingErrorScreen extends Screen {
         private final String detectedOn;
-        private final String changedId;
 
-        public TamperingErrorScreen(String changedId, String detectedOn) {
+        public TamperingErrorScreen(String detectedOn) {
             super(Text.translatable("text." + MOD_ID + ".tampering_detected"));
             this.detectedOn = detectedOn;
-            this.changedId = changedId;
         }
 
 
@@ -257,8 +277,6 @@ public class ModObserver implements ClientModInitializer {
             this.addDrawableChild(ButtonWidget.builder(Text.translatable("text." + MOD_ID + ".discord"), button -> ConfirmLinkScreen.open(this, "https://discord.gg/nNYHDryaj3", true)).dimensions((this.width / 2) + 10, height - 25, 150, 20).build());
             height = height + 30;
             this.addDrawableChild(new TextWidget(this.width, height, Text.translatable("text." + MOD_ID + ".tampering.detected", detectedOn), client.textRenderer));
-            height = height + 30;
-            this.addDrawableChild(new TextWidget(this.width, height, Text.translatable("text." + MOD_ID + ".tampering.original_id", changedId), client.textRenderer));
             height = height + 30;
             this.addDrawableChild(new TextWidget(this.width, height, Text.translatable("text." + MOD_ID + ".tampering.false_positive"), client.textRenderer));
         }

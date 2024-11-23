@@ -8,6 +8,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.io.IOException;
+
 @Mixin(TitleScreen.class)
 public abstract class ClientFinishLoadingMixin {
     @Inject(method = "init", at = @At(value = "TAIL"))
@@ -16,6 +18,9 @@ public abstract class ClientFinishLoadingMixin {
             ModObserver.getMods();
         } catch (ModObserver.TamperingException e) {
             MinecraftClient.getInstance().setScreen(e.getScreen());
+        }catch (IOException e) {
+            System.out.println("Something happened with the conflicts file");
+            e.printStackTrace();
         }
     }
 }

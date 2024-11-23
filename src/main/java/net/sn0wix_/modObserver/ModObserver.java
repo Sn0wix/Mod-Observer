@@ -79,7 +79,7 @@ public class ModObserver implements ClientModInitializer {
             EntrypointBuilder builder = entry.getValue();
             String modid = entry.getKey();
 
-            if (!builder.getValidId(modid).equals(modid)) {
+            if (!builder.getValidId(modid).equals(modid) && !(builder.icon.contains(modid) || builder.hasMixinsWithId(modid))) {
                 throw new TamperingException(modid, builder.getValidId(modid));
             }
 

@@ -22,7 +22,6 @@ import net.minecraft.util.Identifier;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -46,17 +45,7 @@ public class ModObserver implements ClientModInitializer {
         ClientConfigurationConnectionEvents.START.register((handler, client) -> ClientConfigurationNetworking.send(new ModsForApprovalPacket()));
     }
 
-    public static Set<String> getMods() throws TamperingException, IOException {
-        File file = new File(MOD_ID + "_conflicts.txt");
-
-        if (file.exists()) {
-            file.createNewFile();
-        }
-
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-
-
+    public static Set<String> getMods() throws TamperingException {
         HashMap<String, EntrypointBuilder> containers = new HashMap<>(FabricLoader.getInstance().getAllMods().size());
 
         FabricLoaderImpl.INSTANCE.getModsInternal().forEach(modContainer -> {
@@ -99,16 +88,14 @@ public class ModObserver implements ClientModInitializer {
             EntrypointBuilder builder = entry.getValue();
             String modid = entry.getKey();
 
-            if (!builder.hasModids() && !builder.icon.isEmpty() && !builder.mixins.isEmpty()) {
-                if (!(builder.icon.contains(modid) || builder.hasMixinsWithId(modid))) {
+            if (!builder.mixins.isEmpty()) {
+                if (!(builder.icon.contains(modid) || builder.hasMixinsWithId(modid)) && !(builder.getValidId(modid).equals(modid)) && !(builder.name.toLowerCase().replace(" ", "").equals(modid) || builder.name.toLowerCase().replace(" ", "-").equals(modid) || builder.name.toLowerCase().replace(" ", "_").equals(modid))) {
                     if (!builder.bl) {
-                        writer.write(modid + ";mixins-" + builder.mixins + ";icon-" + builder.icon + ";name-" + builder.name);
+                        throw new TamperingException(modid);
                     }
                 }
             }
         }
-
-        writer.close();
 
 
         return containers.keySet();
@@ -149,8 +136,6 @@ public class ModObserver implements ClientModInitializer {
                     MinecraftClient.getInstance().setScreen(e.getScreen());
                     MinecraftClient.getInstance().disconnect();
                 });
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }
 

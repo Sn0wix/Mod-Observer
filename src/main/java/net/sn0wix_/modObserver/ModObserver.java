@@ -19,11 +19,20 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.text.*;
 import net.minecraft.util.Identifier;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldNode;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.lang.reflect.Field;
+import java.io.*;
+import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -69,7 +78,7 @@ public class ModObserver implements ClientModInitializer {
                 EntrypointBuilder builder = containers.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder() : containers.get(modContainer.getProvider().getMetadata().getId());
 
                 try {
-                    builder.addId(modContainer.getEntrypoint().getClass());
+                    builder.addId(Path.of(modContainer.getDefinition().split("::")[0].replace('.', '/') + ".class"));
 
                     if (builder.getValidId(modContainer.getProvider().getMetadata().getId()).equals(modContainer.getProvider().getMetadata().getId())) {
                         containers.put(modContainer.getProvider().getMetadata().getId(), builder);
@@ -158,9 +167,10 @@ public class ModObserver implements ClientModInitializer {
             return this;
         }
 
-        private EntrypointBuilder addId(Class<?> main) {
-            if (!getId(main).isEmpty()) {
-                modids.add(getId(main));
+        private EntrypointBuilder addId(Path path) {
+            String s = getId(path);
+            if (!s.isEmpty()) {
+                modids.add(s);
             }
 
             return this;
@@ -216,16 +226,27 @@ public class ModObserver implements ClientModInitializer {
         }
 
 
-        private String getId(Class<?> reference) {
-            for (int i = 0; i < reference.getDeclaredFields().length; i++) {
-                Field field = reference.getDeclaredFields()[i];
-                try {
-                    if (field.getName().equalsIgnoreCase("modid") || field.getName().equalsIgnoreCase("mod_id")) {
-                        return (String) field.get("");
+        private String getId(Path path) {
+            try {
+                byte[] classBytes = Thread.currentThread().getContextClassLoader().getResourceAsStream(path.toString().replace("\\", "/")).readAllBytes();
+
+                ClassReader classReader = new ClassReader(classBytes);
+                ClassNode classNode = new ClassNode();
+                classReader.accept(classNode, 0);
+
+                List<FieldNode> fields = classNode.fields;
+
+                for (FieldNode field : fields) {
+                    boolean isString = "Ljava/lang/String;".equals(field.desc);
+
+                    if (isString && ("modid".equalsIgnoreCase(field.name) || "mod_id".equalsIgnoreCase(field.name))) {
+                        if (field.value instanceof String) {
+                            System.out.println((String) field.value);
+                            return (String) field.value;
+                        }
                     }
-                } catch (IllegalAccessException | ClassCastException ignored) {
                 }
-            }
+            } catch (Exception ignored) {}
 
             return "";
         }

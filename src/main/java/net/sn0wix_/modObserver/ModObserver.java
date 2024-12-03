@@ -20,19 +20,13 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.text.*;
 import net.minecraft.util.Identifier;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.*;
-import java.net.URI;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -79,13 +73,6 @@ public class ModObserver implements ClientModInitializer {
 
                 try {
                     builder.addId(Path.of(modContainer.getDefinition().split("::")[0].replace('.', '/') + ".class"));
-
-                    if (builder.getValidId(modContainer.getProvider().getMetadata().getId()).equals(modContainer.getProvider().getMetadata().getId())) {
-                        containers.put(modContainer.getProvider().getMetadata().getId(), builder);
-                    } else {
-                        containers.remove(modContainer.getProvider().getMetadata().getId());
-                        containers.put(builder.getValidId(""), builder);
-                    }
                 } catch (Exception e) {
                     LOGGER.info("You can pretty much ignore this.");
                     e.printStackTrace();
@@ -93,21 +80,27 @@ public class ModObserver implements ClientModInitializer {
             });
         }
 
+        Set<String> set = new LinkedHashSet<>(containers.keySet().size());
+
         for (Map.Entry<String, EntrypointBuilder> entry : containers.entrySet()) {
             EntrypointBuilder builder = entry.getValue();
             String modid = entry.getKey();
 
-            if (!builder.mixins.isEmpty()) {
-                if (!(builder.icon.contains(modid) || builder.hasMixinsWithId(modid)) && !(builder.getValidId(modid).equals(modid)) && !(builder.name.toLowerCase().replace(" ", "").equals(modid) || builder.name.toLowerCase().replace(" ", "-").equals(modid) || builder.name.toLowerCase().replace(" ", "_").equals(modid))) {
+            if (!builder.modids.isEmpty()) {
+                set.add(builder.getValidId());
+                System.out.println(builder.getValidId());
+            } else if (!builder.mixins.isEmpty()) {
+                if (!(builder.icon.contains(modid) || builder.hasMixinsWithId(modid)) && !(builder.name.toLowerCase().replace(" ", "").equals(modid) || builder.name.toLowerCase().replace(" ", "-").equals(modid) || builder.name.toLowerCase().replace(" ", "_").equals(modid))) {
                     if (!builder.bl) {
                         throw new TamperingException(modid);
                     }
                 }
+
+                set.add(modid);
             }
         }
 
-
-        return containers.keySet();
+        return set;
     }
 
 
@@ -204,20 +197,11 @@ public class ModObserver implements ClientModInitializer {
             return ids.get() > 0;
         }
 
-        private boolean hasModids() {
-            return !modids.isEmpty();
-        }
-
-        private String getValidId(String originalId) {
-            if (modids.isEmpty()) {
-                return originalId;
-            }
-
-            if (!modids.contains(originalId)) {
+        private String getValidId() {
+            if (!modids.isEmpty()) {
                 return (String) modids.toArray()[0];
             }
-
-            return originalId;
+             return "";
         }
 
         private EntrypointBuilder addIconPath(Optional<String> optional) {
@@ -241,7 +225,6 @@ public class ModObserver implements ClientModInitializer {
 
                     if (isString && ("modid".equalsIgnoreCase(field.name) || "mod_id".equalsIgnoreCase(field.name))) {
                         if (field.value instanceof String) {
-                            System.out.println((String) field.value);
                             return (String) field.value;
                         }
                     }

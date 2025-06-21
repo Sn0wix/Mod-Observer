@@ -114,31 +114,29 @@ public class ModObserver implements ClientModInitializer {
         }
 
         private void write(PacketByteBuf byteBuf) {
-            try {
-                StringBuilder stringBuilder = new StringBuilder();
-
-                for (String str : ModObserver.getMods()) {
-                    stringBuilder.append(str).append(",");
-                }
-
+            MinecraftClient.getInstance().execute(() -> {
                 try {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (String str : Utils.getMods()) {
+                        stringBuilder.append(str).append(",");
+                    }
+
                     byte[] messageContent = stringBuilder.toString().getBytes(StandardCharsets.UTF_8);
                     Cipher cipher = Cipher.getInstance("AES");
-                    cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(MinecraftClient.getInstance().getGameProfile().getId().toString().getBytes(StandardCharsets.UTF_8), 0, 16, "AES"));
+                    String playerName = MinecraftClient.getInstance().getGameProfile().getName();
+                    String key = String.format("%-32s", playerName).substring(0, 32);
+                    cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES"));
 
                     byteBuf.writeBytes(MessageDigest.getInstance("SHA-256").digest(messageContent));
                     byteBuf.writeBytes(cipher.doFinal(messageContent));
-                } catch (NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
-                         BadPaddingException |
-                         NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
-                }
-            } catch (TamperingException e) {
-                MinecraftClient.getInstance().execute(() -> {
+                    
+                } catch (TamperingException e) {
                     MinecraftClient.getInstance().setScreen(e.getScreen());
                     MinecraftClient.getInstance().disconnect();
-                });
-            }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
 
         @Override

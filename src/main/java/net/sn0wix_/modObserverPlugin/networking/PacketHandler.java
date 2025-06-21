@@ -37,8 +37,19 @@ public class PacketHandler {
         String concatenatedString;
         try {
             Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(player.getUniqueId().toString().getBytes(StandardCharsets.UTF_8), 0, 16, "AES"));
+            String playerName = player.getName();
+
+            String key = String.format("%-32s", playerName).substring(0, 32); // padding/truncating to 32 chars
+            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+
             byte[] decryptedData = cipher.doFinal(encryptedContent);
+            byte[] calculatedHash = MessageDigest.getInstance("SHA-256").digest(decryptedData);
+
+            if (!Arrays.equals(calculatedHash, hash)) {
+                ModObserverPlugin.LOGGER.warning("Hash mismatch from " + player.getName() + ". Discarding packet.");
+                return;
+            }
 
             if (!Arrays.equals(MessageDigest.getInstance("SHA-256").digest(decryptedData), hash)) {
                 ModObserverPlugin.LOGGER.warning("Packet hash mismatch! Packet hash from" + player.getName() + " does not match the expected value. Discarding the packet.");

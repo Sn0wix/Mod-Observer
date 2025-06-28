@@ -81,7 +81,7 @@ public class ModObserverCommandArgs {
                             Bukkit.getPlayerExact(args[0]).kickPlayer(Config.REQUIRED_MODS_MESSAGE.replace("<$MODS$>", Arrays.toString(modids)));
                         }
                     } else {
-                        sender.sendMessage(ChatColor.GREEN + args[0] + " passed the mod check.");
+                        sender.sendMessage(ChatColor.GREEN + args[0] + " passed the mod check with mods " + ChatColor.RESET + Arrays.toString(modids));
                     }
                 }, () -> {
                     sender.sendMessage(ChatColor.RED + "No ModObserver installation found on " + args[0] + "\nKicking the player.");
@@ -106,7 +106,7 @@ public class ModObserverCommandArgs {
                                 "\nProhibited mods found: " + Util.getNonApprovedMods(modids) +
                                 "\nMissing required mods: " + Util.getMissingRequiredMods(modids));
                     } else {
-                        sender.sendMessage(ChatColor.GREEN + args[0] + " passed the mod check.");
+                        sender.sendMessage(ChatColor.GREEN + args[0] + " passed the mod check with mods " + ChatColor.RESET + Arrays.toString(modids));
                     }
                 }, () -> sender.sendMessage(ChatColor.RED + "No ModObserver installation found on " + args[0])));
             }, (commandSender, command, label, argsAfterLastCommand) -> Util.getAllOnlinePlayers())),

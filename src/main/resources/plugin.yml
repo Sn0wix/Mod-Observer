@@ -1,8 +1,13 @@
 name: ModObserverPlugin
-version: '2.1.0'
+version: '3.0.0'
 main: net.sn0wix_.modObserverPlugin.ModObserverPlugin
 api-version: '1.21'
-load: STARTUP
 authors: [ Sn0wix_ ]
-description: Observers, what mods are the players using.
+description: Verifies, if the player has installed only permitted mods.
 website: https://modrinth.com/plugin/mod-observer-plugin
+
+commands:
+  modObserver:
+    description: Lets you configure ModObserver plugin.
+    usage: /modobserver {value}...
+    permission: op

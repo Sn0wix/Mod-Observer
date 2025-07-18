@@ -1,0 +1,8 @@
+name: ModObserverPlugin
+version: '2.1.0'
+main: net.sn0wix_.modObserverPlugin.ModObserverPlugin
+api-version: '1.21'
+load: STARTUP
+authors: [ Sn0wix_ ]
+description: Observers, what mods are the players using.
+website: https://modrinth.com/plugin/mod-observer-plugin

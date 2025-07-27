@@ -7,12 +7,18 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.util.Identifier;
 import net.sn0wix_.modObserver.detection.EntrypointBuilder;
 import net.sn0wix_.modObserver.detection.ModEntry;
 import net.sn0wix_.modObserver.detection.tampering.TamperingException;
+import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.*;
@@ -182,4 +188,17 @@ public class Utils {
         }
         return hexString.toString();
     }
+
+    /*public NativeImageBackedTexture createIcon(ModContainer iconSource, String iconPath) {
+        try {
+            try (InputStream inputStream = Files.newInputStream(iconSource.findPath(iconPath).get())) {
+                NativeImage image = NativeImage.read(Objects.requireNonNull(inputStream));
+                Validate.validState(image.getHeight() == image.getWidth(), "Must be square icon");
+                NativeImageBackedTexture tex = new NativeImageBackedTexture(() -> Identifier.of(ModObserver.MOD_ID, iconSource.findPath(iconPath).get().toString()).toString(), image);
+                return tex;
+            }
+        } catch (Exception e) {
+            return null;
+        }
+    }*/
 }

@@ -1,6 +1,7 @@
 package net.sn0wix_.modObserver.detection.tampering;
 
 import net.fabricmc.loader.api.ModContainer;
+import net.sn0wix_.modObserver.screen.TamperingErrorScreen;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ public class TamperingException extends Exception {
         this.detectedOn = detectedOn;
     }
 
-    /*public TamperingErrorScreen getScreen() {
+    public TamperingErrorScreen getScreen() {
         return new TamperingErrorScreen(detectedOn);
-    }*/
+    }
 }

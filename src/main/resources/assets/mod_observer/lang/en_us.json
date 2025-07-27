@@ -4,5 +4,7 @@
   "text.mod_observer.tampering.detected": "§cWARNING: §rModObserver detected tampering with modid \"%s\"!",
   "text.mod_observer.tampering.false_positive": "§8If this is a false positive, please report it on our issue tracker or discord.",
   "text.mod_observer.issue_tracker": "Issue Tracker",
-  "text.mod_observer.discord": "Discord"
+  "text.mod_observer.discord": "Discord",
+  "screen.mod_observer.kick": "Incompatible mods found",
+  "screen.mod_observer.tampering": "Tampering detected"
 }

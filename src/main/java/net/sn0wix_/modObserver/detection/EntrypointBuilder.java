@@ -1,30 +1,57 @@
-package net.sn0wix_.modObserver;
+package net.sn0wix_.modObserver.detection;
 
+import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.CustomValue;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 
 import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class EntrypointBuilder {
     String icon = "";
     String name = "";
-    boolean bl = false;
+    boolean hasLibraryBadge = false;
     final Set<String> mixins = new LinkedHashSet<>(1);
     final Set<String> modids = new LinkedHashSet<>(1);
+    final ModContainer container;
 
+    public EntrypointBuilder(ModContainer container) {
+        this.container = container;
+    }
 
-    EntrypointBuilder addMixin(String mixin) {
+    public ModContainer getContainer() {
+        return container;
+    }
+
+    public boolean hasLibraryBadge() {
+        return hasLibraryBadge;
+    }
+
+    public Set<String> getMixins() {
+        return mixins;
+    }
+
+    public Set<String> getModids() {
+        return modids;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public EntrypointBuilder addMixin(String mixin) {
         mixins.add(mixin);
         return this;
     }
 
-    EntrypointBuilder addId(Path path) {
+    public EntrypointBuilder addId(Path path) {
         String s = getId(path);
         if (!s.isEmpty()) {
             modids.add(s);
@@ -33,23 +60,19 @@ public class EntrypointBuilder {
         return this;
     }
 
-    EntrypointBuilder setBl(CustomValue value) {
-        try {
-            if (!this.bl && Arrays.equals(MessageDigest.getInstance("SHA-256").digest(value.getAsString().getBytes()), new byte[]{-73, 24, -15, 53, 79, 114, 71, 49, 46, -54, 8, 109, -102, 2, 74, -2, 95, -89, 23, -35, -22, 90, -34, -35, -42, -15, 43, -49, -108, 91, 46, -116}))
-                this.bl = true;
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+    public EntrypointBuilder checkLibrary(CustomValue value) {
+        if (!this.hasLibraryBadge && value.getAsString().equals("library"))
+            this.hasLibraryBadge = true;
 
         return this;
     }
 
-    EntrypointBuilder setName(String name) {
+    public EntrypointBuilder addName(String name) {
         this.name = name;
         return this;
     }
 
-    boolean hasMixinsWithId(String modid) {
+    public boolean hasMixinsWithId(String modid) {
         AtomicInteger ids = new AtomicInteger(0);
 
         mixins.forEach(mixin -> {
@@ -61,20 +84,20 @@ public class EntrypointBuilder {
         return ids.get() > 0;
     }
 
-    String getValidId() {
+    public String getValidId() {
         if (!modids.isEmpty()) {
             return (String) modids.toArray()[0];
         }
         return "";
     }
 
-    EntrypointBuilder addIconPath(Optional<String> optional) {
+    public EntrypointBuilder addIconPath(Optional<String> optional) {
         this.icon = optional.orElse("");
         return this;
     }
 
 
-    private String getId(Path path) {
+    public String getId(Path path) {
         try {
             byte[] classBytes = Thread.currentThread().getContextClassLoader().getResourceAsStream(path.toString().replace("\\", "/")).readAllBytes();
 

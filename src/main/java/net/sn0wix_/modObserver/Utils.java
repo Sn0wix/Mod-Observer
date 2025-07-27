@@ -7,9 +7,10 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
+import net.sn0wix_.modObserver.detection.EntrypointBuilder;
 import net.sn0wix_.modObserver.detection.ModEntry;
+import net.sn0wix_.modObserver.detection.tampering.TamperingException;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -17,16 +18,18 @@ import java.security.MessageDigest;
 import java.util.*;
 
 public class Utils {
-    public static Set<String> getMods() throws TamperingErrorScreen.TamperingException {
+
+    @Deprecated
+    public static Set<String> getMods() throws TamperingException {
         HashMap<String, EntrypointBuilder> containers = new HashMap<>(FabricLoader.getInstance().getAllMods().size());
 
         FabricLoaderImpl.INSTANCE.getModsInternal().forEach(modContainer -> {
-            EntrypointBuilder builder = new EntrypointBuilder().addIconPath(modContainer.getMetadata().getIconPath(128)).setName(modContainer.getMetadata().getName());
+            EntrypointBuilder builder = new EntrypointBuilder(modContainer).addIconPath(modContainer.getMetadata().getIconPath(128)).addName(modContainer.getMetadata().getName());
 
             try {
                 modContainer.getMetadata().getMixinConfigs(EnvType.CLIENT).forEach(builder::addMixin);
                 modContainer.getMetadata().getMixinConfigs(EnvType.SERVER).forEach(builder::addMixin);
-                modContainer.getMetadata().getCustomValue("modmenu").getAsObject().get("badges").getAsArray().forEach(builder::setBl);
+                modContainer.getMetadata().getCustomValue("modmenu").getAsObject().get("badges").getAsArray().forEach(builder::checkLibrary);
             } catch (Exception ignored) {
             }
 
@@ -38,7 +41,7 @@ public class Utils {
 
         for (int i = 0; i < strings.length; i++) {
             FabricLoader.getInstance().getEntrypointContainers(strings[i], classes[i]).forEach(modContainer -> {
-                EntrypointBuilder builder = containers.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder() : containers.get(modContainer.getProvider().getMetadata().getId());
+                EntrypointBuilder builder = containers.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder(modContainer.getProvider()) : containers.get(modContainer.getProvider().getMetadata().getId());
 
                 try {
                     builder.addId(Path.of(modContainer.getDefinition().split("::")[0].replace('.', '/') + ".class"));
@@ -55,12 +58,12 @@ public class Utils {
             EntrypointBuilder builder = entry.getValue();
             String modid = entry.getKey();
 
-            if (!builder.modids.isEmpty()) {
+            if (!builder.getModids().isEmpty()) {
                 set.add(builder.getValidId());
-            } else if (!builder.mixins.isEmpty()) {
-                if (!(builder.icon.contains(modid) || builder.hasMixinsWithId(modid)) && !(builder.name.toLowerCase().replace(" ", "").equals(modid) || builder.name.toLowerCase().replace(" ", "-").equals(modid) || builder.name.toLowerCase().replace(" ", "_").equals(modid))) {
-                    if (!builder.bl) {
-                        throw new TamperingErrorScreen.TamperingException(modid);
+            } else if (!builder.getMixins().isEmpty()) {
+                if (!(builder.getIcon().contains(modid) || builder.hasMixinsWithId(modid)) && !(builder.getName().toLowerCase().replace(" ", "").equals(modid) || builder.getName().toLowerCase().replace(" ", "-").equals(modid) || builder.getName().toLowerCase().replace(" ", "_").equals(modid))) {
+                    if (!builder.hasLibraryBadge()) {
+                        throw new TamperingException(List.of(builder.getContainer()));
                     }
                 }
 
@@ -70,6 +73,70 @@ public class Utils {
 
         return set;
     }
+
+    public static void checkTampering() throws TamperingException {
+        HashMap<String, EntrypointBuilder> containers = new HashMap<>(FabricLoader.getInstance().getAllMods().size());
+
+        FabricLoaderImpl.INSTANCE.getModsInternal().forEach(modContainer -> {
+            EntrypointBuilder builder = new EntrypointBuilder(modContainer).addIconPath(modContainer.getMetadata().getIconPath(128)).addName(modContainer.getMetadata().getName());
+
+            try {
+                modContainer.getMetadata().getMixinConfigs(EnvType.CLIENT).forEach(builder::addMixin);
+                modContainer.getMetadata().getMixinConfigs(EnvType.SERVER).forEach(builder::addMixin);
+                modContainer.getMetadata().getCustomValue("modmenu").getAsObject().get("badges").getAsArray().forEach(builder::checkLibrary);
+            } catch (Exception ignored) {
+            }
+
+            containers.put(modContainer.getMetadata().getId(), builder);
+        });
+
+        Class<?>[] classes = new Class<?>[]{DedicatedServerModInitializer.class, ClientModInitializer.class, ModInitializer.class};
+        String[] strings = new String[]{"server", "client", "main"};
+
+        for (int i = 0; i < strings.length; i++) {
+            FabricLoader.getInstance().getEntrypointContainers(strings[i], classes[i]).forEach(modContainer -> {
+                EntrypointBuilder builder = containers.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder(modContainer.getProvider()) : containers.get(modContainer.getProvider().getMetadata().getId());
+
+                try {
+                    builder.addId(Path.of(modContainer.getDefinition().split("::")[0].replace('.', '/') + ".class"));
+                } catch (Exception ignored) {
+                }
+            });
+        }
+
+        ArrayList<ModContainer> tamperedMods = new ArrayList<>(0);
+
+        for (Map.Entry<String, EntrypointBuilder> entry : containers.entrySet()) {
+            EntrypointBuilder builder = entry.getValue();
+            String modid = entry.getKey();
+
+            //TODO improve detection checks
+            if (!builder.getMixins().isEmpty()) {
+                if (!(builder.getIcon().contains(modid) || builder.hasMixinsWithId(modid)) && !(builder.getName().toLowerCase().replace(" ", "").equals(modid) || builder.getName().toLowerCase().replace(" ", "-").equals(modid) || builder.getName().toLowerCase().replace(" ", "_").equals(modid))) {
+                    if (!builder.hasLibraryBadge()) {
+                        tamperedMods.add(builder.getContainer());
+                    }
+                }
+            }
+        }
+
+        if (!tamperedMods.isEmpty()) {
+            throw new TamperingException(tamperedMods);
+        }
+    }
+
+    public static LinkedHashMap<ModEntry, Object> getModsList() {
+        LinkedHashMap<ModEntry, Object> mods = new LinkedHashMap<>();
+
+        FabricLoader.getInstance().getAllMods().forEach(modContainer -> {
+            if (modContainer.getContainingMod().isEmpty()) {
+                mods.put(new ModEntry(modContainer, Utils.getHash(modContainer)), Utils.getChildren(modContainer));
+            }
+        });
+
+        return mods;
+    }
+
 
     public static LinkedHashMap<ModEntry, Object> getChildren(ModContainer entry) {
         LinkedHashMap<ModEntry, Object> result = new LinkedHashMap<>();
@@ -87,7 +154,7 @@ public class Utils {
         return result;
     }
 
-    public static String getSHA256(ModContainer container) {
+    public static String getHash(ModContainer container) {
         if (container.getOrigin().getPaths().isEmpty() || container.getOrigin().getPaths().getFirst().toFile().isDirectory()) return "";
 
         try {
@@ -103,12 +170,12 @@ public class Utils {
             byte[] hashBytes = digest.digest();
             return bytesToHex(hashBytes);
         } catch (Exception e) {
-            ModObserver.LOGGER.error("Can not hash mod file of mod " + container.getMetadata().getId());
+            ModObserver.LOGGER.error("Can not create hash of " + container.getMetadata().getId());
             throw new RuntimeException(e);
         }
     }
 
-    private static String bytesToHex(byte[] bytes) {
+    public static String bytesToHex(byte[] bytes) {
         StringBuilder hexString = new StringBuilder(2 * bytes.length);
         for (byte b : bytes) {
             hexString.append(String.format("%02x", b));

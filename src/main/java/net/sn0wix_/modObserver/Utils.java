@@ -5,13 +5,16 @@ import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
+import net.sn0wix_.modObserver.detection.ModEntry;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.security.MessageDigest;
+import java.util.*;
 
 public class Utils {
     public static Set<String> getMods() throws TamperingErrorScreen.TamperingException {
@@ -66,5 +69,50 @@ public class Utils {
         }
 
         return set;
+    }
+
+    public static LinkedHashMap<ModEntry, Object> getChildren(ModContainer entry) {
+        LinkedHashMap<ModEntry, Object> result = new LinkedHashMap<>();
+
+        if (entry.getContainedMods().isEmpty()) return result;
+
+        entry.getContainedMods().forEach(container -> {
+            if (!container.getContainedMods().isEmpty()) {
+                result.put(new ModEntry(container), new LinkedHashMap<>());
+            } else {
+                result.put(new ModEntry(container), List.of());
+            }
+        });
+
+        return result;
+    }
+
+    public static String getSHA256(ModContainer container) {
+        if (container.getOrigin().getPaths().isEmpty() || container.getOrigin().getPaths().getFirst().toFile().isDirectory()) return "";
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            try (InputStream fis = new FileInputStream(container.getOrigin().getPaths().getFirst().toFile())) {
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = fis.read(buffer)) != -1) {
+                    digest.update(buffer, 0, bytesRead);
+                }
+            }
+
+            byte[] hashBytes = digest.digest();
+            return bytesToHex(hashBytes);
+        } catch (Exception e) {
+            ModObserver.LOGGER.error("Can not hash mod file of mod " + container.getMetadata().getId());
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder(2 * bytes.length);
+        for (byte b : bytes) {
+            hexString.append(String.format("%02x", b));
+        }
+        return hexString.toString();
     }
 }

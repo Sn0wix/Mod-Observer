@@ -13,14 +13,10 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-import net.minecraft.util.Identifier;
 import net.sn0wix_.modObserver.ModObserver;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
     private int maxKeyNameLength;
@@ -109,11 +105,10 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
             name.setPosition(startPos, y + entryHeight / 2 - 9 / 2);
             name.render(context, mouseX, mouseY, tickProgress);
 
-            //TODO fix icon loading
-            /*if (container.hasIcon()) {
-                context.drawTexture(RenderPipelines.GUI_TEXTURED, container.getIconIdentifier(),
-                        startPos - 25, y, 0, 0, 0, 20, 20, 20, 20);
-            }*/
+            //TODO fix?
+            if (container.hasIcon()) {
+                context.drawTexture(RenderPipelines.GUI_TEXTURED, container.getIconId(), startPos, y, 0, 0, 20, 20, 20, 20, 20);
+            }
         }
     }
 

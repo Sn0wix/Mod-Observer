@@ -1,18 +1,26 @@
 package net.sn0wix_.modObserver.screen;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.widget.*;
+import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.sn0wix_.modObserver.ModObserver;
+import org.apache.commons.lang3.Validate;
 
+import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ModsScreen extends Screen {
     public final List<Container> detectedOn;
@@ -23,11 +31,18 @@ public class ModsScreen extends Screen {
     public ModsScreen(Text title, List<Container> detectedOn) {
         super(title);
         this.detectedOn = detectedOn;
+
+        detectedOn.forEach(mod -> {
+            if (mod.hasIcon()) {
+                NativeImageBackedTexture icon = mod.getIcon();
+                icon.setFilter(false, false);
+                MinecraftClient.getInstance().getTextureManager().registerTexture(mod.getIconId(), icon);
+            }
+        });
     }
 
     public ModsScreen(List<Container> detectedOn) {
-        super(Text.translatable("screen." + ModObserver.MOD_ID + ".kick"));
-        this.detectedOn = detectedOn;
+        this(Text.translatable("screen." + ModObserver.MOD_ID + ".kick"), detectedOn);
     }
 
     protected void init() {
@@ -53,7 +68,7 @@ public class ModsScreen extends Screen {
 
     protected void initFooter() {
         this.layout.addFooter(new ButtonWidget.Builder(Text.translatable("gui.toMenu"), button ->
-                client.setScreen(new MultiplayerScreen(new TitleScreen()))).size((int) (this.width / 1.8),20).build());
+                client.setScreen(new MultiplayerScreen(new TitleScreen()))).size((int) (this.width / 1.8), 20).build());
     }
 
     protected void refreshWidgetPositions() {
@@ -71,11 +86,10 @@ public class ModsScreen extends Screen {
         private final String icon;
 
         public Container(net.fabricmc.loader.api.ModContainer modContainer) {
-            this.name = modContainer.getMetadata().getName();
-            this.modid = modContainer.getMetadata().getId();
-            this.issues = modContainer.getMetadata().getContact().get("issues").orElse("");
-            this.homepage = modContainer.getMetadata().getContact().get("homepage").orElse("");
-            this.icon = modContainer.getMetadata().getIconPath(32).orElse("");
+            this(modContainer.getMetadata().getName(), modContainer.getMetadata().getId(),
+                    modContainer.getMetadata().getContact().get("issues").orElse(""),
+                    modContainer.getMetadata().getContact().get("homepage").orElse(""),
+                    modContainer.getMetadata().getIconPath(32).orElse(""));
         }
 
         public Container(String name, String modid, String issues, String homepage, String icon) {
@@ -104,7 +118,7 @@ public class ModsScreen extends Screen {
             return issues.isEmpty() ? URI.create("") : URI.create(issues);
         }
 
-        public URI  getHomepage() {
+        public URI getHomepage() {
             return homepage.isEmpty() ? URI.create("") : URI.create(homepage);
         }
 
@@ -116,12 +130,20 @@ public class ModsScreen extends Screen {
             return icon;
         }
 
-        public Identifier getIconIdentifier() {
-            return Identifier.of(getModid(), getIconPath().replace("assets/", "").replace(getModid() + "/", ""));
+        public Identifier getIconId() {
+            return Identifier.of(ModObserver.MOD_ID, getModid() + "_icon");
         }
 
-        public static Identifier getIconIdentifier(String modid, String path) {
-            return Identifier.of(modid, path.replace("assets/", "").replace(modid + "/", ""));
+        public NativeImageBackedTexture getIcon() {
+            try {
+                Path path = FabricLoader.getInstance().getModContainer(getModid()).get().findPath(getIconPath()).get();
+                InputStream inputStream = Files.newInputStream(path);
+                NativeImage image = NativeImage.read(Objects.requireNonNull(inputStream));
+                Validate.validState(image.getHeight() == image.getWidth(), "Must be square icon");
+                return new NativeImageBackedTexture(() -> Identifier.of(ModObserver.MOD_ID, path.toString()).toString(), image);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

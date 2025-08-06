@@ -13,8 +13,11 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.gui.widget.TextWidget;
+import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.sn0wix_.modObserver.ModObserver;
+import net.sn0wix_.modObserver.compat.ModMenuCompat;
 
 import java.util.List;
 
@@ -46,6 +49,7 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
     }
 
     public class ModEntry extends Entry {
+        Identifier iconLocation;
         private final ModsScreen.Container container;
         private final ButtonWidget issuesButton;
         private final ButtonWidget homepageButton;
@@ -95,20 +99,39 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
             int resetButtonPos = ModsListWidget.this.getScrollbarX() - this.issuesButton.getWidth() - 8;
             int j = y - 2;
             int startPos = getWidth() / 2 - maxKeyNameLength;
+
+            if (startPos < 10) {
+                startPos = 10;
+            }
+
+            name.setPosition(startPos + (ModObserver.HAS_MODMENU ? 25 : 0), y + entryHeight / 2 - 9 / 2);
+            name.render(context, mouseX, mouseY, tickProgress);
+
+            if (ModObserver.HAS_MODMENU) {
+                context.drawTexture(RenderPipelines.GUI_TEXTURED, getIconTexture(), startPos, y, 0, 0, 20, 20, 20, 20);
+            }
+
             this.issuesButton.setPosition(resetButtonPos, j);
             issuesButton.render(context, mouseX, mouseY, tickProgress);
 
             int editButtonPos = resetButtonPos - 8 - this.homepageButton.getWidth();
             homepageButton.setPosition(editButtonPos, j);
             homepageButton.render(context, mouseX, mouseY, tickProgress);
+        }
 
-            name.setPosition(startPos, y + entryHeight / 2 - 9 / 2);
-            name.render(context, mouseX, mouseY, tickProgress);
+        public Identifier getIconTexture() {
+            if (ModObserver.HAS_MODMENU) {
+                if (this.iconLocation == null) {
+                    this.iconLocation = Identifier.of(ModObserver.MOD_ID, container.getModid() + "_icon");
+                    NativeImageBackedTexture icon = ModMenuCompat.getIconImage(container.getModid());
+                    icon.setFilter(false, false);
+                    MinecraftClient.getInstance().getTextureManager().registerTexture(this.iconLocation, icon);
+                }
 
-            //TODO fix?
-            if (container.hasIcon()) {
-                context.drawTexture(RenderPipelines.GUI_TEXTURED, container.getIconId(), startPos, y, 0, 0, 20, 20, 20, 20, 20);
+                return iconLocation;
             }
+
+            return null;
         }
     }
 

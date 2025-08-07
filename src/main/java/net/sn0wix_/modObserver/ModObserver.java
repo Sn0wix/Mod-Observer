@@ -18,7 +18,7 @@ public class ModObserver implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        
+
         //PayloadTypeRegistry.configurationC2S().register(ModsPacket.PAYLOAD_ID, ModsPacket.CODEC);
         PayloadTypeRegistry.configurationC2S().register(ModsRequestPacket.PAYLOAD_ID, ModsRequestPacket.CODEC);
 

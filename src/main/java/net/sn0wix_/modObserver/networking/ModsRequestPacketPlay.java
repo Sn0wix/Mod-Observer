@@ -6,19 +6,19 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.sn0wix_.modObserver.ModObserver;
 
-public class ModsRequestPacket implements CustomPayload {
-    public static final Id<ModsRequestPacket> PAYLOAD_ID = new Id<>(Identifier.of(ModObserver.MOD_ID, "mods"));
-    public static final PacketCodec<PacketByteBuf, ModsRequestPacket> CODEC = PacketCodec.of(ModsRequestPacket::write, ModsRequestPacket::new);
+public class ModsRequestPacketPlay implements CustomPayload {
+    public static final Id<ModsRequestPacketPlay> PAYLOAD_ID = new Id<>(Identifier.of(ModObserver.MOD_ID, "mods"));
+    public static final PacketCodec<PacketByteBuf, ModsRequestPacketPlay> CODEC = PacketCodec.of(ModsRequestPacketPlay::write, ModsRequestPacketPlay::new);
 
     private final boolean checkTampering;
     private final boolean sendHashes;
 
-    public ModsRequestPacket(boolean checkTampering, boolean sendHashes) {
+    public ModsRequestPacketPlay(boolean checkTampering, boolean sendHashes) {
         this.checkTampering = checkTampering;
         this.sendHashes = sendHashes;
     }
 
-    private ModsRequestPacket(PacketByteBuf byteBuf) {
+    private ModsRequestPacketPlay(PacketByteBuf byteBuf) {
         this.checkTampering = byteBuf.readBoolean();
         this.sendHashes = byteBuf.readBoolean();
     }

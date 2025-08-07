@@ -1,14 +1,13 @@
 {
   "link.mod_observer.curseforge": "§6§nCurseforge",
   "link.mod_observer.modrinth": "§2§nMondrinth",
-  "text.mod_observer.tampering.detected": "§cWARNING: §rModObserver detected tampering with modid \"%s\"!",
-  "text.mod_observer.tampering.false_positive": "§8If this is a false positive, please report it on our issue tracker or discord.",
   "text.mod_observer.issue_tracker": "Issues",
   "text.mod_observer.homepage": "Homepage",
   "text.mod_observer.discord": "Discord",
-  "text.mod_observer.required_mods": "§c§lThese mods are required by the server!",
-  "text.mod_observer.incompatible_mods": "§c§lYou can not use these mods on this server!",
+  "text.mod_observer.required_mods": "§cThese mods are required by the server!",
+  "text.mod_observer.incompatible_mods": "§cYou can not use these mods on this server!",
 
   "screen.mod_observer.kick": "Incompatible mods found",
-  "screen.mod_observer.tampering": "Tampering detected"
+  "screen.mod_observer.tampering": "Tampering detected",
+  "gui.mod_observer.show_mods": "Show Mods List"
 }

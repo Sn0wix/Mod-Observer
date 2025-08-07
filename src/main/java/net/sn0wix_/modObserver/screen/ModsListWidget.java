@@ -1,5 +1,7 @@
 package net.sn0wix_.modObserver.screen;
 
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.RenderPipelines;
@@ -16,10 +18,13 @@ import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.sn0wix_.modObserver.ModObserver;
 import net.sn0wix_.modObserver.compat.ModMenuCompat;
 
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
     private int maxKeyNameLength;
@@ -53,25 +58,54 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
         private final ModsScreen.Container container;
         private final ButtonWidget issuesButton;
         private final ButtonWidget homepageButton;
-        private final TextWidget name;
+        private TextWidget name;
 
         public ModEntry(ModsScreen.Container container, ModsScreen parent) {
             TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-
             this.container = container;
-            this.issuesButton = ButtonWidget.builder(Text.translatable("text." + ModObserver.MOD_ID + ".issue_tracker"),
+
+            this.issuesButton = ButtonWidget.builder(Text.translatable("text.mod_observer.issue_tracker"),
                             ConfirmLinkScreen.opening(parent, container.getIssues(), false))
-                    .size(textRenderer.getWidth(Text.translatable("text." + ModObserver.MOD_ID + ".issue_tracker")) + 8, 20).build();
+                    .size(textRenderer.getWidth(Text.translatable("text.mod_observer.issue_tracker")) + 8, 20).build();
 
-            this.homepageButton = ButtonWidget.builder(Text.translatable("text." + ModObserver.MOD_ID + ".homepage"),
+            this.homepageButton = ButtonWidget.builder(Text.translatable("text.mod_observer.homepage"),
                             ConfirmLinkScreen.opening(parent, container.getHomepage(), false))
-                    .size(textRenderer.getWidth(Text.translatable("text." + ModObserver.MOD_ID + ".homepage")) + 8, 20).build();
+                    .size(textRenderer.getWidth(Text.translatable("text.mod_observer.homepage")) + 8, 20).build();
 
-            this.name = new TextWidget(Text.literal(container.getName()), textRenderer);
-            name.setTooltip(Tooltip.of(Text.literal(container.getModid())));
+            Optional<ModContainer> modContainer = FabricLoader.getInstance().getModContainer(container.getModid());
+
+
+            try {
+                Path path = modContainer.get().getOrigin().getPaths().getFirst();
+                this.name = new TextWidget(Text.literal(container.getName()), textRenderer) {
+                    @Override
+                    public void onClick(double mouseX, double mouseY) {
+                        try {
+                            Util.getOperatingSystem().open(modContainer.get().getOrigin().getPaths().getFirst().getParent());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+
+                name.setTooltip(Tooltip.of(Text.literal(path.getFileName().toString())));
+                name.active = true;
+            } catch (Exception e) {
+                this.name = new TextWidget(Text.literal(container.getName()), textRenderer);
+                name.setTooltip(Tooltip.of(Text.literal("id: " + container.getModid())));
+            }
+
 
             this.issuesButton.active = !container.getIssues().toString().isEmpty();
             this.homepageButton.active = !container.getHomepage().toString().isEmpty();
+        }
+
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            /*System.out.println("asdfasdf");
+            boolean bl = name.mouseClicked(mouseX, mouseY, button);
+            System.out.println(bl);*/
+            return super.mouseClicked(mouseX, mouseY, button);
         }
 
         @Override

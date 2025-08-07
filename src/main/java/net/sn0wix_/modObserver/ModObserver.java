@@ -1,13 +1,11 @@
 package net.sn0wix_.modObserver;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.sn0wix_.modObserver.networking.ModsPacket;
 import net.sn0wix_.modObserver.networking.ModsRequestPacket;
-import net.sn0wix_.modObserver.screen.ModsScreen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,15 +18,20 @@ public class ModObserver implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        PayloadTypeRegistry.configurationC2S().register(ModsPacket.PAYLOAD_ID, ModsPacket.CODEC);
-        PayloadTypeRegistry.configurationS2C().register(ModsRequestPacket.PAYLOAD_ID, ModsRequestPacket.CODEC);
+        
+        //PayloadTypeRegistry.configurationC2S().register(ModsPacket.PAYLOAD_ID, ModsPacket.CODEC);
+        PayloadTypeRegistry.configurationC2S().register(ModsRequestPacket.PAYLOAD_ID, ModsRequestPacket.CODEC);
+
+        ClientConfigurationConnectionEvents.START.register((handler, client) -> {
+            ClientConfigurationNetworking.send(new ModsRequestPacket(false, false));
+        });
 
 
-        ClientTickEvents.END_CLIENT_TICK.register(minecraftClient -> {
+        /*ClientTickEvents.END_CLIENT_TICK.register(minecraftClient -> {
             if (minecraftClient.currentScreen instanceof TitleScreen && !bl) {
-                minecraftClient.setScreen(new ModsScreen(ModsScreen.Container.cast(FabricLoader.getInstance().getAllMods().stream().toList())));
+                minecraftClient.setScreen(new IncompatibleModsScreen(ModsScreen.Container.cast(FabricLoader.getInstance().getAllMods().stream().toList()), Text.translatable("text.mod_observer.required_mods")));
                 bl = true;
             }
-        });
+        });*/
     }
 }

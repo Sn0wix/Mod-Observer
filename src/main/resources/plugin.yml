@@ -5,6 +5,7 @@ api-version: '1.21'
 authors: [ Sn0wix_ ]
 description: Verifies, if the player has installed only permitted mods.
 website: https://modrinth.com/plugin/mod-observer-plugin
+depend: [ ProtocolLib ]
 
 commands:
   modObserver:

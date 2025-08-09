@@ -1,113 +1,75 @@
 package net.sn0wix_.modObserverPlugin.networking;
 
+import io.papermc.paper.connection.PlayerConnection;
 import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
-import net.sn0wix_.modObserverPlugin.Util;
-import net.sn0wix_.modObserverPlugin.players.IncomingPlayers;
-import net.sn0wix_.modObserverPlugin.players.WaitingForResponsePlayers;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.messaging.PluginMessageListener;
+import org.jetbrains.annotations.NotNull;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
 
-public class PacketHandler {
-    public static final String MODS_FOR_APPROVAL_CHANNEL = ModObserverPlugin.MOD_ID + ":mods_for_approval";
+public class PacketHandler implements PluginMessageListener {
+    public static final String MODS_CHANNEL = ModObserverPlugin.MOD_ID + ":mods";
 
-    public static void send(Plugin plugin, Player player, byte[] byteArray) {
-        player.sendPluginMessage(plugin, MODS_FOR_APPROVAL_CHANNEL, byteArray);
-    }
-
-
-    public static void receive(String channel, Player player, byte[] payload) {
-        if (!channel.equals(MODS_FOR_APPROVAL_CHANNEL)) return;
-        if (Util.checkForSusActivity(player.getName(), payload))return;
-
-        byte[] hash = Arrays.copyOfRange(payload, 0, 32);
-        byte[] encryptedContent = Arrays.copyOfRange(payload, 32, payload.length);
-
-        String concatenatedString;
-        try {
-            Cipher cipher = Cipher.getInstance("AES");
-            String playerName = player.getName();
-
-            String key = String.format("%-32s", playerName).substring(0, 32); // padding/truncating to 32 chars
-            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey);
-
-            byte[] decryptedData = cipher.doFinal(encryptedContent);
-            byte[] calculatedHash = MessageDigest.getInstance("SHA-256").digest(decryptedData);
-
-            if (!Arrays.equals(calculatedHash, hash)) {
-                ModObserverPlugin.LOGGER.warning("Hash mismatch from " + player.getName() + ". Discarding packet.");
-                return;
-            }
-
-            if (!Arrays.equals(MessageDigest.getInstance("SHA-256").digest(decryptedData), hash)) {
-                ModObserverPlugin.LOGGER.warning("Packet hash mismatch! Packet hash from" + player.getName() + " does not match the expected value. Discarding the packet.");
-                return;
-            }
-
-            concatenatedString = new String(decryptedData);
-        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException |
-                 BadPaddingException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalBlockSizeException e) {
-            ModObserverPlugin.LOGGER.severe("Wrong data padding in packet sent by " + player.getName());
-            throw new RuntimeException(e);
-        }
-
-
-        String delimiter = ",";
-        String[] modids = concatenatedString.split(delimiter);
-
-        if (Util.checkForSusActivity(player.getName(), modids.length == 0 ? new byte[1] : new byte[]{1}))return;
-
-        IncomingPlayers.setHasSendPacket(player.getName());
-
-        if (WaitingForResponsePlayers.containsPlayer(player.getName())) {
-            WaitingForResponsePlayers.handlePacket(player.getName(), modids);
-            WaitingForResponsePlayers.removePlayer(player.getName());
+    @Override
+    public void onPluginMessageReceived(@NotNull String channel, @NotNull PlayerConnection connection, byte @NotNull [] message) {
+        if (!channel.equals(MODS_CHANNEL)) return;
+        if (message.length == 0) {
+            ModObserverPlugin.LOGGER.warning("Mod packet from " + connection.getClientAddress() + " is empty!");
             return;
         }
 
-        if (IncomingPlayers.containsPlayer(player.getName())) {
-            ArrayList<String> notApprovedMods = Util.getNonApprovedMods(modids);
-            ArrayList<String> missingRequiredMods = Util.getMissingRequiredMods(modids);
+        try {
+            int compressedLength = message.length - 32;
+            byte[] compressedData = new byte[compressedLength];
+            byte[] hash = new byte[32];
 
-            boolean shouldBeKicked = false;
-            boolean hasOnlyAllowedMods = false;
+            System.arraycopy(message, 0, compressedData, 0, compressedLength);
+            System.arraycopy(message, compressedLength, hash, 0, 32);
 
-            if (notApprovedMods.isEmpty()) {
-                hasOnlyAllowedMods = true;
-            } else {
-                notApprovedMods.forEach(modid -> IncomingPlayers.addNonApprovedMod(player.getName(), modid));
-                shouldBeKicked = true;
+            byte[] jsonData = decompress(compressedData);
+
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] computedHash = digest.digest(jsonData);
+
+            if (!Arrays.equals(hash, computedHash)) {
+                throw new RuntimeException("Hash verification failed! Provided hash: " + new String(hash) + " Calculated hash: " + new String(computedHash));
             }
 
-            if (!missingRequiredMods.isEmpty()) {
-                missingRequiredMods.forEach(modid -> IncomingPlayers.addMissingRequiredMod(player.getName(), modid));
-                shouldBeKicked = true;
-            } else if (hasOnlyAllowedMods) {
-                IncomingPlayers.setApproved(player.getName());
-            }
-
-            if (shouldBeKicked) {
-                Util.checkIncomingPlayer(player);
-            }
+            ModObserverPlugin.LOGGER.info(new String(jsonData));
+        } catch (Exception e) {
+            ModObserverPlugin.LOGGER.severe("There was an error while decoding packet from " + connection.getClientAddress());
+            ModObserverPlugin.LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
     }
 
-    @FunctionalInterface
-    public interface ResponseHandler {
-        void execute(String[] modids);
+    private static byte[] decompress(byte[] data) throws IOException {
+        Inflater inflater = new Inflater();
+        inflater.setInput(data);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
+        byte[] buffer = new byte[1024];
+
+        try {
+            while (!inflater.finished()) {
+                int count = inflater.inflate(buffer);
+                outputStream.write(buffer, 0, count);
+            }
+        } catch (DataFormatException e) {
+            throw new IOException("Data format exception while decompressing", e);
+        } finally {
+            inflater.end();
+        }
+        return outputStream.toByteArray();
+    }
+
+    @Override
+    public void onPluginMessageReceived(@NotNull String channel, @NotNull Player player, byte @NotNull [] message) {
+        ModObserverPlugin.LOGGER.warning("Received mod packet from " + player.getName() + " without requesting it!\n" + player.getName() + " may be using cracked version of ModObserver!");
     }
 }

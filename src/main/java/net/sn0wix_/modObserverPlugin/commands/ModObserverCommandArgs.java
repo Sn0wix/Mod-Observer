@@ -3,11 +3,9 @@ package net.sn0wix_.modObserverPlugin.commands;
 import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
 import net.sn0wix_.modObserverPlugin.Util;
 import net.sn0wix_.modObserverPlugin.config.Config;
-import net.sn0wix_.modObserverPlugin.players.WaitingForResponsePlayers;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
-import java.time.Instant;
 import java.util.*;
 
 public class ModObserverCommandArgs {
@@ -28,7 +26,7 @@ public class ModObserverCommandArgs {
                     "\"removeAll\" is not the same as \"clear\". Example: whitelist addAll/removeAll PlayerName This will add or remove all the mods provided by PlayerName"))));
 
     //Check player
-    public static final ModObserverCommandArg CHECK_PLAYER = registerCommandArg(new ModObserverCommandArg("checkPlayer", List.of(
+    /*public static final ModObserverCommandArg CHECK_PLAYER = registerCommandArg(new ModObserverCommandArg("checkPlayer", List.of(
             new ModObserverCommandArg("kickIf", (sender, command, label, args) -> {
                 if (args.length == 0) {
                     sender.sendMessage(ChatColor.RED + "You need to pass in the player name after \"kickIf\"");
@@ -332,7 +330,7 @@ public class ModObserverCommandArgs {
                         sender.sendMessage("Ignored players list was cleared.");
                     })
     ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver ignoredPlayers show\\add playername playername ...\\remove playername playername ...\\addAll\\removeAll\\reset")));
-
+*/
 
     public static ModObserverCommandArg registerCommandArg(ModObserverCommandArg arg) {
         REGISTERED_COMMANDS.add(arg);

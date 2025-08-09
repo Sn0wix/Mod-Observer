@@ -9,7 +9,6 @@ import net.minecraft.text.Text;
 
 import java.util.List;
 
-//TODO
 public class IncompatibleModsScreen extends Screen {
     List<ModsScreen.Container> detectedOn;
     Text reason;

@@ -1,137 +1,41 @@
 package net.sn0wix_.modObserver;
 
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.ModInitializer;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.fabricmc.loader.impl.FabricLoaderImpl;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.util.Identifier;
-import net.sn0wix_.modObserver.detection.EntrypointBuilder;
 import net.sn0wix_.modObserver.detection.ModEntry;
-import net.sn0wix_.modObserver.detection.tampering.TamperingException;
-import org.apache.commons.lang3.Validate;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.*;
 
 public class Utils {
-
-    @Deprecated
-    public static Set<String> getMods() throws TamperingException {
-        HashMap<String, EntrypointBuilder> containers = new HashMap<>(FabricLoader.getInstance().getAllMods().size());
-
-        FabricLoaderImpl.INSTANCE.getModsInternal().forEach(modContainer -> {
-            EntrypointBuilder builder = new EntrypointBuilder(modContainer).addIconPath(modContainer.getMetadata().getIconPath(128)).addName(modContainer.getMetadata().getName());
-
-            try {
-                modContainer.getMetadata().getMixinConfigs(EnvType.CLIENT).forEach(builder::addMixin);
-                modContainer.getMetadata().getMixinConfigs(EnvType.SERVER).forEach(builder::addMixin);
-                modContainer.getMetadata().getCustomValue("modmenu").getAsObject().get("badges").getAsArray().forEach(builder::checkLibrary);
-            } catch (Exception ignored) {
-            }
-
-            containers.put(modContainer.getMetadata().getId(), builder);
-        });
-
-        Class<?>[] classes = new Class<?>[]{DedicatedServerModInitializer.class, ClientModInitializer.class, ModInitializer.class};
-        String[] strings = new String[]{"server", "client", "main"};
-
-        for (int i = 0; i < strings.length; i++) {
-            FabricLoader.getInstance().getEntrypointContainers(strings[i], classes[i]).forEach(modContainer -> {
-                EntrypointBuilder builder = containers.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder(modContainer.getProvider()) : containers.get(modContainer.getProvider().getMetadata().getId());
-
-                try {
-                    builder.addId(Path.of(modContainer.getDefinition().split("::")[0].replace('.', '/') + ".class"));
-                } catch (Exception e) {
-                    ModObserver.LOGGER.info("You can pretty much ignore this.");
-                    e.printStackTrace();
-                }
-            });
-        }
-
-        Set<String> set = new LinkedHashSet<>(containers.keySet().size());
-
-        for (Map.Entry<String, EntrypointBuilder> entry : containers.entrySet()) {
-            EntrypointBuilder builder = entry.getValue();
-            String modid = entry.getKey();
-
-            if (!builder.getModids().isEmpty()) {
-                set.add(builder.getValidId());
-            } else if (!builder.getMixins().isEmpty()) {
-                if (!(builder.getIcon().contains(modid) || builder.hasMixinsWithId(modid)) && !(builder.getName().toLowerCase().replace(" ", "").equals(modid) || builder.getName().toLowerCase().replace(" ", "-").equals(modid) || builder.getName().toLowerCase().replace(" ", "_").equals(modid))) {
-                    if (!builder.hasLibraryBadge()) {
-                        throw new TamperingException(List.of(builder.getContainer()));
-                    }
-                }
-
-                set.add(modid);
-            }
-        }
-
-        return set;
+    public static String getModsJson() {
+        return toJson(getModsList());
     }
 
-    public static void checkTampering() throws TamperingException {
-        HashMap<String, EntrypointBuilder> containers = new HashMap<>(FabricLoader.getInstance().getAllMods().size());
+    private static Map<String, Object> toJsonMap(LinkedHashMap<ModEntry, Object> map) {
+        LinkedHashMap<String, Object> jsonReadyMap = new LinkedHashMap<>();
 
-        FabricLoaderImpl.INSTANCE.getModsInternal().forEach(modContainer -> {
-            EntrypointBuilder builder = new EntrypointBuilder(modContainer).addIconPath(modContainer.getMetadata().getIconPath(128)).addName(modContainer.getMetadata().getName());
-
-            try {
-                modContainer.getMetadata().getMixinConfigs(EnvType.CLIENT).forEach(builder::addMixin);
-                modContainer.getMetadata().getMixinConfigs(EnvType.SERVER).forEach(builder::addMixin);
-                modContainer.getMetadata().getCustomValue("modmenu").getAsObject().get("badges").getAsArray().forEach(builder::checkLibrary);
-            } catch (Exception ignored) {
-            }
-
-            containers.put(modContainer.getMetadata().getId(), builder);
-        });
-
-        Class<?>[] classes = new Class<?>[]{DedicatedServerModInitializer.class, ClientModInitializer.class, ModInitializer.class};
-        String[] strings = new String[]{"server", "client", "main"};
-
-        for (int i = 0; i < strings.length; i++) {
-            FabricLoader.getInstance().getEntrypointContainers(strings[i], classes[i]).forEach(modContainer -> {
-                EntrypointBuilder builder = containers.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder(modContainer.getProvider()) : containers.get(modContainer.getProvider().getMetadata().getId());
-
-                try {
-                    builder.addId(Path.of(modContainer.getDefinition().split("::")[0].replace('.', '/') + ".class"));
-                } catch (Exception ignored) {
-                }
-            });
-        }
-
-        ArrayList<ModContainer> tamperedMods = new ArrayList<>(0);
-
-        for (Map.Entry<String, EntrypointBuilder> entry : containers.entrySet()) {
-            EntrypointBuilder builder = entry.getValue();
-            String modid = entry.getKey();
-
-            //TODO improve detection checks
-            if (!builder.getMixins().isEmpty()) {
-                if (!(builder.getIcon().contains(modid) || builder.hasMixinsWithId(modid)) && !(builder.getName().toLowerCase().replace(" ", "").equals(modid) || builder.getName().toLowerCase().replace(" ", "-").equals(modid) || builder.getName().toLowerCase().replace(" ", "_").equals(modid))) {
-                    if (!builder.hasLibraryBadge()) {
-                        tamperedMods.add(builder.getContainer());
-                    }
-                }
+        for (Map.Entry<ModEntry, Object> mapEntry : map.entrySet()) {
+            if (mapEntry.getValue() instanceof LinkedHashMap<?, ?> linkedHashMap && !linkedHashMap.isEmpty()) {
+                jsonReadyMap.put(
+                        mapEntry.getKey().getId() + " " + mapEntry.getKey().getHash(),
+                        toJsonMap((LinkedHashMap<ModEntry, Object>) linkedHashMap)
+                );
+            } else {
+                jsonReadyMap.put(mapEntry.getKey().getId(), mapEntry.getKey().getHash());
             }
         }
 
-        if (!tamperedMods.isEmpty()) {
-            throw new TamperingException(tamperedMods);
-        }
+        return jsonReadyMap;
+    }
+
+    public static String toJson(LinkedHashMap<ModEntry, Object> map) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(toJsonMap(map));
     }
 
     public static LinkedHashMap<ModEntry, Object> getModsList() {
@@ -147,7 +51,7 @@ public class Utils {
     }
 
 
-    public static LinkedHashMap<ModEntry, Object> getChildren(ModContainer entry) {
+    private static LinkedHashMap<ModEntry, Object> getChildren(ModContainer entry) {
         LinkedHashMap<ModEntry, Object> result = new LinkedHashMap<>();
 
         if (entry.getContainedMods().isEmpty()) return result;
@@ -185,7 +89,7 @@ public class Utils {
         }
     }
 
-    public static String bytesToHex(byte[] bytes) {
+    private static String bytesToHex(byte[] bytes) {
         StringBuilder hexString = new StringBuilder(2 * bytes.length);
         for (byte b : bytes) {
             hexString.append(String.format("%02x", b));

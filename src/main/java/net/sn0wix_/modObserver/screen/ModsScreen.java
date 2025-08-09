@@ -10,7 +10,6 @@ import net.sn0wix_.modObserver.ModObserver;
 import net.sn0wix_.modObserver.compat.ModMenuCompat;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ModsScreen extends Screen {
@@ -25,7 +24,7 @@ public class ModsScreen extends Screen {
     }
 
     public ModsScreen(List<Container> detectedOn) {
-        this(Text.translatable("screen." + ModObserver.MOD_ID + ".kick"), detectedOn);
+        this(Text.translatable("screen.mod_observer.kick"), detectedOn);
     }
 
     protected void init() {
@@ -39,7 +38,7 @@ public class ModsScreen extends Screen {
     protected void initHeader() {
         DirectionalLayoutWidget column = DirectionalLayoutWidget.vertical().spacing(10);
         column.add(new TextWidget(this.width, 9, this.title, this.textRenderer));
-        column.add(new TextWidget(this.width, 9, Text.translatable("text." + ModObserver.MOD_ID + ".incompatible_mods"), this.textRenderer));
+        column.add(new TextWidget(this.width, 9, Text.translatable("text.mod_observer.incompatible_mods"), this.textRenderer));
 
         this.layout.addHeader(column);
     }
@@ -75,27 +74,18 @@ public class ModsScreen extends Screen {
         private final String modid;
         private final String issues;
         private final String homepage;
-        private final String icon;
 
-        public Container(net.fabricmc.loader.api.ModContainer modContainer) {
+        public Container(ModContainer modContainer) {
             this(modContainer.getMetadata().getName(), modContainer.getMetadata().getId(),
                     modContainer.getMetadata().getContact().get("issues").orElse(""),
-                    modContainer.getMetadata().getContact().get("homepage").orElse(""),
-                    modContainer.getMetadata().getIconPath(32).orElse(""));
+                    modContainer.getMetadata().getContact().get("homepage").orElse(""));
         }
 
-        public Container(String name, String modid, String issues, String homepage, String icon) {
+        public Container(String name, String modid, String issues, String homepage) {
             this.name = name;
             this.modid = modid;
             this.issues = issues;
             this.homepage = homepage;
-            this.icon = icon;
-        }
-
-        public static List<Container> cast(List<ModContainer> list) {
-            List<Container> containers = new ArrayList<>(list.size());
-            list.forEach(entry -> containers.add(new Container(entry)));
-            return containers;
         }
 
         public String getName() {
@@ -112,14 +102,6 @@ public class ModsScreen extends Screen {
 
         public URI getHomepage() {
             return homepage.isEmpty() ? URI.create("") : URI.create(homepage);
-        }
-
-        public boolean hasIcon() {
-            return !icon.isEmpty();
-        }
-
-        public String getIconPath() {
-            return icon;
         }
     }
 }

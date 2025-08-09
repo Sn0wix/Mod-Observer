@@ -101,14 +101,6 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            /*System.out.println("asdfasdf");
-            boolean bl = name.mouseClicked(mouseX, mouseY, button);
-            System.out.println(bl);*/
-            return super.mouseClicked(mouseX, mouseY, button);
-        }
-
-        @Override
         public List<? extends Selectable> selectableChildren() {
             return List.of(new Selectable() {
                 @Override

@@ -1,9 +1,5 @@
 package net.sn0wix_.modObserverPlugin.commands;
 
-import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
-import net.sn0wix_.modObserverPlugin.Util;
-import net.sn0wix_.modObserverPlugin.config.Config;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 import java.util.*;

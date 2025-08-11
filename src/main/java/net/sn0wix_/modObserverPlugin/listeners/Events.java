@@ -1,7 +1,7 @@
 package net.sn0wix_.modObserverPlugin.listeners;
 
 import io.papermc.paper.event.connection.PlayerConnectionValidateLoginEvent;
-import net.kyori.adventure.text.Component;
+import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.players.Connections;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,15 +15,15 @@ public class Events implements Listener {
             Connections.Connection connection = Connections.get(event.getConnection());
 
             if (!connection.hasSentPacket()) {
-                event.kickMessage(Component.text("test"));
+                event.kickMessage(Config.getModObserverRequiredMessage());
             } else if (!connection.isApproved()) {
-                event.kickMessage(connection.getKickMessage());
+                //event.kickMessage(connection.getKickMessage());
             }
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onJoin(PlayerJoinEvent event) {
+    public void onJoin(PlayerJoinEvent event)  {
         Connections.update();
     }
 

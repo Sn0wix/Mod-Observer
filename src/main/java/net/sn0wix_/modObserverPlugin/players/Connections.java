@@ -3,7 +3,7 @@ package net.sn0wix_.modObserverPlugin.players;
 import com.google.common.collect.ImmutableList;
 import io.papermc.paper.connection.PlayerConnection;
 import net.kyori.adventure.text.Component;
-import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
+import net.sn0wix_.modObserverPlugin.ModObserver;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,7 +16,7 @@ public class Connections {
     private static final ArrayList<Connection> CONNECTIONS = new ArrayList<>();
 
     public static void update() {
-        ImmutableList.copyOf(ModObserverPlugin.getInstance().getServer().getOnlinePlayers()).forEach(onlinePlayer ->
+        ImmutableList.copyOf(ModObserver.getInstance().getServer().getOnlinePlayers()).forEach(onlinePlayer ->
                 CONNECTIONS.removeIf(connection -> connection.equals(onlinePlayer.getConnection())));
     }
 

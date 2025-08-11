@@ -1,5 +1,6 @@
 package net.sn0wix_.modObserverPlugin;
 
+import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.listeners.Events;
 import net.sn0wix_.modObserverPlugin.networking.PacketHandler;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -10,7 +11,7 @@ import java.util.logging.Logger;
 
 //TODO remove . files from git history
 //TODO test event.getPlayer().getConnection().reenterConfiguration();
-public final class ModObserverPlugin extends JavaPlugin {
+public final class ModObserver extends JavaPlugin {
 
     /*https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Minecraft_Forge_Handshake
      * Forge handshake emulation - config enabled
@@ -33,10 +34,15 @@ public final class ModObserverPlugin extends JavaPlugin {
         instance = this;
         LOGGER = getLogger();
 
+        //Config
+        saveDefaultConfig();
+        Config.init(getConfig());
+
         //Registering stuff
         getServer().getPluginManager().registerEvents(new Events(), this);
         getServer().getMessenger().registerIncomingPluginChannel(this, "mod_observer:mods", new PacketHandler());
 
+        LOGGER.info("ModObserver initialized!");
         /*//Initialize logger
         LOGGER = getLogger();
         LOGGER.info("----------------ModObserver----------------");

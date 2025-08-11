@@ -1,7 +1,8 @@
 package net.sn0wix_.modObserverPlugin.networking;
 
 import io.papermc.paper.connection.PlayerConnection;
-import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
+import net.sn0wix_.modObserverPlugin.ModObserver;
+import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.players.Connections;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -16,13 +17,13 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 public class PacketHandler implements PluginMessageListener {
-    public static final String MODS_CHANNEL = ModObserverPlugin.MOD_ID + ":mods";
+    public static final String MODS_CHANNEL = ModObserver.MOD_ID + ":mods";
 
     @Override
     public void onPluginMessageReceived(@NotNull String channel, @NotNull PlayerConnection connection, byte @NotNull [] message) {
         if (!channel.equals(MODS_CHANNEL)) return;
         if (message.length == 0) {
-            ModObserverPlugin.LOGGER.warning("Mod packet from " + connection.getClientAddress() + " is empty!");
+            ModObserver.LOGGER.warning("Mod packet from " + connection.getClientAddress() + " is empty!");
             return;
         }
 
@@ -45,11 +46,11 @@ public class PacketHandler implements PluginMessageListener {
             }
 
             //Mod checking
-            //ModObserverPlugin.LOGGER.info(new String(jsonData));
             Connections.setSentPacket(connection);
+
         } catch (Exception e) {
-            ModObserverPlugin.LOGGER.severe("There was an error while decoding packet from " + connection.getClientAddress());
-            ModObserverPlugin.LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            ModObserver.LOGGER.severe("There was an error while decoding packet from " + connection.getClientAddress());
+            ModObserver.LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
     }
 
@@ -74,6 +75,6 @@ public class PacketHandler implements PluginMessageListener {
 
     @Override
     public void onPluginMessageReceived(@NotNull String channel, @NotNull Player player, byte @NotNull [] message) {
-        ModObserverPlugin.LOGGER.warning("Received mod packet from " + player.getName() + " without requesting it!\n" + player.getName() + " may be using cracked version of ModObserver!");
+        ModObserver.LOGGER.warning("Received mod packet from " + player.getName() + " without requesting it!\n" + player.getName() + " may be using cracked version of ModObserver!");
     }
 }

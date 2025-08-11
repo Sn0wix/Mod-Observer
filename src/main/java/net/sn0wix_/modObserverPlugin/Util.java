@@ -1,6 +1,6 @@
 package net.sn0wix_.modObserverPlugin;
 
-import net.sn0wix_.modObserverPlugin.config.Config;
+import net.sn0wix_.modObserverPlugin.config.ConfigOld;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -19,12 +19,12 @@ public class Util {
     }
 
     public static boolean checkPlayer(String playerName, String[] modids, boolean kick) {
-        if (Config.IGNORED_PLAYERS.contains(playerName)) return true;
+        if (ConfigOld.IGNORED_PLAYERS.contains(playerName)) return true;
         if (modids.length == 0) return false;
         if (!getNonApprovedMods(modids).isEmpty()) {
             if (kick) {
                 Objects.requireNonNull(Bukkit.getPlayerExact(playerName))
-                        .kickPlayer(Config.PROHIBITED_MODS_FOUND_MESSAGE.replace("<$MODS$>", Util.getNonApprovedMods(modids).toString()));
+                        .kickPlayer(ConfigOld.PROHIBITED_MODS_FOUND_MESSAGE.replace("<$MODS$>", Util.getNonApprovedMods(modids).toString()));
             }
             return false;
         }
@@ -32,7 +32,7 @@ public class Util {
         if (!getMissingRequiredMods(modids).isEmpty()) {
             if (kick) {
                 Objects.requireNonNull(Bukkit.getPlayerExact(playerName))
-                        .kickPlayer(Config.REQUIRED_MODS_MESSAGE.replace("<$MODS$>", Util.getMissingRequiredMods(modids).toString()));
+                        .kickPlayer(ConfigOld.REQUIRED_MODS_MESSAGE.replace("<$MODS$>", Util.getMissingRequiredMods(modids).toString()));
             }
             return false;
         }
@@ -59,7 +59,7 @@ public class Util {
 
     public static boolean checkForSusActivity(String playerName, byte[] modids) {
         if (modids.length == 0) {
-            ModObserverPlugin.LOGGER.info("Suspicious activity from " + playerName + ". When asked for mods, the response was empty. Kicking the player.");
+            ModObserver.LOGGER.info("Suspicious activity from " + playerName + ". When asked for mods, the response was empty. Kicking the player.");
             return true;
         }
 
@@ -71,15 +71,15 @@ public class Util {
     public static ArrayList<String> getNonApprovedMods(String[] modids) {
         ArrayList<String> notApprovedMods = new ArrayList<>();
 
-        if (Config.MODE.equals(Config.Mode.WHITELIST)) {
+        if (ConfigOld.MODE.equals(ConfigOld.Mode.WHITELIST)) {
             for (String modid : modids) {
-                if (!Config.WHITELISTED_MODS.contains(modid)) {
+                if (!ConfigOld.WHITELISTED_MODS.contains(modid)) {
                     notApprovedMods.add(modid);
                 }
             }
-        } else if (Config.MODE.equals(Config.Mode.BLACKLIST)) {
+        } else if (ConfigOld.MODE.equals(ConfigOld.Mode.BLACKLIST)) {
             for (String modid : modids) {
-                if (Config.BLACKLISTED_MODS.contains(modid)) {
+                if (ConfigOld.BLACKLISTED_MODS.contains(modid)) {
                     notApprovedMods.add(modid);
                 }
             }
@@ -89,7 +89,7 @@ public class Util {
     }
 
     public static ArrayList<String> getMissingRequiredMods(String[] modids) {
-        ArrayList<String> missingRequiredMods = new ArrayList<>(List.copyOf(Config.REQUIRED_MODS));
+        ArrayList<String> missingRequiredMods = new ArrayList<>(List.copyOf(ConfigOld.REQUIRED_MODS));
         missingRequiredMods.removeAll(List.of(modids));
         return missingRequiredMods;
     }

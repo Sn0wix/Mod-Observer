@@ -1,22 +1,29 @@
 package net.sn0wix_.modObserverPlugin.players;
 
-import net.sn0wix_.modObserverPlugin.Util;
+import com.google.common.collect.ImmutableList;
+import io.papermc.paper.connection.PlayerConnection;
+import net.kyori.adventure.text.Component;
+import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
-public class IncomingPlayers {
+public class Connections {
     /**
-     * This array list represents all the players that have not yet joined in and still are in process of mod checking.
+     * All the players represented by their client ip and port that have not yet joined the game and still are in process of mod checking.
      */
-    private static final ArrayList<IncomingPlayer> PLAYERS = new ArrayList<>();
+    private static final ArrayList<Connection> CONNECTIONS = new ArrayList<>();
 
-    public static boolean containsPlayer(String playerName) {
+    public static void update() {
+        ImmutableList.copyOf(ModObserverPlugin.getInstance().getServer().getOnlinePlayers()).forEach(onlinePlayer ->
+                CONNECTIONS.removeIf(connection -> connection.equals(onlinePlayer.getConnection())));
+    }
+
+    public static boolean contains(PlayerConnection connection) {
         AtomicBoolean bl = new AtomicBoolean(false);
-        PLAYERS.forEach(incomingPlayer -> {
-            if (incomingPlayer.getName().equals(playerName)) {
+        CONNECTIONS.forEach(cn -> {
+            if (cn.equals(connection)) {
                 bl.set(true);
             }
         });
@@ -24,14 +31,47 @@ public class IncomingPlayers {
         return bl.get();
     }
 
-    public static void removePlayer(String playerName) {
-        PLAYERS.removeIf(player -> player.getName().equals(playerName));
+    public static boolean containsAndAdd(PlayerConnection connection) {
+        boolean bl = contains(connection);
+        if (!bl) add(connection);
+        return bl;
     }
 
-    public static void addPlayer(String playerName) {
-        PLAYERS.add(new IncomingPlayer(playerName));
+    public static void remove(PlayerConnection connection) {
+        CONNECTIONS.removeIf(cn -> cn.equals(connection));
     }
 
+    public static void add(PlayerConnection connection) {
+        CONNECTIONS.add(new Connection(connection));
+    }
+
+    public static Connection get(PlayerConnection connection) {
+        Iterator<Connection> iterator = CONNECTIONS.stream().iterator();
+
+        while (iterator.hasNext()) {
+            Connection cn = iterator.next();
+
+            if (cn.equals(connection)) {
+                return cn;
+            }
+        }
+
+        return null;
+    }
+
+    public static void approve(PlayerConnection connection) {
+        get(connection).approve();
+    }
+
+    public static String getIpPort(PlayerConnection connection) {
+        return connection.getClientAddress().getHostString() + ":" + connection.getClientAddress().getPort();
+    }
+
+    public static void setSentPacket(PlayerConnection connection) {
+        get(connection).setSentPacket();
+    }
+
+/*
     public static void setApproved(String playerName) {
         PLAYERS.forEach(incomingPlayer -> {
             if (incomingPlayer.getName().equals(playerName)) {
@@ -106,55 +146,49 @@ public class IncomingPlayers {
                 incomingPlayer.addMissingRequiredMod(modid);
             }
         });
-    }
+    }*/
 
 
 
-    public static class IncomingPlayer {
-        private final String name;
+    public static class Connection {
+        private final String ipPort;
         private boolean isApproved = false;
-        private boolean hasSendPacket = false;
-        private final ArrayList<String> notApprovedMods = new ArrayList<>();
-        private final ArrayList<String> missingRequiredMods = new ArrayList<>();
+        private boolean hasSentPacket = false;
 
-        public IncomingPlayer(String name) {
-            this.name = name;
+        public Connection(PlayerConnection connection) {
+            this.ipPort = Connections.getIpPort(connection);
         }
 
-        public void setHasSendPacket(boolean send) {
-            hasSendPacket = send;
+        public String getIpPort() {
+            return ipPort;
         }
 
-        public boolean hasSendPacket() {
-            return hasSendPacket;
+        public void setSentPacket() {
+            hasSentPacket = true;
         }
 
-        public void addMissingRequiredMod(String modid) {
-            missingRequiredMods.add(modid);
-        }
-
-        public List<String> getMissingRequiredMods() {
-            return missingRequiredMods;
-        }
-
-        public void addNonApprovedMod(String modid) {
-            notApprovedMods.add(modid);
-        }
-
-        public List<String> getNonApprovedMods() {
-            return notApprovedMods;
-        }
-
-        public String getName() {
-            return name;
+        public boolean hasSentPacket() {
+            return hasSentPacket;
         }
 
         public boolean isApproved() {
             return isApproved;
         }
 
-        public void setApproved(boolean approved) {
-            isApproved = approved;
+        public void approve() {
+            isApproved = true;
+        }
+
+        public boolean equals(PlayerConnection connection) {
+            return ipPort.equals(Connections.getIpPort(connection));
+        }
+
+        public boolean equals(String ipPort) {
+            return ipPort.equals(getIpPort());
+        }
+
+        public Component getKickMessage() {
+            return Component.empty();
         }
     }
 }

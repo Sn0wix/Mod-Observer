@@ -1,61 +1,34 @@
 package net.sn0wix_.modObserverPlugin.listeners;
 
 import io.papermc.paper.event.connection.PlayerConnectionValidateLoginEvent;
-import io.papermc.paper.event.connection.configuration.PlayerConnectionInitialConfigureEvent;
-import io.papermc.paper.event.player.PlayerServerFullCheckEvent;
-import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
+import net.kyori.adventure.text.Component;
+import net.sn0wix_.modObserverPlugin.players.Connections;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 public class Events implements Listener {
-    /*@EventHandler
-    public void testEvent(PlayerConnectionValidateLoginEvent event) {
-        ModObserverPlugin.LOGGER.info("------------------------------------------------------");
-        ModObserverPlugin.LOGGER.info("PlayerConnectionValidateLoginEvent");
+    @EventHandler(priority = EventPriority.HIGHEST) //MONITOR with connection.disconnect()?
+    public void onConnectionValidate(PlayerConnectionValidateLoginEvent event) {
+        if (event.isAllowed() && Connections.containsAndAdd(event.getConnection())) {
+            Connections.Connection connection = Connections.get(event.getConnection());
+
+            if (!connection.hasSentPacket()) {
+                event.kickMessage(Component.text("test"));
+            } else if (!connection.isApproved()) {
+                event.kickMessage(connection.getKickMessage());
+            }
+        }
     }
 
-    @EventHandler
-    public void testEvent(PlayerConnectionInitialConfigureEvent event) {
-        ModObserverPlugin.LOGGER.info("------------------------------------------------------");
-        ModObserverPlugin.LOGGER.info("PlayerConnectionInitialConfigureEvent");
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onJoin(PlayerJoinEvent event) {
+        Connections.update();
     }
 
-    @EventHandler
-    public void testEvent(PlayerServerFullCheckEvent event) {
-        ModObserverPlugin.LOGGER.info("------------------------------------------------------");
-        ModObserverPlugin.LOGGER.info("PlayerServerFullCheckEvent");
-    }*/
 
-    //Lowest priority to keep the join message set to an empty string
-    /*@EventHandler(priority = EventPriority.LOWEST)
-    public void join(PlayerJoinEvent event) {
-        if (!Util.checkIncomingPlayer(event.getPlayer())) {
-            event.joinMessage(Component.empty());
-        } else {
-            IncomingPlayers.removePlayer(event.getPlayer().getName());
-        }
-    }*/
-
-
-    /*@EventHandler
-    public void login(PlayerLoginEvent event) {
-        IncomingPlayers.addPlayer(event.getConnection().getProfile().getName());
-
-        if (Config.IGNORED_PLAYERS.contains(event.getConnection().getProfile().getName())) {
-            IncomingPlayers.setApproved(event.getConnection().getProfile().getName());
-        }
-    }*/
-
-    /*@EventHandler(priority = EventPriority.LOWEST)
-    public void quit(PlayerQuitEvent event) {
-        if (IncomingPlayers.containsPlayer(event.getPlayer().getName())) {
-            IncomingPlayers.removePlayer(event.getPlayer().getName());
-            event.quitMessage(Component.empty());
-        }
-    }*/
-
-    /*
-      ------------------------------------------------------
+      /*------------------------------------------------------
       PlayerHandshakeEvent
       ------------------------------------------------------
       AsyncPlayerPreLoginEvent
@@ -88,4 +61,5 @@ public class Events implements Listener {
       PlayerChannelEvent
       fabric-screen-handler-api-v1:open_screen
     */
+
 }

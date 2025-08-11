@@ -1,23 +1,15 @@
 package net.sn0wix_.modObserverPlugin;
 
 import net.sn0wix_.modObserverPlugin.config.Config;
-import net.sn0wix_.modObserverPlugin.players.IncomingPlayers;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class Util {
-    public static List<String> getAllOnlinePlayers() {
-        ArrayList<String> players = new ArrayList<>();
-        Bukkit.getOnlinePlayers().forEach(player -> players.add(player.getName()));
-        return players;
-    }
-
     public static boolean checkIfOnline(String playername, CommandSender messenger) {
         if (Bukkit.getPlayerExact(playername) == null) {
             messenger.sendMessage(ChatColor.RED + playername + " is not online!");
@@ -48,7 +40,7 @@ public class Util {
         return true;
     }
 
-    public static boolean checkIncomingPlayer(Player player) {
+    /*public static boolean checkIncomingPlayer(Player player) {
         if (!IncomingPlayers.isApproved(player.getName())) {
             if (!IncomingPlayers.hasSendPacket(player.getName())) {
                 player.kickPlayer(Config.MOD_OBSERVER_REQUIRED_MESSAGE);
@@ -63,7 +55,7 @@ public class Util {
         }
 
         return true;
-    }
+    }*/
 
     public static boolean checkForSusActivity(String playerName, byte[] modids) {
         if (modids.length == 0) {

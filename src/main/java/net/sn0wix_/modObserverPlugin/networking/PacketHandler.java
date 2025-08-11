@@ -2,6 +2,7 @@ package net.sn0wix_.modObserverPlugin.networking;
 
 import io.papermc.paper.connection.PlayerConnection;
 import net.sn0wix_.modObserverPlugin.ModObserverPlugin;
+import net.sn0wix_.modObserverPlugin.players.Connections;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,7 @@ public class PacketHandler implements PluginMessageListener {
             return;
         }
 
+        //Packet decoding
         try {
             int compressedLength = message.length - 32;
             byte[] compressedData = new byte[compressedLength];
@@ -42,7 +44,9 @@ public class PacketHandler implements PluginMessageListener {
                 throw new RuntimeException("Hash verification failed! Provided hash: " + new String(hash) + " Calculated hash: " + new String(computedHash));
             }
 
-            ModObserverPlugin.LOGGER.info(new String(jsonData));
+            //Mod checking
+            //ModObserverPlugin.LOGGER.info(new String(jsonData));
+            Connections.setSentPacket(connection);
         } catch (Exception e) {
             ModObserverPlugin.LOGGER.severe("There was an error while decoding packet from " + connection.getClientAddress());
             ModObserverPlugin.LOGGER.log(Level.SEVERE, e.getMessage(), e);

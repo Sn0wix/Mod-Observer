@@ -1,23 +1,27 @@
-package net.sn0wix_.modObserverPlugin.players;
+package net.sn0wix_.modObserverPlugin.utils;
 
 import com.google.common.collect.ImmutableList;
 import io.papermc.paper.connection.PlayerConnection;
 import net.kyori.adventure.text.Component;
 import net.sn0wix_.modObserverPlugin.ModObserver;
+import net.sn0wix_.modObserverPlugin.config.Config;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Connections {
     /**
      * All the players represented by their client ip and port that have not yet joined the game and still are in process of mod checking.
      */
-    private static final ArrayList<Connection> CONNECTIONS = new ArrayList<>();
+    private static final List<Connection> CONNECTIONS = new CopyOnWriteArrayList<>(); //Thread safe list
 
     public static void update() {
-        ImmutableList.copyOf(ModObserver.getInstance().getServer().getOnlinePlayers()).forEach(onlinePlayer ->
-                CONNECTIONS.removeIf(connection -> connection.equals(onlinePlayer.getConnection())));
+        ImmutableList.copyOf(ModObserver.getInstance().getServer().getOnlinePlayers()).forEach(onlinePlayer -> {
+            CONNECTIONS.removeIf(connection -> connection.equals(onlinePlayer.getConnection()));
+        });
     }
 
     public static boolean contains(PlayerConnection connection) {
@@ -31,9 +35,9 @@ public class Connections {
         return bl.get();
     }
 
-    public static boolean containsAndAdd(PlayerConnection connection) {
+    public static boolean containsAndAdd(PlayerConnection connection, String playerName) {
         boolean bl = contains(connection);
-        if (!bl) add(connection);
+        if (!bl) add(connection, playerName);
         return bl;
     }
 
@@ -41,8 +45,8 @@ public class Connections {
         CONNECTIONS.removeIf(cn -> cn.equals(connection));
     }
 
-    public static void add(PlayerConnection connection) {
-        CONNECTIONS.add(new Connection(connection));
+    public static void add(PlayerConnection connection, String playerName) {
+        CONNECTIONS.add(new Connection(connection, playerName));
     }
 
     public static Connection get(PlayerConnection connection) {
@@ -149,14 +153,27 @@ public class Connections {
     }*/
 
 
-
     public static class Connection {
         private final String ipPort;
         private boolean isApproved = false;
         private boolean hasSentPacket = false;
+        private final String playerName;
+        private boolean canBeChecked = false;
 
-        public Connection(PlayerConnection connection) {
+        public Connection(@NotNull PlayerConnection connection, @NotNull String playerName) {
             this.ipPort = Connections.getIpPort(connection);
+            this.playerName = playerName;
+        }
+
+        //PlayerConnectionValidateLoginEvent gets fired twice
+        public boolean canBeChecked() {
+            boolean wasChecked = canBeChecked;
+            canBeChecked = true;
+            return wasChecked;
+        }
+
+        public String getPlayerName() {
+            return playerName;
         }
 
         public String getIpPort() {
@@ -172,7 +189,7 @@ public class Connections {
         }
 
         public boolean isApproved() {
-            return isApproved;
+            return isApproved || Config.getIgnoredPlayers().contains(playerName);
         }
 
         public void approve() {

@@ -2,28 +2,42 @@ package net.sn0wix_.modObserverPlugin.listeners;
 
 import io.papermc.paper.event.connection.PlayerConnectionValidateLoginEvent;
 import net.sn0wix_.modObserverPlugin.config.Config;
-import net.sn0wix_.modObserverPlugin.players.Connections;
+import net.sn0wix_.modObserverPlugin.utils.Connections;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 public class Events implements Listener {
-    @EventHandler(priority = EventPriority.HIGHEST) //MONITOR with connection.disconnect()?
-    public void onConnectionValidate(PlayerConnectionValidateLoginEvent event) {
-        if (event.isAllowed() && Connections.containsAndAdd(event.getConnection())) {
-            Connections.Connection connection = Connections.get(event.getConnection());
-
-            if (!connection.hasSentPacket()) {
-                event.kickMessage(Config.getModObserverRequiredMessage());
-            } else if (!connection.isApproved()) {
-                //event.kickMessage(connection.getKickMessage());
-            }
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onAsyncPreLogin(AsyncPlayerPreLoginEvent event) {
+        if (event.getLoginResult().equals(AsyncPlayerPreLoginEvent.Result.ALLOWED)) {
+            Connections.add(event.getConnection(), event.getPlayerProfile().getName());
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onJoin(PlayerJoinEvent event)  {
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onConnectionValidate(PlayerConnectionValidateLoginEvent event) {
+        if (event.isAllowed() && Connections.get(event.getConnection()).canBeChecked()) {
+            Connections.Connection connection = Connections.get(event.getConnection());
+
+            if (!connection.isApproved()) {
+                if (!connection.hasSentPacket()) {
+                    event.kickMessage(Config.getModObserverRequiredMessage());
+                    Connections.remove(event.getConnection());
+                } else {
+                    //event.kickMessage(connection.getKickMessage());
+                    //Connections.remove(event.getConnection());
+                }
+            }
+        } else if (!event.isAllowed()) {
+            Connections.remove(event.getConnection());
+        }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
         Connections.update();
     }
 

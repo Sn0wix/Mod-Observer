@@ -1,6 +1,8 @@
 package net.sn0wix_.modObserverPlugin;
 
+import net.sn0wix_.modObserverPlugin.commands.ConfigurationCommand;
 import net.sn0wix_.modObserverPlugin.config.Config;
+import net.sn0wix_.modObserverPlugin.config.JsonLoader;
 import net.sn0wix_.modObserverPlugin.listeners.Events;
 import net.sn0wix_.modObserverPlugin.networking.PacketHandler;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -25,6 +27,7 @@ public final class ModObserver extends JavaPlugin {
      * */
     private static Plugin instance;
     public static Logger LOGGER;
+    @Deprecated
     public static FileConfiguration CONFIG;
     public static final String MOD_ID = "mod_observer";
 
@@ -34,13 +37,27 @@ public final class ModObserver extends JavaPlugin {
         instance = this;
         LOGGER = getLogger();
 
-        //Config
+        //Configs
         saveDefaultConfig();
         Config.init(getConfig());
+        saveConfig();
+
+        JsonLoader.init();
+
+        LOGGER.info(ModObserver.getInstance().getConfig().getCurrentPath());
 
         //Registering stuff
         getServer().getPluginManager().registerEvents(new Events(), this);
         getServer().getMessenger().registerIncomingPluginChannel(this, "mod_observer:mods", new PacketHandler());
+
+        if (Config.isCommandInterfaceAllowed()) {
+            try {
+                LOGGER.info("Registering command interface...");
+                getCommand("modObserver").setExecutor(new ConfigurationCommand());
+            } catch (NullPointerException e) {
+                LOGGER.warning("Could not register command interface. Configuration must be done directly in the config file.");
+            }
+        }
 
         LOGGER.info("ModObserver initialized!");
         /*//Initialize logger

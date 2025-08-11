@@ -1,5 +1,7 @@
 package net.sn0wix_.modObserverPlugin.commands;
 
+import net.sn0wix_.modObserverPlugin.ModObserver;
+import net.sn0wix_.modObserverPlugin.config.Config;
 import org.bukkit.ChatColor;
 
 import java.util.*;
@@ -10,16 +12,15 @@ public class ModObserverCommandArgs {
 
     //Help
     public static final ModObserverCommandArg HELP = registerCommandArg(new ModObserverCommandArg("help", ((sender, command, label, args) ->
-            sender.sendMessage("ModObserver is a plugin that controls, which mods are the players using." +
-                    "\nYou can configure this plugin with command /modobserver" +
-                    "\nIf you are configuring in game, it will provide you with all the possible commands." +
-                    "\nAll these commands should be self-explanatory. Here are some, that might not be:\n" +
-                    ChatColor.BOLD + "verificationTimer: " + ChatColor.RESET + "explained in the help message of this command.\n" +
+            sender.sendMessage("""
+                            ModObserver lets you control which mods are used by the players.
+                            It is recommended to use the config file located in plugins/ModObserver/config.yml instead of commands
+                            /modObserver :
+                            """,
                     ChatColor.BOLD + "ignoredPlayers: " + ChatColor.RESET + "Players in this list are not checked for mods, therefore they don't need ModObserver mod installed.\n" +
-                    ChatColor.BOLD + "mode: " + ChatColor.RESET + "Switches between blacklist and whitelist.\n" +
-                    ChatColor.BOLD + "checkPlayer: " + ChatColor.RESET + "Allows you to check players by command. Option \"kickIf\" kicks the player, if the check is not successful, and \"dontKickIf\" does the opposite.\n" +
-                    ChatColor.BOLD + "addAll" + ChatColor.RESET + " and " + ChatColor.BOLD +"removeAll: " + ChatColor.RESET + "these two sub-commands are used when you want to add or remove all entries(specified after the command) from or to a list.\n" +
-                    "\"removeAll\" is not the same as \"clear\". Example: whitelist addAll/removeAll PlayerName This will add or remove all the mods provided by PlayerName"))));
+                    ChatColor.BOLD + "mode: " + ChatColor.RESET + "Switches between blacklist and whitelist.\n",
+                    ChatColor.BOLD + "config reload: " + ChatColor.RESET + "Reloads the configuration file.\n",
+                    ChatColor.BOLD + "help: " + ChatColor.RESET + "Shows this message.\n"))));
 
     //Check player
     /*public static final ModObserverCommandArg CHECK_PLAYER = registerCommandArg(new ModObserverCommandArg("checkPlayer", List.of(
@@ -74,40 +75,35 @@ public class ModObserverCommandArgs {
                     }
                 }, () -> sender.sendMessage(ChatColor.RED + "No ModObserver installation found on " + args[0])));
             }, (commandSender, command, label, argsAfterLastCommand) -> Util.getAllOnlinePlayers())),
-            (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "Usage: /modObserver checkPlayer kickIf\\dontKickIf <playername>")));
+            (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "Usage: /modObserver checkPlayer kickIf\\dontKickIf <playername>")));*/
 
     //Config
     public static final ModObserverCommandArg CONFIG = registerCommandArg(new ModObserverCommandArg("config", List.of(
             new ModObserverCommandArg("reload", (sender, command, label, args) -> {
-                Config.loadValues(ModObserverPlugin.CONFIG);
+                ModObserver.getInstance().reloadConfig();
+                Config.init(ModObserver.getInstance().getConfig());
                 sender.sendMessage("Config was reloaded.");
-            }),
-            new ConfirmCommandArg("reset", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD +
-                    "Are you sure you want to reset config settings?\nProceed with by repeating the command.",
-                    (sender, command, label, args) -> {
-                        Config.loadDefaults(ModObserverPlugin.CONFIG);
-                        sender.sendMessage("Config was reseted.");
-                    })
-    ), ((sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "Usage: /modObserver config reload\\save\\reset"))));
+            })
+    ), ((sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "Usage: /modObserver config reload"))));
 
 
     //Mode
     public static final ModObserverCommandArg MODE = registerCommandArg(new ModObserverCommandArg("mode", List.of(
             new ModObserverCommandArg("switch", List.of(
                     new ModObserverCommandArg("blacklist", (sender, command, label, args) -> {
-                        Config.MODE = Config.Mode.BLACKLIST;
+                        Config.setMode(Config.Mode.BLACKLIST);
                         sender.sendMessage("Current mode was set to: blacklist");
                     }),
                     new ModObserverCommandArg("whitelist", (sender, command, label, args) -> {
-                        Config.MODE = Config.Mode.WHITELIST;
+                        Config.setMode(Config.Mode.WHITELIST);
                         sender.sendMessage("Current mode was set to: whitelist");
                     })
             ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "Use blacklist or whitelist.")),
-            new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Current mode is: " + Config.MODE.getName()))
+            new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Current mode is: " + Config.getMode().getName()))
     ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "Usage: /modObserver mode show\\switch whitelist\\blacklist")));
 
 
-    //Whitelist
+    /*//Whitelist
     public static final ModObserverCommandArg WHITELIST = registerCommandArg(new ModObserverCommandArg("whitelist", List.of(
             new ModObserverCommandArg("add", (sender, command, label, args) -> {
                 if (args.length > 0) {
@@ -281,52 +277,41 @@ public class ModObserverCommandArgs {
                     }));
                 }
             }, (commandSender, command, label, argsAfterLastCommand) -> Util.getAllOnlinePlayers())
-    ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver requiredMods show\\add modid modid ...\\remove modid modid ...\\clear\\addAll <playerName>\\removeAll <playername>")));
+    ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver requiredMods show\\add modid modid ...\\remove modid modid ...\\clear\\addAll <playerName>\\removeAll <playername>")));*/
 
     //Ignored players
     public static final ModObserverCommandArg IGNORED_PLAYERS = registerCommandArg(new ModObserverCommandArg("ignoredPlayers", List.of(
             new ModObserverCommandArg("add", (sender, command, label, args) -> {
                 if (args.length > 0) {
-                    Config.IGNORED_PLAYERS.removeAll(List.of(args));
-                    Config.IGNORED_PLAYERS.addAll(List.of(args));
+                    List<String> list = Config.getIgnoredPlayers();
+                    list.removeAll(List.of(args));
+                    list.addAll(List.of(args));
+                    Config.setIgnoredPlayers(list);
+
                     sender.sendMessage("Added " + Arrays.toString(args) + " to Ignored players list.");
                 } else {
                     sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"add\"");
                 }
-            }, (commandSender, command, label, argsAfterLastCommand) -> Util.getAllOnlinePlayers()),
+            }),
             new ModObserverCommandArg("remove", (sender, command, label, args) -> {
                 if (args.length > 0) {
-                    Config.IGNORED_PLAYERS.removeAll(List.of(args));
+                    List<String> list = Config.getIgnoredPlayers();
+                    list.removeAll(List.of(args));
+                    Config.setIgnoredPlayers(list);
+
                     sender.sendMessage("Removed " + Arrays.toString(args) + " from Ignored players list.");
                 } else {
                     sender.sendMessage(ChatColor.RED + "You need to add at least one value after \"remove\"");
                 }
-            }, (commandSender, command, label, argsAfterLastCommand) -> Util.getAllOnlinePlayers()), //add all, clear - yes, no
-            new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Ignored players list: " + Config.IGNORED_PLAYERS)),
-            new ModObserverCommandArg("addAll", (sender, command, label, args) -> {
-                Bukkit.getOnlinePlayers().forEach(player -> {
-                    if (!Config.IGNORED_PLAYERS.contains(player.getName())) {
-                        Config.IGNORED_PLAYERS.add(player.getName());
-                    }
-                });
-
-                sender.sendMessage("Added all online players to Ignored players list.");
             }),
-            new ModObserverCommandArg("removeAll", (sender, command, label, args) -> {
-                Bukkit.getOnlinePlayers().forEach(player -> Config.IGNORED_PLAYERS.remove(player.getName()));
-                sender.sendMessage("Removed all online players from Ignored players list.");
-            }),
+            new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Ignored players list: " + Config.getIgnoredPlayers())),
             new ConfirmCommandArg("clear", 10, ChatColor.DARK_RED + "" + ChatColor.BOLD + "Are you sure you want to clear Ignored players list? All the entries in this list will be removed!\nProceed by repeating the command.",
                     (sender, command, label, args) -> {
-                        Iterator<String> iterator = Config.IGNORED_PLAYERS.listIterator();
-                        while (iterator.hasNext()) {
-                            iterator.next();
-                            iterator.remove();
-                        }
+                        Config.setIgnoredPlayers(List.of());
                         sender.sendMessage("Ignored players list was cleared.");
                     })
     ), (sender, command, label, args) -> sender.sendMessage(ChatColor.RED + "/modObserver ignoredPlayers show\\add playername playername ...\\remove playername playername ...\\addAll\\removeAll\\reset")));
-*/
+
 
     public static ModObserverCommandArg registerCommandArg(ModObserverCommandArg arg) {
         REGISTERED_COMMANDS.add(arg);

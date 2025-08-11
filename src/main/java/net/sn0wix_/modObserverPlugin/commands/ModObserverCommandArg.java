@@ -1,7 +1,5 @@
 package net.sn0wix_.modObserverPlugin.commands;
 
-import net.sn0wix_.modObserverPlugin.ModObserver;
-import net.sn0wix_.modObserverPlugin.config.ConfigOld;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -51,7 +49,6 @@ public class ModObserverCommandArg {
 
     public void execute(CommandSender sender, Command command, String label, String[] argsAfterLastCommand) {
         executor.execute(sender, command, label, argsAfterLastCommand);
-        ConfigOld.saveValues(ModObserver.CONFIG);
     }
 
     public List<String> onTabCompleted(CommandSender commandSender, Command command, String label, String[] argsAfterLastCommand) {

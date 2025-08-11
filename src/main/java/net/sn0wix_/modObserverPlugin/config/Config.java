@@ -9,26 +9,32 @@ import java.util.List;
 import java.util.Objects;
 
 public class Config {
-    private static final String ignoredPlayersKey = "ignoredPlayers";
-    private static final String allowCommandInterfaceKey = "allowCommandInterface";
+    private static final String ignoredPlayersKey = "ignored-players";
+    private static final String allowCommandInterfaceKey = "allow-command-interface";
     private static final String modeKey = "mode";
-    private static final String modObserverRequiredMessageKey = "modObserverRequiredMessage";
+    private static final String modObserverRequiredMessageKey = "modobserver-required-message";
+    private static final String useHashesKey = "use-hashes";
+    private static final String checkNestedModsKey = "check-nested-mods";
     private static FileConfiguration config;
+
+
 
     public static void init(FileConfiguration fileConfiguration) {
         config = fileConfiguration;
+        config.setComments(modeKey, List.of("Check out ModObserver wiki for further information:", "https://github.com/Sn0wix/Mod-Observer/wiki"));
     }
 
 
-    public static List<String> getIgnoredPlayersKey() {
+
+    public static List<String> getIgnoredPlayers() {
         return config.getStringList(ignoredPlayersKey);
     }
 
-    public static boolean getAllowCommandInterfaceKey() {
+    public static boolean isCommandInterfaceAllowed() {
         return config.getBoolean(allowCommandInterfaceKey);
     }
 
-    public Mode getMode() {
+    public static Mode getMode() {
         String loadedValue = config.getString(modeKey);
 
         for (Mode value : Mode.values()) {
@@ -45,22 +51,48 @@ public class Config {
         return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString(modObserverRequiredMessageKey)));
     }
 
+    public static boolean useHashes() {
+        return config.getBoolean(useHashesKey);
+    }
 
+    public static boolean checkNestedMods() {
+        return config.getBoolean(checkNestedModsKey);
+    }
+
+
+
+    public static void setCheckNestedMods(boolean value) {
+        config.set(checkNestedModsKey, value);
+        save();
+    }
+
+    public static void setUseHashes(boolean value) {
+        config.set(useHashesKey, value);
+        save();
+    }
 
     public static void setIgnoredPlayers(List<String> ignoredPlayers) {
         config.set(ignoredPlayersKey, ignoredPlayers);
+        save();
     }
 
     public static void setAllowCommandInterface(boolean allow) {
         config.set(allowCommandInterfaceKey, allow);
+        save();
     }
 
     public static void setMode(Mode mode) {
         config.set(modeKey, mode.getName());
+        save();
     }
 
     public static void setModObserverRequiredMessage(String message) {
         config.set(modObserverRequiredMessageKey, message);
+        save();
+    }
+
+    public static void save() {
+        ModObserver.getInstance().saveConfig();
     }
 
 

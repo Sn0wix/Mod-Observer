@@ -1,4 +1,4 @@
-package net.sn0wix_.modObserverPlugin.players;
+package net.sn0wix_.modObserverPlugin.utils;
 
 import java.util.HashMap;
 

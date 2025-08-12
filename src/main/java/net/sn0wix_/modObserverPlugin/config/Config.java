@@ -16,6 +16,7 @@ public class Config {
     private static final String useHashesKey = "use-hashes";
     private static final String checkNestedModsKey = "check-nested-mods";
     private static final String fabricApiAutodetectKey = "fabric-api-autodetect";
+    private static final String modobserverKickMssageKey = "modobserver-kick-message";
     private static FileConfiguration config;
 
 
@@ -63,8 +64,16 @@ public class Config {
     public static boolean fabricApiAutodetect() {
         return config.getBoolean(fabricApiAutodetectKey);
     }
+    public static Component getModObserverKickMessage() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString(modobserverKickMssageKey)));
+    }
 
 
+
+    public static void setFabricApiAutodetect(String value) {
+        config.set(modobserverKickMssageKey, value);
+        save();
+    }
 
     public static void setFabricApiAutodetect(boolean value) {
         config.set(fabricApiAutodetectKey, value);

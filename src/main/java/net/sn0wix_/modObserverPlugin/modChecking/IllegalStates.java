@@ -2,41 +2,28 @@ package net.sn0wix_.modObserverPlugin.modChecking;
 
 import net.kyori.adventure.text.Component;
 import net.sn0wix_.modObserverPlugin.ModObserver;
+import net.sn0wix_.modObserverPlugin.config.Config;
+import net.sn0wix_.modObserverPlugin.config.JsonLoader;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public enum IllegalStates {
-    INCOMPATIBLE(0),
-    REQUIRED(1),
-    HASH_MISMATCH(2),
-    BAD_CHILDREN(3);
-
-    final int code;
-
-    IllegalStates(int code) {
-        this.code = code;
-    }
+    INCOMPATIBLE,
+    REQUIRED,
+    HASH_MISMATCH,
+    BAD_CHILDREN;
 
     public static final String IDENTIFIER = "$" + ModObserver.MOD_ID + "$";
 
     public static Component createKickMessage(Map<IllegalStates, List<String>> illegalStatesMap) {
-        StringBuilder message = new StringBuilder(IDENTIFIER);
-        illegalStatesMap.forEach((state, modids) -> {
-            if (!modids.isEmpty()) {
-                message.append(state.getCode()).append(":");
-                message.append(modids);
-                message.append(";");
-            }
-        });
+        StringBuilder data = new StringBuilder(IDENTIFIER);
+        Map<IllegalStates, List<String>> filteredMap = illegalStatesMap.entrySet().stream()
+                .filter(e -> e.getValue() != null && !e.getValue().isEmpty())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        return Component.text(message.toString());
-    }
-
-    public int getCode() {
-        return code;
+        data.append(JsonLoader.getGson().toJson(filteredMap));
+        return Config.getModObserverKickMessage().append(Component.text(data.toString()));
     }
 
     public static Map<IllegalStates, List<String>> getMap() {

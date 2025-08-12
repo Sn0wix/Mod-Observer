@@ -91,4 +91,8 @@ public class JsonLoader {
     public static Map<String, Object> loadJsonFromString(String content) {
         return gson.fromJson(content, new TypeToken<Map<String, Object>>() {}.getType());
     }
+
+    public static Gson getGson() {
+        return gson;
+    }
 }

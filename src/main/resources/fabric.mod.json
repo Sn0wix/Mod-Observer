@@ -19,6 +19,9 @@
 			"net.sn0wix_.modObserver.ModObserver"
 		]
 	},
+	"mixins": [
+		"mod_observer.mixins.json"
+	],
 	"depends": {
 		"fabricloader": "*",
 		"minecraft": ">=1.21.4",

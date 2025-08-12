@@ -10,21 +10,20 @@ import net.sn0wix_.modObserver.ModObserver;
 import net.sn0wix_.modObserver.compat.ModMenuCompat;
 
 import java.net.URI;
-import java.util.List;
 
 public class ModsScreen extends Screen {
-    public final List<Container> detectedOn;
     public final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this, 43, 30);
     private ModsListWidget listWidget;
+    private final String jsonData;
 
 
-    public ModsScreen(Text title, List<Container> detectedOn) {
+    public ModsScreen(Text title, String kickJsonData) {
         super(title);
-        this.detectedOn = detectedOn;
+        this.jsonData = kickJsonData;
     }
 
-    public ModsScreen(List<Container> detectedOn) {
-        this(Text.translatable("screen.mod_observer.kick"), detectedOn);
+    public ModsScreen(String kickJsonData) {
+        this(Text.translatable("screen.mod_observer.mods_list"), kickJsonData);
     }
 
     protected void init() {
@@ -38,7 +37,6 @@ public class ModsScreen extends Screen {
     protected void initHeader() {
         DirectionalLayoutWidget column = DirectionalLayoutWidget.vertical().spacing(10);
         column.add(new TextWidget(this.width, 9, this.title, this.textRenderer));
-        column.add(new TextWidget(this.width, 9, Text.translatable("text.mod_observer.incompatible_mods"), this.textRenderer));
 
         this.layout.addHeader(column);
     }

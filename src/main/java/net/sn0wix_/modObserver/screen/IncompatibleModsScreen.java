@@ -7,17 +7,15 @@ import net.minecraft.client.gui.widget.*;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 
-import java.util.List;
-
 public class IncompatibleModsScreen extends Screen {
-    List<ModsScreen.Container> detectedOn;
+    String jsonData;
     Text reason;
     private final DirectionalLayoutWidget grid = DirectionalLayoutWidget.vertical();
 
-    public IncompatibleModsScreen(List<ModsScreen.Container> detectedOn, Text reason) {
+    public IncompatibleModsScreen(Text kickMessage, String jsonData) {
         super(Text.translatable("connect.failed"));
-        this.detectedOn = detectedOn;
-        this.reason = reason;
+        this.jsonData = jsonData;
+        this.reason = kickMessage;
     }
 
     @Override
@@ -27,7 +25,7 @@ public class IncompatibleModsScreen extends Screen {
         this.grid.add(new MultilineTextWidget(reason, this.textRenderer).setMaxWidth(this.width - 50).setCentered(true));
         this.grid.getMainPositioner().margin(2);
 
-        this.grid.add(ButtonWidget.builder(Text.translatable("gui.mod_observer.show_mods"), button -> this.client.setScreen(new ModsScreen(detectedOn)))
+        this.grid.add(ButtonWidget.builder(Text.translatable("gui.mod_observer.show_mods"), button -> this.client.setScreen(new ModsScreen(jsonData)))
                 .dimensions(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20).build());
 
         this.grid.add(ButtonWidget.builder(Text.translatable("gui.toMenu"), button -> client.setScreen(new MultiplayerScreen(new TitleScreen())))

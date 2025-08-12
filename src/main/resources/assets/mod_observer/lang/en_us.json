@@ -4,10 +4,17 @@
   "text.mod_observer.issue_tracker": "Issues",
   "text.mod_observer.homepage": "Homepage",
   "text.mod_observer.discord": "Discord",
-  "text.mod_observer.required_mods": "§cThese mods are required by the server!",
-  "text.mod_observer.incompatible_mods": "§cYou can not use these mods on this server!",
 
-  "screen.mod_observer.kick": "Incompatible mods found",
-  "screen.mod_observer.tampering": "Tampering detected",
+  "text.mod_observer.incompatible": "Incompatible Mods",
+  "tooltip.mod_observer.incompatible": "Incompatible Mods tooltip",
+  "text.mod_observer.required": "Required Mods",
+  "tooltip.mod_observer.required": "Required Mods tooltip",
+  "text.mod_observer.hash_mismatch": "Hash mismatch",
+  "tooltip.mod_observer.hash_mismatch": "Hash mismatch tooltip",
+  "text.mod_observer.bad_children": "Incomplete Nested Mods",
+  "tooltip.mod_observer.bad_children": "Incomplete Nested Mods tooltip",
+
+
+  "screen.mod_observer.mods_list": "Incomplete Mods",
   "gui.mod_observer.show_mods": "Show Mods List"
 }

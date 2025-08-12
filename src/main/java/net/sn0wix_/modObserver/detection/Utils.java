@@ -1,10 +1,10 @@
-package net.sn0wix_.modObserver;
+package net.sn0wix_.modObserver.detection;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.sn0wix_.modObserver.detection.ModEntry;
+import net.sn0wix_.modObserver.ModObserver;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -58,7 +58,7 @@ public class Utils {
 
         entry.getContainedMods().forEach(container -> {
             if (!container.getContainedMods().isEmpty()) {
-                result.put(new ModEntry(container), new LinkedHashMap<>());
+                result.put(new ModEntry(container), getChildren(container));
             } else {
                 result.put(new ModEntry(container), List.of());
             }

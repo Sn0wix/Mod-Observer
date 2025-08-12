@@ -21,6 +21,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.sn0wix_.modObserver.ModObserver;
 import net.sn0wix_.modObserver.compat.ModMenuCompat;
+import net.sn0wix_.modObserver.detection.IllegalStates;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -32,7 +33,7 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
     public ModsListWidget(ModsScreen parent, MinecraftClient client) {
         super(client, parent.width, parent.layout.getContentHeight(), parent.layout.getHeaderHeight(), 20);
 
-        parent.detectedOn.forEach(container -> {
+        /*parent.detectedOn.forEach(container -> {
             int i = client.textRenderer.getWidth(Text.literal(container.getName()));
 
             if (i > this.maxKeyNameLength) {
@@ -40,7 +41,7 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
             }
 
             this.addEntry(new ModEntry(container, parent));
-        });
+        });*/
     }
 
     @Override
@@ -51,6 +52,29 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
     @Override
     protected int getScrollbarX() {
         return this.getX() + this.width / 2 - 340 / 2 + 340 + 10;
+    }
+
+    public class TitleEntry extends Entry {
+        private IllegalStates state;
+
+        public TitleEntry(IllegalStates state) {
+            this.state = state;
+        }
+
+        @Override
+        public List<? extends Selectable> selectableChildren() {
+            return null;
+        }
+
+        @Override
+        public List<? extends Element> children() {
+            return null;
+        }
+
+        @Override
+        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+
+        }
     }
 
     public class ModEntry extends Entry {

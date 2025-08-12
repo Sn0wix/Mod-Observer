@@ -5,7 +5,7 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.sn0wix_.modObserver.ModObserver;
-import net.sn0wix_.modObserver.Utils;
+import net.sn0wix_.modObserver.detection.Utils;
 
 import java.io.ByteArrayOutputStream;
 import java.security.MessageDigest;
@@ -24,6 +24,8 @@ public class ModsPacket implements CustomPayload {
     private void write(PacketByteBuf byteBuf) {
         try {
             byte[] jsonBytes = Utils.getModsJson().getBytes();
+
+            ModObserver.LOGGER.info(new String(jsonBytes));
 
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(jsonBytes);

@@ -1,6 +1,7 @@
 package net.sn0wix_.modObserverPlugin.listeners;
 
 import io.papermc.paper.event.connection.PlayerConnectionValidateLoginEvent;
+import net.sn0wix_.modObserverPlugin.ModObserver;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.utils.Connections;
 import net.sn0wix_.modObserverPlugin.utils.OnlinePlayers;
@@ -10,6 +11,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.logging.Level;
 
 public class Events implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
@@ -40,15 +43,20 @@ public class Events implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        Connections.Connection connection = Connections.get(event.getPlayer().getConnection());
-        OnlinePlayers.add(event.getPlayer(), connection.getRawPacket());
-        connection.onJoin(event.getPlayer());
+        try {
+            Connections.Connection connection = Connections.get(event.getPlayer().getConnection());
+            OnlinePlayers.add(event.getPlayer().getName(), connection.getRawPacket());
+            connection.onJoin(event.getPlayer());
+        }catch (NullPointerException e) {
+            ModObserver.LOGGER.log(Level.WARNING, e.getMessage(), e);
+        }
+
         Connections.update();
     }
 
     @EventHandler
     public void onDisconnect(PlayerQuitEvent event) {
-        OnlinePlayers.remove(event.getPlayer());
+        OnlinePlayers.remove(event.getPlayer().getName());
     }
 
       /*

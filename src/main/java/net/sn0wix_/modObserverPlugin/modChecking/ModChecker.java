@@ -9,7 +9,6 @@ import net.sn0wix_.modObserverPlugin.utils.Connections;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ModChecker {
     private static final Map<ModEntry, Object> whitelist = toModEntryMap(JsonLoader.getWhitelistMap());

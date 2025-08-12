@@ -36,11 +36,31 @@ public class ModChecker {
 
         requiredModifiable.forEach((requiredMod, nested) -> {
             if (!Util.containsEntry(clientMods, requiredMod)) {
+                //Client is missing the mod
                 illegalStatesMap.get(IllegalStates.REQUIRED).add(requiredMod.getId());
             } else if (Config.checkNestedMods() && !checkNested((Map<ModEntry, Object>) nested, (Map<ModEntry, Object>) Util.getValue(clientMods, requiredMod))) {
+                //Nested mods are not okay
                 illegalStatesMap.get(IllegalStates.BAD_CHILDREN).add(requiredMod.getId());
+            } else if (Config.useHashes() && !requiredMod.getHash().isEmpty() && !Util.getEntry(clientMods, requiredMod).getHash().equals(requiredMod.getHash())) {
+                //Hashes are not the same
+                illegalStatesMap.get(IllegalStates.HASH_MISMATCH).add(requiredMod.getId());
             }
         });
+
+
+        //Fabric api auto detect
+        if (Config.fabricApiAutodetect()) {
+            Iterator<ModEntry> iterator = clientMods.keySet().iterator();
+            ModEntry key;
+
+            while (iterator.hasNext()) {
+                key = iterator.next();
+
+                if (isFabricApi(key.getId())) {
+                    iterator.remove();
+                }
+            }
+        }
 
 
         //Final check
@@ -98,7 +118,7 @@ public class ModChecker {
             return true;
         }
 
-        //fabric-[something]-api-v[number]
+        //fabric-[something]-v[number]
         try {
             Integer.parseInt(String.valueOf(modid.charAt(modid.length() - 1)));
         } catch (NumberFormatException ignored) {
@@ -106,7 +126,7 @@ public class ModChecker {
             return false;
         }
 
-        return modid.startsWith("fabric-") && modid.lastIndexOf("-api-v") == modid.length() - 7;
+        return modid.startsWith("fabric-") && modid.lastIndexOf("-v") == modid.length() - 3;
     }
 
 
@@ -123,6 +143,8 @@ public class ModChecker {
                 } catch (IndexOutOfBoundsException ignored) {
                     hash = (String) value;
                 }
+            } else if (value instanceof String s) {
+                hash = s;
             } else {
                 hash = "";
             }

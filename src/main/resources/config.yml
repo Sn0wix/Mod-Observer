@@ -1,4 +1,5 @@
 mode: "whitelist"
+fabric-api-autodetect: false
 use-hashes: false
 check-nested-mods: false
 allow-command-interface: true

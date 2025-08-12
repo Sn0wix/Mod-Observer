@@ -5,6 +5,7 @@ import io.papermc.paper.connection.PlayerConnection;
 import net.kyori.adventure.text.Component;
 import net.sn0wix_.modObserverPlugin.ModObserver;
 import net.sn0wix_.modObserverPlugin.config.Config;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -19,9 +20,8 @@ public class Connections {
     private static final List<Connection> CONNECTIONS = new CopyOnWriteArrayList<>(); //Thread safe list
 
     public static void update() {
-        ImmutableList.copyOf(ModObserver.getInstance().getServer().getOnlinePlayers()).forEach(onlinePlayer -> {
-            CONNECTIONS.removeIf(connection -> connection.equals(onlinePlayer.getConnection()));
-        });
+        ImmutableList.copyOf(ModObserver.getInstance().getServer().getOnlinePlayers()).forEach(onlinePlayer ->
+                CONNECTIONS.removeIf(connection -> connection.equals(onlinePlayer.getConnection())));
     }
 
     public static boolean contains(PlayerConnection connection) {
@@ -33,12 +33,6 @@ public class Connections {
         });
 
         return bl.get();
-    }
-
-    public static boolean containsAndAdd(PlayerConnection connection, String playerName) {
-        boolean bl = contains(connection);
-        if (!bl) add(connection, playerName);
-        return bl;
     }
 
     public static void remove(PlayerConnection connection) {
@@ -63,8 +57,8 @@ public class Connections {
         return null;
     }
 
-    public static void approve(PlayerConnection connection) {
-        get(connection).approve();
+    public static void approve(PlayerConnection connection, boolean bl) {
+        get(connection).approve(bl);
     }
 
     public static String getIpPort(PlayerConnection connection) {
@@ -159,6 +153,7 @@ public class Connections {
         private boolean hasSentPacket = false;
         private final String playerName;
         private boolean canBeChecked = false;
+        private OnJoin onJoin = null;
 
         public Connection(@NotNull PlayerConnection connection, @NotNull String playerName) {
             this.ipPort = Connections.getIpPort(connection);
@@ -170,6 +165,16 @@ public class Connections {
             boolean wasChecked = canBeChecked;
             canBeChecked = true;
             return wasChecked;
+        }
+
+        public void setOnJoin(OnJoin runnable) {
+            onJoin = runnable;
+        }
+
+        public void onJoin(Player player) {
+            if (onJoin != null) {
+                onJoin.execute(player);
+            }
         }
 
         public String getPlayerName() {
@@ -192,8 +197,8 @@ public class Connections {
             return isApproved || Config.getIgnoredPlayers().contains(playerName);
         }
 
-        public void approve() {
-            isApproved = true;
+        public void approve(boolean bl) {
+            isApproved = bl;
         }
 
         public boolean equals(PlayerConnection connection) {
@@ -206,6 +211,11 @@ public class Connections {
 
         public Component getKickMessage() {
             return Component.empty();
+        }
+
+        @FunctionalInterface
+        public interface OnJoin {
+            void execute(Player player);
         }
     }
 }

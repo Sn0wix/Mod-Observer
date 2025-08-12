@@ -44,8 +44,6 @@ public final class ModObserver extends JavaPlugin {
 
         JsonLoader.init();
 
-        LOGGER.info(ModObserver.getInstance().getConfig().getCurrentPath());
-
         //Registering stuff
         getServer().getPluginManager().registerEvents(new Events(), this);
         getServer().getMessenger().registerIncomingPluginChannel(this, "mod_observer:mods", new PacketHandler());

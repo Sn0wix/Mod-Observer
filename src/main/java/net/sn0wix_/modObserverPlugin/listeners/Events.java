@@ -27,8 +27,8 @@ public class Events implements Listener {
                     event.kickMessage(Config.getModObserverRequiredMessage());
                     Connections.remove(event.getConnection());
                 } else {
-                    //event.kickMessage(connection.getKickMessage());
-                    //Connections.remove(event.getConnection());
+                    event.kickMessage(connection.getKickMessage());
+                    Connections.remove(event.getConnection());
                 }
             }
         } else if (!event.isAllowed()) {
@@ -38,6 +38,7 @@ public class Events implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        Connections.get(event.getPlayer().getConnection()).onJoin(event.getPlayer());
         Connections.update();
     }
 

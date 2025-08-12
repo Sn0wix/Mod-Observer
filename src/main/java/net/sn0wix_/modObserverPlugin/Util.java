@@ -1,15 +1,52 @@
 package net.sn0wix_.modObserverPlugin;
 
 import net.sn0wix_.modObserverPlugin.config.ConfigOld;
+import net.sn0wix_.modObserverPlugin.modChecking.ModEntry;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Util {
+    public static boolean containsEntry(Map<ModEntry, Object> map, ModEntry entry) {
+        AtomicBoolean bl = new AtomicBoolean(false);
+        map.keySet().forEach(key -> {
+            if (key.equals(entry)) {
+                bl.set(true);
+            }
+        });
+
+        return bl.get();
+    }
+
+    public static ModEntry getEntry(Map<ModEntry, Object> map, ModEntry entry) {
+        AtomicReference<ModEntry> returnValue = new AtomicReference<>();
+        map.keySet().forEach(key -> {
+            if (key.equals(entry)) {
+                returnValue.set(key);
+            }
+        });
+
+        return returnValue.get();
+    }
+
+    public static Object getValue(Map<ModEntry, Object> map, ModEntry entry) {
+        AtomicReference<Object> returnValue = new AtomicReference<>();
+        map.forEach((key, value) -> {
+            if (key.equals(entry)) {
+                returnValue.set(value);
+            }
+        });
+
+        return returnValue.get();
+    }
+
     public static boolean checkIfOnline(String playername, CommandSender messenger) {
         if (Bukkit.getPlayerExact(playername) == null) {
             messenger.sendMessage(ChatColor.RED + playername + " is not online!");

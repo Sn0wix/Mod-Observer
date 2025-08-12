@@ -1,33 +1,17 @@
 package net.sn0wix_.modObserverPlugin.modChecking;
 
-import org.jetbrains.annotations.Nullable;
-
 public class ModEntry {
-    private final ModEntry origin;
     private final String hash;
     private final String modid;
 
     public ModEntry(String modid) {
         this.modid = modid;
         this.hash = "";
-        this.origin = null;
     }
 
     public ModEntry(String modid, String hash) {
         this.modid = modid;
-        this.hash = "";
-        this.origin = null;
-    }
-
-    public ModEntry(String modid, ModEntry origin) {
-        this.modid = modid;
-        this.hash = "";
-        this.origin = origin;
-    }
-
-    @Nullable
-    public ModEntry getOrigin() {
-        return origin;
+        this.hash = hash;
     }
 
     public String getHash() {
@@ -36,5 +20,14 @@ public class ModEntry {
 
     public String getId() {
         return modid;
+    }
+
+    @Override
+    public String toString() {
+        return "[modid=" + getId() + (getHash().isEmpty() ? "" : ", hash=" + getHash()) + "]";
+    }
+
+    public boolean equals(ModEntry entry) {
+        return entry.getId().equals(this.getId());
     }
 }

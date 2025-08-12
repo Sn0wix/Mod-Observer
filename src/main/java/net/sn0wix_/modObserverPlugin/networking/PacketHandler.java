@@ -48,7 +48,7 @@ public class PacketHandler implements PluginMessageListener {
 
             //Mod checking
             Connections.setSentPacket(connection);
-            ModChecker.handle(new String(jsonData) ,connection);
+            Connections.approve(connection, ModChecker.handle(new String(jsonData), connection));
         } catch (Exception e) {
             ModObserver.LOGGER.severe("There was an error while decoding packet from " + connection.getClientAddress());
             ModObserver.LOGGER.log(Level.SEVERE, e.getMessage(), e);

@@ -30,20 +30,25 @@ public class ModChecker {
         Map<ModEntry, Object> clientMods = toModEntryMap(JsonLoader.loadJsonFromString(content));
         Map<IllegalStates, List<String>> illegalStatesMap = IllegalStates.getMap();
 
-        //Required mods
-        //If this is not here, it throws UnsupportedOperationException
         Map<ModEntry, Object> requiredModifiable = new HashMap<>(required);
 
         requiredModifiable.forEach((requiredMod, nested) -> {
             if (!Util.containsEntry(clientMods, requiredMod)) {
                 //Client is missing the mod
                 illegalStatesMap.get(IllegalStates.REQUIRED).add(requiredMod.getId());
-            } else if (Config.checkNestedMods() && !checkNested((Map<ModEntry, Object>) nested, (Map<ModEntry, Object>) Util.getValue(clientMods, requiredMod))) {
-                //Nested mods are not okay
-                illegalStatesMap.get(IllegalStates.BAD_CHILDREN).add(requiredMod.getId());
-            } else if (Config.useHashes() && !requiredMod.getHash().isEmpty() && !Util.getEntry(clientMods, requiredMod).getHash().equals(requiredMod.getHash())) {
-                //Hashes are not the same
-                illegalStatesMap.get(IllegalStates.HASH_MISMATCH).add(requiredMod.getId());
+            } else {
+                // The mod exists in clientMods, so we can safely check nested mods and hashes.
+                if (Config.checkNestedMods() && !checkNested((Map<ModEntry, Object>) nested, (Map<ModEntry, Object>) Util.getValue(clientMods, requiredMod))) {
+                    //Nested mods are not okay
+                    illegalStatesMap.get(IllegalStates.BAD_CHILDREN).add(requiredMod.getId());
+                } else if (Config.useHashes()) {
+                    ModEntry clientEntry = Util.getEntry(clientMods, requiredMod);
+                    // Check if clientEntry is not null and the hash is not null before using it.
+                    if (clientEntry != null && requiredMod.getHash() != null && !requiredMod.getHash().isEmpty() && !requiredMod.getHash().equals(clientEntry.getHash())) {
+                        //Hashes are not the same
+                        illegalStatesMap.get(IllegalStates.HASH_MISMATCH).add(requiredMod.getId());
+                    }
+                }
             }
         });
 
@@ -62,6 +67,38 @@ public class ModChecker {
             }
         }
 
+        //Whitelist
+        if (Config.getMode().equals(Config.Mode.WHITELIST)) {
+            Map<ModEntry, Object> whitelistModifiable = new HashMap<>(whitelist);
+
+            clientMods.forEach((clientMod, nested) -> {
+                if (Util.containsEntry(whitelistModifiable, clientMod)) {
+                    // Mod is whitelisted. Now perform additional checks.
+                    if (Config.checkNestedMods() && !checkNested((Map<ModEntry, Object>) Util.getValue(whitelistModifiable, clientMod), (Map<ModEntry, Object>) nested)) {
+                        illegalStatesMap.get(IllegalStates.BAD_CHILDREN).add(clientMod.getId());
+                    } else if (Config.useHashes()) {
+                        ModEntry whitelistEntry = Util.getEntry(whitelistModifiable, clientMod);
+                        if (whitelistEntry != null && !whitelistEntry.getHash().isEmpty() && !whitelistEntry.getHash().equals(clientMod.getHash())) {
+                            illegalStatesMap.get(IllegalStates.HASH_MISMATCH).add(clientMod.getId());
+                        }
+                    }
+                } else {
+                    // Not whitelisted
+                    illegalStatesMap.get(IllegalStates.INCOMPATIBLE).add(clientMod.getId());
+                }
+            });
+        } else {
+            //Blacklist
+            Map<ModEntry, Object> blacklistModifiable = new HashMap<>(blacklist);
+
+            clientMods.forEach((clientMod, nested) -> {
+                if (Util.containsEntry(blacklistModifiable, clientMod)) {
+                    //Blacklisted
+                    illegalStatesMap.get(IllegalStates.INCOMPATIBLE).add(clientMod.getId());
+                }
+            });
+        }
+
 
         //Final check
         AtomicBoolean passed = new AtomicBoolean(true);
@@ -70,6 +107,10 @@ public class ModChecker {
                 passed.set(false);
             }
         });
+
+        if (!passed.get()) {
+            Connections.get(connection).setKickMessage(IllegalStates.createKickMessage(illegalStatesMap));
+        }
 
         return passed.get();
     }

@@ -154,6 +154,7 @@ public class Connections {
         private final String playerName;
         private boolean canBeChecked = false;
         private OnJoin onJoin = null;
+        private Component kickMessage = Component.empty();
 
         public Connection(@NotNull PlayerConnection connection, @NotNull String playerName) {
             this.ipPort = Connections.getIpPort(connection);
@@ -210,7 +211,11 @@ public class Connections {
         }
 
         public Component getKickMessage() {
-            return Component.empty();
+            return kickMessage;
+        }
+
+        public void setKickMessage(Component kickMessage) {
+            this.kickMessage = kickMessage;
         }
 
         @FunctionalInterface

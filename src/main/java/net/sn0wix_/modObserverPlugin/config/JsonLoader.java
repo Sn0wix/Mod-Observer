@@ -2,6 +2,7 @@ package net.sn0wix_.modObserverPlugin.config;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import net.sn0wix_.modObserverPlugin.ModObserver;
 
 import java.io.File;
@@ -77,7 +78,13 @@ public class JsonLoader {
     private static Map<String, Object> loadJsonFromFile(File file) throws IOException {
         try (FileReader reader = new FileReader(file)) {
             Type type = new TypeToken<Map<String, Object>>() {}.getType();
-            return gson.fromJson(reader, type);
+            try {
+                return gson.fromJson(reader, type);
+            }catch (JsonSyntaxException e) {
+                ModObserver.LOGGER.severe("There is a syntax error in the file " + file.getName());
+                throw new RuntimeException(e);
+            }
+
         }
     }
 

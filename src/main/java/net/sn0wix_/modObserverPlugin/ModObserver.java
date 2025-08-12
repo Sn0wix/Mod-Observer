@@ -16,14 +16,10 @@ import java.util.logging.Logger;
 public final class ModObserver extends JavaPlugin {
 
     /*https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Minecraft_Forge_Handshake
-     * Forge handshake emulation - config enabled
-     * C -> S mods packet - json?
-     * S -> C kick (optional) - string message, json? mods
+     * Forge handshake emulation - config enabled - maybe
      *
-     * Mod jars hashes - config enabled
-     *
-     * whitelist, blacklist, required mods, jsons
-     * Config generator tool, modmenu?
+     * Configurable kick message before kick data
+     * Config generator tool, modmenu
      * */
     private static Plugin instance;
     public static Logger LOGGER;
@@ -58,57 +54,10 @@ public final class ModObserver extends JavaPlugin {
         }
 
         LOGGER.info("ModObserver initialized!");
-        /*//Initialize logger
-        LOGGER = getLogger();
-        LOGGER.info("----------------ModObserver----------------");
-
-        //Initialize plugin
-        PLUGIN = this;
-
-        //Config
-        CONFIG = getConfig();
-
-        Config.loadValues(CONFIG);
-        saveConfig();
-
-        //Register listeners
-        getServer().getPluginManager().registerEvents(new Events(), this);
-
-        //Commands
-        if (Config.ALLOW_COMMAND_INTERFACE) {
-            try {
-                getCommand("modObserver").setExecutor(new ConfigurationCommand());
-            } catch (NullPointerException e) {
-                LOGGER.warning("Could not register command interface. Configuration must be done directly in the config file.");
-            }
-        }
-
-        //Plugin messaging
-        getServer().getMessenger().registerIncomingPluginChannel(this, PacketHandler.MODS_FOR_APPROVAL_CHANNEL, PacketHandler::receive);
-        getServer().getMessenger().registerOutgoingPluginChannel(this, PacketHandler.MODS_FOR_APPROVAL_CHANNEL);
-
-        //Messages to the console
-        LOGGER.info("ModObserver initialized!");
-        LOGGER.info("Here is a quick tutorial: \nWhen joining for the first time, it might not let you in, so execute /modobserver ignoredPlayers add <yourName>" +
-                "\nThis will add you to the Ignored players list, so you won't be checked.\nOnce you are in game, execute /modobserver help to view the help message." +
-                "\nAnd don't forget to remove yourself from the Ignored players list: /modobserver ignoredPlayers remove <yourName>");
-        LOGGER.info("If this plugin gives you errors when someone is kicked, ignore them.");
-        LOGGER.info("----------------ModObserver----------------");*/
     }
 
     @Override
     public void onDisable() {
-        /*//Config
-        Config.saveValues(CONFIG);
-        saveConfig();
-
-        //Plugin ticker
-        pluginTicker.cancel();
-
-        //Plugin messaging
-        getServer().getMessenger().unregisterIncomingPluginChannel(this, PacketHandler.MODS_FOR_APPROVAL_CHANNEL);
-        getServer().getMessenger().unregisterOutgoingPluginChannel(this, PacketHandler.MODS_FOR_APPROVAL_CHANNEL);*/
-
         getServer().getMessenger().unregisterIncomingPluginChannel(this, "mod_observer:mods", new PacketHandler());
         LOGGER.info("ModObserver disabled!");
     }

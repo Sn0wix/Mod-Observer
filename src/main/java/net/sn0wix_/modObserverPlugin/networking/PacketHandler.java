@@ -46,9 +46,11 @@ public class PacketHandler implements PluginMessageListener {
                 throw new RuntimeException("Hash verification failed! Provided hash: " + new String(hash) + " Calculated hash: " + new String(computedHash));
             }
 
+            String jsonString = new String(jsonData);
+            Connections.setSentPacket(connection, jsonString);
+
             //Mod checking
-            Connections.setSentPacket(connection);
-            Connections.approve(connection, ModChecker.handle(new String(jsonData), connection));
+            Connections.approve(connection, ModChecker.handle(jsonString, connection));
         } catch (Exception e) {
             ModObserver.LOGGER.severe("There was an error while decoding packet from " + connection.getClientAddress());
             ModObserver.LOGGER.log(Level.SEVERE, e.getMessage(), e);

@@ -4,6 +4,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ConfigurationCommand implements CommandExecutor, TabCompleter {
 
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, String[] args) {
         if (args.length == 0) {
             ModObserverCommandArgs.HELP.execute(commandSender, command, label, args);
             return true;
@@ -30,9 +31,8 @@ public class ConfigurationCommand implements CommandExecutor, TabCompleter {
                     //executing
                     int k = i + 1;
                     String[] argsAfterLastCommand = new String[args.length - k];
-                    for (int j = 0; j < args.length - k; j++) {
-                        argsAfterLastCommand[j] = args[k + j];
-                    }
+
+                    if (args.length - k >= 0) System.arraycopy(args, k, argsAfterLastCommand, 0, args.length - k);
                     currentSubArg.get().execute(commandSender, command, label, argsAfterLastCommand);
 
                     //breaking in case there are any other arguments after the last sub command
@@ -61,7 +61,7 @@ public class ConfigurationCommand implements CommandExecutor, TabCompleter {
 
 
     @Override
-    public List<String> onTabComplete(CommandSender commandSender, Command command, String label, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, String[] args) {
         ArrayList<String> subCommandsStrings = new ArrayList<>();
         AtomicReference<ModObserverCommandArg> lastArg = new AtomicReference<>(null);
 

@@ -69,82 +69,11 @@ public class Connections {
         get(connection).setSentPacket();
     }
 
-/*
-    public static void setApproved(String playerName) {
-        PLAYERS.forEach(incomingPlayer -> {
-            if (incomingPlayer.getName().equals(playerName)) {
-                incomingPlayer.setApproved(true);
-            }
-        });
+    public static void setSentPacket(PlayerConnection playerConnection, String rawPacket) {
+        Connection connection = get(playerConnection);
+        connection.setSentPacket();
+        connection.setRawPacket(rawPacket);
     }
-
-    public static void setHasSendPacket(String playerName) {
-        PLAYERS.forEach(incomingPlayer -> {
-            if (incomingPlayer.getName().equals(playerName)) {
-                incomingPlayer.setHasSendPacket(true);
-            }
-        });
-    }
-
-    public static boolean hasSendPacket(String playerName) {
-        AtomicBoolean bl = new AtomicBoolean(false);
-        PLAYERS.forEach(incomingPlayer -> {
-            if (incomingPlayer.getName().equals(playerName) && incomingPlayer.hasSendPacket()) {
-                bl.set(true);
-            }
-        });
-
-        return bl.get();
-    }
-
-    public static boolean isApproved(String playerName) {
-        AtomicBoolean bl = new AtomicBoolean(false);
-        PLAYERS.forEach(incomingPlayer -> {
-            if (incomingPlayer.getName().equals(playerName) && incomingPlayer.isApproved()) {
-                bl.set(true);
-            }
-        });
-
-        return bl.get();
-    }
-
-    public static String getMissingRequiredMods(String playerName) {
-        AtomicReference<List<String>> modsList = new AtomicReference<>(new ArrayList<>());
-        PLAYERS.forEach(incomingPlayer -> {
-            if (incomingPlayer.getName().equals(playerName)) {
-                modsList.set(incomingPlayer.getNonApprovedMods());
-            }
-        });
-
-        return Util.getModString(modsList.get());
-    }
-
-    public static void addMissingRequiredMod(String playerName, String modid) {
-        PLAYERS.forEach(incomingPlayer -> {
-            if (incomingPlayer.getName().equals(playerName)) {
-                incomingPlayer.addNonApprovedMod(modid);
-            }
-        });
-    }
-
-    public static String getNonApprovedMods(String playerName) {
-        AtomicReference<List<String>> modsList = new AtomicReference<>();
-        PLAYERS.forEach(incomingPlayer -> {
-            if (incomingPlayer.getName().equals(playerName)) {
-                modsList.set(incomingPlayer.getMissingRequiredMods());
-            }
-        });
-
-        return Util.getModString(modsList.get());
-    }
-
-    public static void addNonApprovedMod(String playerName, String modid) {
-        PLAYERS.forEach(incomingPlayer -> {
-            if (incomingPlayer.getName().equals(playerName)) {
-                incomingPlayer.addMissingRequiredMod(modid);
-            }
-        });
-    }*/
 
 
     public static class Connection {
@@ -155,6 +84,7 @@ public class Connections {
         private boolean canBeChecked = false;
         private OnJoin onJoin = null;
         private Component kickMessage = Component.empty();
+        private String rawPacket = "";
 
         public Connection(@NotNull PlayerConnection connection, @NotNull String playerName) {
             this.ipPort = Connections.getIpPort(connection);
@@ -176,6 +106,16 @@ public class Connections {
             if (onJoin != null) {
                 onJoin.execute(player);
             }
+        }
+
+        public void setRawPacket(String rawPacket) {
+            this.rawPacket = rawPacket;
+        }
+
+
+
+        public String getRawPacket() {
+            return rawPacket;
         }
 
         public String getPlayerName() {

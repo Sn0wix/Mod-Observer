@@ -3,11 +3,13 @@ package net.sn0wix_.modObserverPlugin.listeners;
 import io.papermc.paper.event.connection.PlayerConnectionValidateLoginEvent;
 import net.sn0wix_.modObserverPlugin.config.Config;
 import net.sn0wix_.modObserverPlugin.utils.Connections;
+import net.sn0wix_.modObserverPlugin.utils.OnlinePlayers;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class Events implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
@@ -38,31 +40,35 @@ public class Events implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        Connections.get(event.getPlayer().getConnection()).onJoin(event.getPlayer());
+        Connections.Connection connection = Connections.get(event.getPlayer().getConnection());
+        OnlinePlayers.add(event.getPlayer(), connection.getRawPacket());
+        connection.onJoin(event.getPlayer());
         Connections.update();
     }
 
+    @EventHandler
+    public void onDisconnect(PlayerQuitEvent event) {
+        OnlinePlayers.remove(event.getPlayer());
+    }
 
-      /*------------------------------------------------------
+      /*
+      ------------------------------------------------------
       PlayerHandshakeEvent
       ------------------------------------------------------
       AsyncPlayerPreLoginEvent
-      r404 is d1fadcd5-f8ee-389b-ae76-2112e34d591e
       ------------------------------------------------------
       PlayerServerFullCheckEvent
       ------------------------------------------------------
       PlayerConnectionValidateLoginEvent
       ------------------------------------------------------
       PlayerConnectionInitialConfigureEvent
-      RECEIVED WITH CONNECTION
+      RECEIVED MOD PACKET
       ------------------------------------------------------
       PlayerServerFullCheckEvent
       ------------------------------------------------------
       PlayerConnectionValidateLoginEvent
       ------------------------------------------------------
       PlayerJoinEvent
-       game
-      :62643] logged in with entity id 98 at ([world]-76.84721942411383, 67.0, -22.17944021409161)
       ------------------------------------------------------
       PlayerRegisterChannelEvent
       fabric:attachment_sync_v1
@@ -76,5 +82,4 @@ public class Events implements Listener {
       PlayerChannelEvent
       fabric-screen-handler-api-v1:open_screen
     */
-
 }

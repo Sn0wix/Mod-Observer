@@ -11,6 +11,7 @@ import net.minecraft.text.Text;
 import net.sn0wix_.modobserver.ModObserver;
 import net.sn0wix_.modobserver.compat.ModMenuCompat;
 import net.sn0wix_.modobserver.detection.IllegalStates;
+import net.sn0wix_.modobserver.screen.gui.ModsListWidget;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -20,7 +21,7 @@ import java.util.Map;
 public class ModsScreen extends Screen {
     public final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this, 43, 30);
     private ModsListWidget listWidget;
-    final Map<IllegalStates, List<String>> detectedOn;
+    public final Map<IllegalStates, List<String>> detectedOn;
 
 
     public ModsScreen(Text title, String kickJsonData) {

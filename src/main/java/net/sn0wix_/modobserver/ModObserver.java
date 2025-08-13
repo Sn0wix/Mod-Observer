@@ -20,13 +20,5 @@ public class ModObserver implements ClientModInitializer {
         PayloadTypeRegistry.configurationC2S().register(ModsPacket.PAYLOAD_ID, ModsPacket.CODEC);
 
         ClientConfigurationConnectionEvents.START.register((handler, client) -> ClientConfigurationNetworking.send(new ModsPacket()));
-
-
-        /*ClientTickEvents.END_CLIENT_TICK.register(minecraftClient -> {
-            if (minecraftClient.currentScreen instanceof TitleScreen && !bl) {
-                minecraftClient.setScreen(new IncompatibleModsScreen(ModsScreen.Container.cast(FabricLoader.getInstance().getAllMods().stream().toList()), Text.translatable("text.mod_observer.required_mods")));
-                bl = true;
-            }
-        });*/
     }
 }

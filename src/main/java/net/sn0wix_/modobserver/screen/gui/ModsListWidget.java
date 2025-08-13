@@ -1,4 +1,4 @@
-package net.sn0wix_.modobserver.screen;
+package net.sn0wix_.modobserver.screen.gui;
 
 import com.google.common.collect.ImmutableList;
 import net.fabricmc.loader.api.FabricLoader;
@@ -24,6 +24,7 @@ import net.minecraft.util.Util;
 import net.sn0wix_.modobserver.ModObserver;
 import net.sn0wix_.modobserver.compat.ModMenuCompat;
 import net.sn0wix_.modobserver.detection.IllegalStates;
+import net.sn0wix_.modobserver.screen.ModsScreen;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -151,7 +152,7 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
                 name.active = true;
             } catch (Exception e) {
                 this.name = new TextWidget(Text.literal(container.name()), textRenderer);
-                name.setTooltip(Tooltip.of(Text.literal("id: " + container.modid())));
+                name.setTooltip(Tooltip.of(Text.literal("Mod ID: " + container.modid())));
             }
 
 

@@ -4,7 +4,7 @@ import net.fabricmc.loader.api.ModContainer;
 
 public class ModEntry {
     private final ModContainer origin;
-    private final String hash;
+    private String hash;
 
     public ModEntry(ModContainer origin) {
         this.origin = origin;
@@ -26,5 +26,9 @@ public class ModEntry {
 
     public String getId() {
         return origin.getMetadata().getId();
+    }
+
+    public void removeHash() {
+        this.hash = "";
     }
 }

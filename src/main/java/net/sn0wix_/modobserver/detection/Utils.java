@@ -16,7 +16,7 @@ public class Utils {
         return toJson(getModsList());
     }
 
-    private static Map<String, Object> toJsonMap(LinkedHashMap<ModEntry, Object> map) {
+    private static LinkedHashMap<String, Object> toJsonMap(LinkedHashMap<ModEntry, Object> map) {
         LinkedHashMap<String, Object> jsonReadyMap = new LinkedHashMap<>();
 
         for (Map.Entry<ModEntry, Object> mapEntry : map.entrySet()) {
@@ -95,5 +95,21 @@ public class Utils {
             hexString.append(String.format("%02x", b));
         }
         return hexString.toString();
+    }
+
+    public static boolean isFabricApi(String modid) {
+        if (List.of("mixinextras", "minecraft", "fabric-api", "fabric-api-base", "fabricloader", "java", "fabric-renderer-indigo").contains(modid)) {
+            return true;
+        }
+
+        //fabric-[something]-v[number]
+        try {
+            Integer.parseInt(String.valueOf(modid.charAt(modid.length() - 1)));
+        } catch (NumberFormatException ignored) {
+            //last char is not a number
+            return false;
+        }
+
+        return modid.startsWith("fabric-") && modid.lastIndexOf("-v") == modid.length() - 3;
     }
 }

@@ -14,6 +14,20 @@
   "text.mod_observer.bad_children": "Missing or Different Dependencies",
   "tooltip.mod_observer.bad_children": "Some related mods or parts of these mods are missing or don’t match the server's requirements. Update them or check with the server staff.",
 
+  "text.mod_observer.generate_config": "Generate Config",
+
+  "text.mod_observer.config_tool.warning": "§cYou are about to open the server config generator.\n\nProceed only if you know what you are doing!",
+  "text.mod_observer.config_tool.continue": "§cContinue",
+  "text.mod_observer.config_tool.back": "§aBack",
+
+
+  "text.mod_observer.include.modmenu": "Include Modmenu",
+  "text.mod_observer.include.children": "Include Nested Mods",
+  "text.mod_observer.include.fabric_api": "Include Fabric API",
+  "text.mod_observer.include.hashes": "Include Hashes",
+
+
   "screen.mod_observer.mods_list": "Mods List",
+  "screen.mod_observer.config_generator": "Server Config Generator",
   "gui.mod_observer.show_mods": "Show Mods List"
 }

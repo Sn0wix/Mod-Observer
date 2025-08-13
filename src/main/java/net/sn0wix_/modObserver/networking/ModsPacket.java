@@ -25,8 +25,6 @@ public class ModsPacket implements CustomPayload {
         try {
             byte[] jsonBytes = Utils.getModsJson().getBytes();
 
-            ModObserver.LOGGER.info(new String(jsonBytes));
-
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(jsonBytes);
 

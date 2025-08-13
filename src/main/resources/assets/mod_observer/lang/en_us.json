@@ -15,6 +15,6 @@
   "tooltip.mod_observer.bad_children": "Incomplete Nested Mods tooltip",
 
 
-  "screen.mod_observer.mods_list": "Incomplete Mods",
+  "screen.mod_observer.mods_list": "Mods List",
   "gui.mod_observer.show_mods": "Show Mods List"
 }

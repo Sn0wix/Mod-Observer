@@ -1,5 +1,7 @@
 package net.sn0wix_.modObserver.screen;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
@@ -8,18 +10,25 @@ import net.minecraft.client.gui.widget.*;
 import net.minecraft.text.Text;
 import net.sn0wix_.modObserver.ModObserver;
 import net.sn0wix_.modObserver.compat.ModMenuCompat;
+import net.sn0wix_.modObserver.detection.IllegalStates;
 
+import java.lang.reflect.Type;
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 public class ModsScreen extends Screen {
     public final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this, 43, 30);
     private ModsListWidget listWidget;
-    private final String jsonData;
+    final Map<IllegalStates, List<String>> detectedOn;
 
 
     public ModsScreen(Text title, String kickJsonData) {
         super(title);
-        this.jsonData = kickJsonData;
+
+        //Serialize the data
+        Type type = new TypeToken<Map<IllegalStates, List<String>>>() {}.getType();
+        detectedOn = new GsonBuilder().create().fromJson(kickJsonData, type);
     }
 
     public ModsScreen(String kickJsonData) {
@@ -36,7 +45,7 @@ public class ModsScreen extends Screen {
 
     protected void initHeader() {
         DirectionalLayoutWidget column = DirectionalLayoutWidget.vertical().spacing(10);
-        column.add(new TextWidget(this.width, 9, this.title, this.textRenderer));
+        column.add(new TextWidget(textRenderer.getWidth(this.title), 9, this.title, this.textRenderer).alignCenter());
 
         this.layout.addHeader(column);
     }
@@ -67,39 +76,19 @@ public class ModsScreen extends Screen {
         }
     }
 
-    public static class Container {
-        private final String name;
-        private final String modid;
-        private final String issues;
-        private final String homepage;
-
-        public Container(ModContainer modContainer) {
-            this(modContainer.getMetadata().getName(), modContainer.getMetadata().getId(),
-                    modContainer.getMetadata().getContact().get("issues").orElse(""),
-                    modContainer.getMetadata().getContact().get("homepage").orElse(""));
-        }
-
-        public Container(String name, String modid, String issues, String homepage) {
-            this.name = name;
-            this.modid = modid;
-            this.issues = issues;
-            this.homepage = homepage;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getModid() {
-            return modid;
-        }
+    public record Container(String name, String modid, String issues, String homepage) {
+            public Container(ModContainer modContainer) {
+                this(modContainer.getMetadata().getName(), modContainer.getMetadata().getId(),
+                        modContainer.getMetadata().getContact().get("issues").orElse(""),
+                        modContainer.getMetadata().getContact().get("homepage").orElse(""));
+            }
 
         public URI getIssues() {
-            return issues.isEmpty() ? URI.create("") : URI.create(issues);
-        }
+                return issues.isEmpty() ? URI.create("") : URI.create(issues);
+            }
 
-        public URI getHomepage() {
-            return homepage.isEmpty() ? URI.create("") : URI.create(homepage);
+            public URI getHomepage() {
+                return homepage.isEmpty() ? URI.create("") : URI.create(homepage);
+            }
         }
-    }
 }

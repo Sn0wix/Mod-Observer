@@ -1,5 +1,6 @@
 package net.sn0wix_.modObserver.screen;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.MinecraftClient;
@@ -17,6 +18,7 @@ import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.sn0wix_.modObserver.ModObserver;
@@ -33,15 +35,23 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
     public ModsListWidget(ModsScreen parent, MinecraftClient client) {
         super(client, parent.width, parent.layout.getContentHeight(), parent.layout.getHeaderHeight(), 20);
 
-        /*parent.detectedOn.forEach(container -> {
-            int i = client.textRenderer.getWidth(Text.literal(container.getName()));
+        parent.detectedOn.forEach(((illegalState, modids) -> {
+            this.addEntry(new TitleEntry(illegalState));
+            modids.forEach(modid -> {
+                ModsScreen.Container container;
 
-            if (i > this.maxKeyNameLength) {
-                this.maxKeyNameLength = i;
-            }
+                Optional<ModContainer> modContainerOptional = FabricLoader.getInstance().getAllMods().stream().filter(modContainer -> modContainer.getMetadata().getId().equals(modid)).findAny();
+                container = modContainerOptional.map(ModsScreen.Container::new).orElseGet(() -> new ModsScreen.Container(modid, modid, "", ""));
 
-            this.addEntry(new ModEntry(container, parent));
-        });*/
+                int i = client.textRenderer.getWidth(Text.literal(modid));
+
+                if (i > this.maxKeyNameLength) {
+                    this.maxKeyNameLength = i;
+                }
+
+                this.addEntry(new ModEntry(container, parent));
+            });
+        }));
     }
 
     @Override
@@ -55,25 +65,36 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
     }
 
     public class TitleEntry extends Entry {
-        private IllegalStates state;
+        private final TextWidget title;
 
         public TitleEntry(IllegalStates state) {
-            this.state = state;
+            title = new TextWidget(state.getTranslation(), client.textRenderer) {
+                @Override
+                public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                    return false;
+                }
+            };
+
+            title.alignCenter();
+            title.setTooltip(state.getTooltip());
+            title.setTextColor(Colors.YELLOW);
+            title.active = true;
         }
 
         @Override
         public List<? extends Selectable> selectableChildren() {
-            return null;
+            return ImmutableList.of(title);
         }
 
         @Override
         public List<? extends Element> children() {
-            return null;
+            return ImmutableList.of(title);
         }
 
         @Override
         public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-
+            title.setPosition(entryWidth / 2 - title.getWidth() / 2, y + entryHeight / 2 - 9 / 2);
+            title.render(context, mouseX, mouseY, tickProgress);
         }
     }
 
@@ -96,12 +117,12 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
                             ConfirmLinkScreen.opening(parent, container.getHomepage(), false))
                     .size(textRenderer.getWidth(Text.translatable("text.mod_observer.homepage")) + 8, 20).build();
 
-            Optional<ModContainer> modContainer = FabricLoader.getInstance().getModContainer(container.getModid());
+            Optional<ModContainer> modContainer = FabricLoader.getInstance().getModContainer(container.modid());
 
 
             try {
                 Path path = modContainer.get().getOrigin().getPaths().getFirst();
-                this.name = new TextWidget(Text.literal(container.getName()), textRenderer) {
+                this.name = new TextWidget(Text.literal(container.name()), textRenderer) {
                     @Override
                     public void onClick(double mouseX, double mouseY) {
                         try {
@@ -113,11 +134,11 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
                 };
 
                 name.setTooltip(Tooltip.of(Text.literal(path.getFileName().toString())));
-                name.active = true;
             } catch (Exception e) {
-                this.name = new TextWidget(Text.literal(container.getName()), textRenderer);
-                name.setTooltip(Tooltip.of(Text.literal("id: " + container.getModid())));
+                this.name = new TextWidget(Text.literal(container.name()), textRenderer);
+                name.setTooltip(Tooltip.of(Text.literal("id: " + container.modid())));
             }
+
 
 
             this.issuesButton.active = !container.getIssues().toString().isEmpty();
@@ -134,7 +155,7 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
 
                 @Override
                 public void appendNarrations(NarrationMessageBuilder builder) {
-                    builder.put(NarrationPart.TITLE, Text.literal(container.getName()));
+                    builder.put(NarrationPart.TITLE, Text.literal(container.name()));
                 }
             });
         }
@@ -161,7 +182,7 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
                 context.drawTexture(RenderPipelines.GUI_TEXTURED, getIconTexture(), startPos, y, 0, 0, 20, 20, 20, 20);
             }
 
-            this.issuesButton.setPosition(resetButtonPos, j);
+            issuesButton.setPosition(resetButtonPos, j);
             issuesButton.render(context, mouseX, mouseY, tickProgress);
 
             int editButtonPos = resetButtonPos - 8 - this.homepageButton.getWidth();
@@ -172,8 +193,8 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
         public Identifier getIconTexture() {
             if (ModObserver.HAS_MODMENU) {
                 if (this.iconLocation == null) {
-                    this.iconLocation = Identifier.of(ModObserver.MOD_ID, container.getModid() + "_icon");
-                    NativeImageBackedTexture icon = ModMenuCompat.getIconImage(container.getModid());
+                    this.iconLocation = Identifier.of(ModObserver.MOD_ID, container.modid() + "_icon");
+                    NativeImageBackedTexture icon = ModMenuCompat.getIconImage(container.modid());
                     icon.setFilter(false, false);
                     MinecraftClient.getInstance().getTextureManager().registerTexture(this.iconLocation, icon);
                 }

@@ -2,6 +2,7 @@ package net.sn0wix_.modObserver.compat;
 
 import com.terraformersmc.modmenu.ModMenu;
 import com.terraformersmc.modmenu.util.mod.fabric.FabricIconHandler;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 
 public class ModMenuCompat {
@@ -11,8 +12,11 @@ public class ModMenuCompat {
         if (iconHandler == null) {
             iconHandler = new FabricIconHandler();
         }
-
-        return ModMenu.MODS.get(modid).getIcon(iconHandler, 32);
+        try {
+            return ModMenu.MODS.get(modid).getIcon(iconHandler, 32);
+        } catch (Exception e) {
+            return iconHandler.createIcon(FabricLoader.getInstance().getModContainer("modmenu").orElseThrow(() -> new RuntimeException("Cannot get ModContainer for Fabric mod with id modmenu")), "assets/modmenu/unknown_icon.png");
+        }
     }
 
     public static void closeIconHandler() {

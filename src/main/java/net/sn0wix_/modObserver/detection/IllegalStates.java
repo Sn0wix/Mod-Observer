@@ -1,5 +1,7 @@
 package net.sn0wix_.modObserver.detection;
 
+import net.minecraft.client.gui.tooltip.Tooltip;
+import net.minecraft.text.Text;
 import net.sn0wix_.modObserver.ModObserver;
 
 public enum IllegalStates {
@@ -8,12 +10,20 @@ public enum IllegalStates {
     HASH_MISMATCH("text.mod_observer.hash_mismatch", "tooltip.mod_observer.hash_mismatch"),
     BAD_CHILDREN("text.mod_observer.bad_children", "tooltip.mod_observer.bad_children");
 
-    private String translationKey;
-    private String tooltip;
+    private final String translationKey;
+    private final String tooltip;
 
     IllegalStates(String translationKey, String tooltip) {
         this.translationKey = translationKey;
         this.tooltip = tooltip;
+    }
+
+    public Text getTranslation() {
+        return Text.translatable(translationKey);
+    }
+
+    public Tooltip getTooltip() {
+        return Tooltip.of(Text.translatable(tooltip));
     }
 
     public static final String IDENTIFIER = "$" + ModObserver.MOD_ID + "$";

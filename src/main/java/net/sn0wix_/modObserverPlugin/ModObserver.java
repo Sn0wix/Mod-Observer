@@ -11,15 +11,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
 
-//TODO remove . files from git history
-//TODO test event.getPlayer().getConnection().reenterConfiguration();
 public final class ModObserver extends JavaPlugin {
 
     /*https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Minecraft_Forge_Handshake
      * Forge handshake emulation - config enabled - maybe
+     * Config generator tool, modmenu?
      *
-     * Configurable kick message before kick data
-     * Config generator tool, modmenu
+     * https://docs.papermc.io/paper/dev/dialogs/
+     * Mod observer required - open the website
      * */
     private static Plugin instance;
     public static Logger LOGGER;

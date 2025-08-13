@@ -1,11 +1,11 @@
-package net.sn0wix_.modObserver.networking;
+package net.sn0wix_.modobserver.networking;
 
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
-import net.sn0wix_.modObserver.ModObserver;
-import net.sn0wix_.modObserver.detection.Utils;
+import net.sn0wix_.modobserver.ModObserver;
+import net.sn0wix_.modobserver.detection.Utils;
 
 import java.io.ByteArrayOutputStream;
 import java.security.MessageDigest;

@@ -1,44 +1,47 @@
 {
-	"schemaVersion": 1,
-	"id": "mod_observer",
-	"version": "${version}",
-	"name": "Mod Observer",
-	"description": "Observers, what mods are loaded, and sends them to the server upon joining.",
-	"authors": [
-		"Sn0wix_"
-	],
-	"contact": {
-		"homepage": "https://modrinth.com/mod/mod-observer",
-		"issues": "https://curseforge.com/minecraft/mc-mods/mod-observer/issues"
-	},
-	"license": "All rights reserved",
-	"icon": "assets/mod_observer/icon.png",
-	"environment": "client",
-	"entrypoints": {
-		"client": [
-			"net.sn0wix_.modObserver.ModObserver"
-		]
-	},
-	"mixins": [
-		"mod_observer.mixins.json"
-	],
-	"depends": {
-		"fabricloader": "*",
-		"minecraft": ">=1.21.4",
-		"java": "*",
-		"fabric-api": "*"
-	},
-	"suggests": {
-		"modmenu": "*"
-	},
-	"custom": {
-		"modmenu": {
-			"links": {
-				"link.mod_observer.curseforge": "https://curseforge.com/minecraft/mc-mods/mod-observer",
-				"link.mod_observer.modrinth": "https://modrinth.com/mod/mod-observer",
-				"modmenu.discord": "https://discord.gg/nNYHDryaj3"
-			},
-			"update_checker": true
-		}
-	}
+  "schemaVersion": 1,
+  "id": "mod_observer",
+  "version": "${version}",
+  "name": "Mod Observer",
+  "description": "Monitors the mods you have installed and sends that information to the server when you join.",
+  "authors": [
+    "Sn0wix_"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/mod-observer",
+    "issues": "https://curseforge.com/minecraft/mc-mods/mod-observer/issues"
+  },
+  "license": "All rights reserved",
+  "icon": "assets/mod_observer/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "net.sn0wix_.modobserver.ModObserver"
+    ],
+    "modmenu": [
+      "net.sn0wix_.modobserver.compat.ModMenuCompat"
+    ]
+  },
+  "mixins": [
+    "mod_observer.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": ">=1.21.7",
+    "java": "*",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "link.mod_observer.curseforge": "https://curseforge.com/minecraft/mc-mods/mod-observer",
+        "link.mod_observer.modrinth": "https://modrinth.com/mod/mod-observer",
+        "modmenu.discord": "https://discord.gg/nNYHDryaj3"
+      },
+      "update_checker": true
+    }
+  }
 }

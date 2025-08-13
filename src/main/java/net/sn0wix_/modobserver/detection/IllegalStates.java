@@ -1,8 +1,8 @@
-package net.sn0wix_.modObserver.detection;
+package net.sn0wix_.modobserver.detection;
 
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.text.Text;
-import net.sn0wix_.modObserver.ModObserver;
+import net.sn0wix_.modobserver.ModObserver;
 
 public enum IllegalStates {
     INCOMPATIBLE("text.mod_observer.incompatible", "tooltip.mod_observer.incompatible"),

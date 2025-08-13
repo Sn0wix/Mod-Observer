@@ -1,11 +1,12 @@
-package net.sn0wix_.modObserver.compat;
+package net.sn0wix_.modobserver.compat;
 
 import com.terraformersmc.modmenu.ModMenu;
+import com.terraformersmc.modmenu.api.ModMenuApi;
 import com.terraformersmc.modmenu.util.mod.fabric.FabricIconHandler;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 
-public class ModMenuCompat {
+public class ModMenuCompat implements ModMenuApi {
     private static FabricIconHandler iconHandler;
 
     public static NativeImageBackedTexture getIconImage(String modid) {

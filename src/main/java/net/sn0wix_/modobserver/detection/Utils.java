@@ -1,10 +1,10 @@
-package net.sn0wix_.modObserver.detection;
+package net.sn0wix_.modobserver.detection;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.sn0wix_.modObserver.ModObserver;
+import net.sn0wix_.modobserver.ModObserver;
 
 import java.io.FileInputStream;
 import java.io.InputStream;

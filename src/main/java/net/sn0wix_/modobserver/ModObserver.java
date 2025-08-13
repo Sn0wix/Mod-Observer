@@ -1,11 +1,11 @@
-package net.sn0wix_.modObserver;
+package net.sn0wix_.modobserver;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
-import net.sn0wix_.modObserver.networking.ModsPacket;
+import net.sn0wix_.modobserver.networking.ModsPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package net.sn0wix_.modObserver.detection;
+package net.sn0wix_.modobserver.detection;
 
 import net.fabricmc.loader.api.ModContainer;
 

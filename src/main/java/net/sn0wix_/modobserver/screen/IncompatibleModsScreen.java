@@ -1,4 +1,4 @@
-package net.sn0wix_.modObserver.screen;
+package net.sn0wix_.modobserver.screen;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;

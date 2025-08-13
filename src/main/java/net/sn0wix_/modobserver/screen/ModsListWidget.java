@@ -1,4 +1,4 @@
-package net.sn0wix_.modObserver.screen;
+package net.sn0wix_.modobserver.screen;
 
 import com.google.common.collect.ImmutableList;
 import net.fabricmc.loader.api.FabricLoader;
@@ -21,9 +21,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
-import net.sn0wix_.modObserver.ModObserver;
-import net.sn0wix_.modObserver.compat.ModMenuCompat;
-import net.sn0wix_.modObserver.detection.IllegalStates;
+import net.sn0wix_.modobserver.ModObserver;
+import net.sn0wix_.modobserver.compat.ModMenuCompat;
+import net.sn0wix_.modobserver.detection.IllegalStates;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -32,6 +32,15 @@ import java.util.Optional;
 public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
     private int maxKeyNameLength;
 
+    /**
+     * Constructs a new ModsListWidget instance, which is a scrollable list of mods, categorized by their
+     * detected illegal states. The widget is populated by iterating over the detected mods and their associated
+     * states to create individual list entries. It adjusts the maximum mod name length for proper rendering
+     * and positioning of entries.
+     *
+     * @param parent The parent ModsScreen instance that manages this widget and provides necessary context.
+     * @param client The current Minecraft client instance, used for rendering and accessing mod metadata.
+     */
     public ModsListWidget(ModsScreen parent, MinecraftClient client) {
         super(client, parent.width, parent.layout.getContentHeight(), parent.layout.getHeaderHeight(), 20);
 
@@ -52,6 +61,11 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
                 this.addEntry(new ModEntry(container, parent));
             });
         }));
+
+
+        if (maxKeyNameLength < this.getWidth() / 3) {
+            maxKeyNameLength = this.getWidth() / 3;
+        }
     }
 
     @Override
@@ -134,6 +148,7 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
                 };
 
                 name.setTooltip(Tooltip.of(Text.literal(path.getFileName().toString())));
+                name.active = true;
             } catch (Exception e) {
                 this.name = new TextWidget(Text.literal(container.name()), textRenderer);
                 name.setTooltip(Tooltip.of(Text.literal("id: " + container.modid())));

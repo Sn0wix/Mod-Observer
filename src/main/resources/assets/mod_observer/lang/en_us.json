@@ -6,14 +6,13 @@
   "text.mod_observer.discord": "Discord",
 
   "text.mod_observer.incompatible": "Incompatible Mods",
-  "tooltip.mod_observer.incompatible": "Incompatible Mods tooltip",
+  "tooltip.mod_observer.incompatible": "These mods aren’t allowed here. Please remove them before joining.",
   "text.mod_observer.required": "Required Mods",
-  "tooltip.mod_observer.required": "Required Mods tooltip",
-  "text.mod_observer.hash_mismatch": "Hash mismatch",
-  "tooltip.mod_observer.hash_mismatch": "Hash mismatch tooltip",
-  "text.mod_observer.bad_children": "Incomplete Nested Mods",
-  "tooltip.mod_observer.bad_children": "Incomplete Nested Mods tooltip",
-
+  "tooltip.mod_observer.required": "You’ll need these mods installed to join the server.",
+  "text.mod_observer.hash_mismatch": "Version Mismatch",
+  "tooltip.mod_observer.hash_mismatch": "Your version of these mods is different from what the server expects. Try updating or ask the server staff for help.",
+  "text.mod_observer.bad_children": "Missing or Different Dependencies",
+  "tooltip.mod_observer.bad_children": "Some related mods or parts of these mods are missing or don’t match the server's requirements. Update them or check with the server staff.",
 
   "screen.mod_observer.mods_list": "Mods List",
   "gui.mod_observer.show_mods": "Show Mods List"

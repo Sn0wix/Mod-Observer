@@ -1,4 +1,4 @@
-package net.sn0wix_.modObserver.screen;
+package net.sn0wix_.modobserver.screen;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.GsonBuilder;
@@ -8,9 +8,9 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.text.Text;
-import net.sn0wix_.modObserver.ModObserver;
-import net.sn0wix_.modObserver.compat.ModMenuCompat;
-import net.sn0wix_.modObserver.detection.IllegalStates;
+import net.sn0wix_.modobserver.ModObserver;
+import net.sn0wix_.modobserver.compat.ModMenuCompat;
+import net.sn0wix_.modobserver.detection.IllegalStates;
 
 import java.lang.reflect.Type;
 import java.net.URI;

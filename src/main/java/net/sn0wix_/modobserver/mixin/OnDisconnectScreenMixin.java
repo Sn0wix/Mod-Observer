@@ -1,12 +1,12 @@
-package net.sn0wix_.modObserver.mixin;
+package net.sn0wix_.modobserver.mixin;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientCommonNetworkHandler;
 import net.minecraft.network.DisconnectionInfo;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.sn0wix_.modObserver.detection.IllegalStates;
-import net.sn0wix_.modObserver.screen.IncompatibleModsScreen;
+import net.sn0wix_.modobserver.detection.IllegalStates;
+import net.sn0wix_.modobserver.screen.IncompatibleModsScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

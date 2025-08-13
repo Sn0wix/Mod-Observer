@@ -3,6 +3,6 @@ fabric-api-autodetect: false
 use-hashes: false
 check-nested-mods: false
 allow-command-interface: true
-modobserver-kick-message: "Please review your mods and ensure they meet the server's requirements."
-modobserver-required-message: "<red><bold>ModObserver is missing!</bold></red>\nThis server uses ModObserver to manage mods. You must have it installed in order to join.\n\nGet the mod here:\n<gold><bold>Curseforge: </bold>curseforge.com/minecraft/mc-mods/mod-observer</gold>\n<dark_green><bold>Modrinth: </bold>modrinth.com/mod/mod-observer</dark_green>"
+modobserver-kick-message: "<red>Your mods don’t match the server’s requirements. Please review them and try again.</red>"
+modobserver-required-message: "<red><bold>ModObserver is missing!</bold></red>\nThis server uses ModObserver to check and manage mods. You’ll need to install it before you can join.\n\nDownload it here:\n<gold><bold>Curseforge: </bold>curseforge.com/minecraft/mc-mods/mod-observer</gold>\n<dark_green><bold>Modrinth: </bold>modrinth.com/mod/mod-observer</dark_green>"
 ignored-players:

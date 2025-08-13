@@ -88,7 +88,7 @@ public class ModChecker {
         }
 
         // Whitelist
-        if (Config.getMode().equals(Config.Mode.WHITELIST)) {
+        if (Config.getMode().equals(Config.Mode.WHITELIST) && !whitelist.isEmpty()) {
             Map<ModEntry, Object> whitelistModifiable = new HashMap<>(whitelist);
 
             clientMods.forEach((clientMod, nested) -> {
@@ -108,7 +108,7 @@ public class ModChecker {
                     illegalStatesMap.get(IllegalStates.INCOMPATIBLE).add(clientMod.getId());
                 }
             });
-        } else {
+        } else if (!blacklist.isEmpty()) {
             // Blacklist
             Map<ModEntry, Object> blacklistModifiable = new HashMap<>(blacklist);
 

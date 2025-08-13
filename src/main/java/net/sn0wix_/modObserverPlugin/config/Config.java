@@ -23,7 +23,7 @@ public class Config {
 
     public static void init(FileConfiguration fileConfiguration) {
         config = fileConfiguration;
-        config.setComments(modeKey, List.of("Check out ModObserver wiki for further information:", "https://github.com/Sn0wix/Mod-Observer/wiki"));
+        config.setComments(modeKey, List.of("Check out the ModObserver wiki for further information:", "https://github.com/Sn0wix/Mod-Observer/wiki"));
     }
 
 

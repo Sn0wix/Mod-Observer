@@ -17,6 +17,8 @@ public class Config {
     private static final String checkNestedModsKey = "check-nested-mods";
     private static final String fabricApiAutodetectKey = "fabric-api-autodetect";
     private static final String modobserverKickMssageKey = "modobserver-kick-message";
+    private static final String modobserverRequiredKey = "modobserver-required";
+    private static final String blacklistedPlayersKey = "blacklisted-players";
     private static FileConfiguration config;
 
 
@@ -30,6 +32,14 @@ public class Config {
 
     public static List<String> getIgnoredPlayers() {
         return config.getStringList(ignoredPlayersKey);
+    }
+
+    public static List<String> getBlacklistedPlayers() {
+        return config.getStringList(blacklistedPlayersKey);
+    }
+
+    public static boolean isModObserverRequired() {
+        return config.getBoolean(modobserverRequiredKey);
     }
 
     public static boolean isCommandInterfaceAllowed() {
@@ -80,6 +90,11 @@ public class Config {
         save();
     }
 
+    public static void setModobserverRequired(boolean value) {
+        config.set(modobserverRequiredKey, value);
+        save();
+    }
+
     public static void setCheckNestedMods(boolean value) {
         config.set(checkNestedModsKey, value);
         save();
@@ -92,6 +107,11 @@ public class Config {
 
     public static void setIgnoredPlayers(List<String> ignoredPlayers) {
         config.set(ignoredPlayersKey, ignoredPlayers);
+        save();
+    }
+
+    public static void setBlacklistedPlayers(List<String> ignoredPlayers) {
+        config.set(blacklistedPlayersKey, ignoredPlayers);
         save();
     }
 

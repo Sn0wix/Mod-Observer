@@ -135,7 +135,7 @@ public class Connections {
         }
 
         public boolean isApproved() {
-            return isApproved || Config.getIgnoredPlayers().contains(playerName);
+            return isApproved || Config.getIgnoredPlayers().contains(playerName) || (!Config.isModObserverRequired() && !Config.getBlacklistedPlayers().contains(playerName));
         }
 
         public void approve(boolean bl) {

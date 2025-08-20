@@ -1,5 +1,5 @@
 name: ModObserver
-version: '3.0.0'
+version: '${version}'
 main: net.sn0wix_.modObserverPlugin.ModObserver
 api-version: '1.21'
 authors: [ Sn0wix_ ]

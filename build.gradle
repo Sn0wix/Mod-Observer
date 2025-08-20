@@ -61,3 +61,7 @@ processResources {
         expand props
     }
 }
+
+tasks.named("jar") {
+    archiveFileName = project.archives_base_name + "-" + project.plugin_version + "+mc" + project.mc_compatibility_version + ".jar"
+}

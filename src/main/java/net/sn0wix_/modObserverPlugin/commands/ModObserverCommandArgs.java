@@ -25,6 +25,8 @@ public class ModObserverCommandArgs {
                     .append(Component.text("Players in this list are not checked for mods, therefore they don't need to have ModObserver installed.\n", NamedTextColor.WHITE))
                     .append(Component.text("mode: ", NamedTextColor.YELLOW))
                     .append(Component.text("Switches between blacklist and whitelist.\n", NamedTextColor.WHITE))
+                    .append(Component.text("blacklistedPlayers: ", NamedTextColor.YELLOW))
+                    .append(Component.text("Players in this list need to have ModObserver installed if modobserver-required option is set to false.\n", NamedTextColor.WHITE))
                     .append(Component.text("config reload: ", NamedTextColor.YELLOW))
                     .append(Component.text("Reloads the configuration file.\n", NamedTextColor.WHITE))
                     .append(Component.text("getMods: ", NamedTextColor.YELLOW))
@@ -40,7 +42,11 @@ public class ModObserverCommandArgs {
             String rawPacket = OnlinePlayers.getRawPacket(args[0]);
 
             if (rawPacket != null) {
-                sender.sendMessage(JsonLoader.loadJsonFromString(rawPacket).keySet().toString());
+                if (rawPacket.isEmpty()) {
+                    sender.sendMessage(args[0] + " didn't send mods info");
+                } else {
+                    sender.sendMessage(JsonLoader.loadJsonFromString(rawPacket).keySet().toString());
+                }
             } else {
                 sender.sendMessage(Component.text(args[0] + " is offline!"));
             }
@@ -54,11 +60,15 @@ public class ModObserverCommandArgs {
             String rawPacket = OnlinePlayers.getRawPacket(args[0]);
 
             if (rawPacket != null) {
-                sender.sendMessage(rawPacket);
+                if (rawPacket.isEmpty()) {
+                    sender.sendMessage(args[0] + " didn't send mods info");
+                } else {
+                    sender.sendMessage(rawPacket);
+                }
             } else {
                 sender.sendMessage(Component.text(args[0] + " is offline!"));
             }
-        }catch (IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             sender.sendMessage("You need to specify a player!");
         }
     }), ((commandSender, command, label, argsAfterLastCommand) -> Util.getOnlinePlayers())));
@@ -69,7 +79,7 @@ public class ModObserverCommandArgs {
             new ModObserverCommandArg("reload", (sender, command, label, args) -> {
                 ModObserver.getInstance().reloadConfig();
                 Config.init(ModObserver.getInstance().getConfig());
-                sender.sendMessage("Config was reloaded.");
+                sender.sendMessage("Config was reloaded");
             })
     ), ((sender, command, label, args) -> sender.sendMessage(Component.text("Usage: /modObserver config reload", NamedTextColor.RED)))));
 
@@ -85,7 +95,7 @@ public class ModObserverCommandArgs {
                         Config.setMode(Config.Mode.WHITELIST);
                         sender.sendMessage("Current mode was set to: whitelist");
                     })
-            ), (sender, command, label, args) -> sender.sendMessage(Component.text("Use blacklist or whitelist.", NamedTextColor.RED))),
+            ), (sender, command, label, args) -> sender.sendMessage(Component.text("Use blacklist or whitelist", NamedTextColor.RED))),
             new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Current mode is: " + Config.getMode().getName()))
     ), (sender, command, label, args) -> sender.sendMessage(Component.text("Usage: /modObserver mode show\\switch whitelist\\blacklist", NamedTextColor.RED))));
 
@@ -98,7 +108,7 @@ public class ModObserverCommandArgs {
                     list.addAll(List.of(args));
                     Config.setIgnoredPlayers(list);
 
-                    sender.sendMessage("Added " + Arrays.toString(args) + " to Ignored players list.");
+                    sender.sendMessage("Added " + Arrays.toString(args) + " to Ignored players list");
                 } else {
                     sender.sendMessage(Component.text("You need to add at least one value after \"add\"", NamedTextColor.RED));
                 }
@@ -109,19 +119,54 @@ public class ModObserverCommandArgs {
                     list.removeAll(List.of(args));
                     Config.setIgnoredPlayers(list);
 
-                    sender.sendMessage("Removed " + Arrays.toString(args) + " from Ignored players list.");
+                    sender.sendMessage("Removed " + Arrays.toString(args) + " from Ignored players list");
                 } else {
                     sender.sendMessage(Component.text("You need to add at least one value after \"remove\"", NamedTextColor.RED));
                 }
             }),
             new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Ignored players list: " + Config.getIgnoredPlayers())),
-            new ConfirmCommandArg("clear", 10, Component.text("Are you sure you want to clear Ignored players list? All the entries in this list will be removed!\n" +
-                    "Proceed by repeating the command.", NamedTextColor.RED),
+            new ConfirmCommandArg("reset", 10, Component.text("Are you sure you want to clear Ignored players list? All the entries in this list will be removed!\n" +
+                    "Proceed by repeating the command", NamedTextColor.RED),
                     (sender, command, label, args) -> {
                         Config.setIgnoredPlayers(List.of());
-                        sender.sendMessage("Ignored players list was cleared.");
+                        sender.sendMessage("Ignored players list was cleared");
                     })
     ), (sender, command, label, args) -> sender.sendMessage(Component.text("/modObserver ignoredPlayers show\\add {playername} ...\\remove {playername} ...\\addAll\\removeAll\\reset", NamedTextColor.RED))));
+
+
+    //Blacklisted players
+    public static final ModObserverCommandArg BLACKLISTED_PLAYERS = registerCommandArg(new ModObserverCommandArg("blacklistedPlayers", List.of(
+            new ModObserverCommandArg("add", (sender, command, label, args) -> {
+                if (args.length > 0) {
+                    List<String> list = Config.getBlacklistedPlayers();
+                    list.removeAll(List.of(args));
+                    list.addAll(List.of(args));
+                    Config.setBlacklistedPlayers(list);
+
+                    sender.sendMessage("Added " + Arrays.toString(args) + " to Blacklist");
+                } else {
+                    sender.sendMessage(Component.text("You need to add at least one value after \"add\"", NamedTextColor.RED));
+                }
+            }),
+            new ModObserverCommandArg("remove", (sender, command, label, args) -> {
+                if (args.length > 0) {
+                    List<String> list = Config.getBlacklistedPlayers();
+                    list.removeAll(List.of(args));
+                    Config.setBlacklistedPlayers(list);
+
+                    sender.sendMessage("Removed " + Arrays.toString(args) + " from Blacklist");
+                } else {
+                    sender.sendMessage(Component.text("You need to add at least one value after \"remove\"", NamedTextColor.RED));
+                }
+            }),
+            new ModObserverCommandArg("show", (sender, command, label, args) -> sender.sendMessage("Blacklisted players: " + Config.getBlacklistedPlayers())),
+            new ConfirmCommandArg("reset", 10, Component.text("Are you sure you want to clear the Blacklist? All the entries in this list will be removed!\n" +
+                    "Proceed by repeating the command", NamedTextColor.RED),
+                    (sender, command, label, args) -> {
+                        Config.setIgnoredPlayers(List.of());
+                        sender.sendMessage("Blacklist was cleared");
+                    })
+    ), (sender, command, label, args) -> sender.sendMessage(Component.text("/modObserver blacklistedPlayers show\\add {playername} ...\\remove {playername} ...\\addAll\\removeAll\\reset", NamedTextColor.RED))));
 
 
     public static ModObserverCommandArg registerCommandArg(ModObserverCommandArg arg) {

@@ -140,7 +140,6 @@ public class ConfigGeneratorScreen extends Screen {
         return fabricApiWidget.isChecked();
     }
 
-    @Override
     protected void refreshWidgetPositions() {
         SimplePositioningWidget.setPos(this.grid, this.getNavigationFocus());
         this.layout.refreshPositions();

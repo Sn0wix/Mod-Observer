@@ -37,7 +37,6 @@ public class IncompatibleModsScreen extends Screen {
         this.refreshWidgetPositions();
     }
 
-    @Override
     protected void refreshWidgetPositions() {
         SimplePositioningWidget.setPos(this.grid, this.getNavigationFocus());
     }

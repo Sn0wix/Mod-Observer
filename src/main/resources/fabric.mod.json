@@ -9,9 +9,10 @@
   ],
   "contact": {
     "homepage": "https://modrinth.com/mod/mod-observer",
-    "issues": "https://curseforge.com/minecraft/mc-mods/mod-observer/issues"
+    "issues": "https://github.com/Sn0wix/Mod-Observer/issues",
+    "sources": "https://github.com/Sn0wix/Mod-Observer"
   },
-  "license": "All rights reserved",
+  "license": "MIT",
   "icon": "assets/mod_observer/icon.png",
   "environment": "client",
   "entrypoints": {

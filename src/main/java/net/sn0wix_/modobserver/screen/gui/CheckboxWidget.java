@@ -12,6 +12,7 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.MultilineTextWidget;
 import net.minecraft.client.gui.widget.PressableWidget;
 import net.minecraft.client.option.SimpleOption;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
@@ -96,7 +97,7 @@ public class CheckboxWidget extends PressableWidget {
         }
 
         int i = getCheckboxSize(textRenderer);
-        context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, identifier, this.getX(), this.getY(), i, i, ColorHelper.getWhite(this.alpha));
+        context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, identifier, this.getX(), this.getY(), i, i);
         int j = this.getX() + i + 4;
         int k = this.getY() + i / 2 - this.textWidget.getHeight() / 2;
         this.textWidget.setPosition(j, k);

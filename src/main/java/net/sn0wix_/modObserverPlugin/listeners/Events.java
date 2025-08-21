@@ -11,7 +11,7 @@ import org.bukkit.event.player.*;
 
 public class Events implements Listener {
     //Lowest priority to keep the join message set to ""
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void join(PlayerJoinEvent event) {
         if (!Util.checkIncomingPlayer(event.getPlayer())) {
             event.setJoinMessage("");
@@ -28,13 +28,13 @@ public class Events implements Listener {
         if (event.getResult().equals(PlayerLoginEvent.Result.ALLOWED)) {
             IncomingPlayers.addPlayer(event.getPlayer().getName());
 
-            if (Config.IGNORED_PLAYERS.contains(event.getPlayer().getName())) {
+            if (Config.IGNORED_PLAYERS.contains(event.getPlayer().getName()) || (!Config.MODOBSERVER_REQUIRED && !Config.BLACKLISTED_PLAYERS.contains(event.getPlayer().getName()))) {
                 IncomingPlayers.setApproved(event.getPlayer().getName());
             }
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void quit(PlayerQuitEvent event) {
         OnlinePlayersToCheck.removePlayer(event.getPlayer().getName());
         if (IncomingPlayers.containsPlayer(event.getPlayer().getName())) {

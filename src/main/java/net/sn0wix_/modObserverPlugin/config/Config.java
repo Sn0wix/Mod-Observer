@@ -15,9 +15,11 @@ public class Config {
     public static String PROHIBITED_MODS_FOUND_MESSAGE;
     public static String MOD_OBSERVER_REQUIRED_MESSAGE;
     public static ArrayList<String> IGNORED_PLAYERS;
+    public static ArrayList<String> BLACKLISTED_PLAYERS;
     public static boolean ALLOW_VERIFICATION_TIMER;
     public static int VERIFICATION_TIMER_DELAY;
     public static Boolean ALLOW_COMMAND_INTERFACE;
+    public static Boolean MODOBSERVER_REQUIRED;
 
 
     private static final String MODE_PATH = "mode";
@@ -28,9 +30,11 @@ public class Config {
     private static final String PROHIBITED_MODS_FOUND_MESSAGE_PATH = "prohibited_mods_found_message";
     private static final String MOD_OBSERVER_REQUIRED_MESSAGE_PATH = "mod_observer_required_message";
     private static final String IGNORED_PLAYERS_PATH = "ignored_players";
+    private static final String BLACKLISTED_PLAYERS_PATH = "blacklisted_players";
     private static final String ALLOW_VERIFICATION_TIMER_PATH = "allow_verification_timer";
     private static final String VERIFICATION_TIMER_VALUE_PATH = "verification_timer_delay_in_sec";
     private static final String ALLOW_COMMAND_INTERFACE_PATH = "allow_command_interface";
+    private static final String MODOBSERVER_REQUIRED_PATH = "modobserver_required";
 
     public static void loadDefaults(FileConfiguration config) {
         String mode = config.getString(MODE_PATH);
@@ -53,9 +57,11 @@ public class Config {
             PROHIBITED_MODS_FOUND_MESSAGE = config.getDefaults().getString(PROHIBITED_MODS_FOUND_MESSAGE_PATH);
             MOD_OBSERVER_REQUIRED_MESSAGE = config.getDefaults().getString(MOD_OBSERVER_REQUIRED_MESSAGE_PATH);
             IGNORED_PLAYERS = (ArrayList<String>) config.getDefaults().getStringList(IGNORED_PLAYERS_PATH);
+            BLACKLISTED_PLAYERS = (ArrayList<String>) config.getDefaults().getStringList(BLACKLISTED_PLAYERS_PATH);
             ALLOW_VERIFICATION_TIMER = config.getDefaults().getBoolean(ALLOW_VERIFICATION_TIMER_PATH);
             VERIFICATION_TIMER_DELAY = config.getDefaults().getInt(VERIFICATION_TIMER_VALUE_PATH);
             ALLOW_COMMAND_INTERFACE = config.getDefaults().getBoolean(ALLOW_COMMAND_INTERFACE_PATH);
+            MODOBSERVER_REQUIRED = config.getDefaults().getBoolean(MODOBSERVER_REQUIRED_PATH);
         } catch (NullPointerException e) {
             ModObserverPlugin.LOGGER.warning("Can not load config defaults! Try deleting current config file to load them. If the issue persists, download the plugin again.");
         }
@@ -84,9 +90,11 @@ public class Config {
         PROHIBITED_MODS_FOUND_MESSAGE = config.getString(PROHIBITED_MODS_FOUND_MESSAGE_PATH);
         MOD_OBSERVER_REQUIRED_MESSAGE = config.getString(MOD_OBSERVER_REQUIRED_MESSAGE_PATH);
         IGNORED_PLAYERS = (ArrayList<String>) config.getStringList(IGNORED_PLAYERS_PATH);
+        BLACKLISTED_PLAYERS = (ArrayList<String>) config.getStringList(BLACKLISTED_PLAYERS_PATH);
         ALLOW_VERIFICATION_TIMER = config.getBoolean(ALLOW_VERIFICATION_TIMER_PATH);
         VERIFICATION_TIMER_DELAY = config.getInt(VERIFICATION_TIMER_VALUE_PATH);
         ALLOW_COMMAND_INTERFACE = config.getBoolean(ALLOW_COMMAND_INTERFACE_PATH);
+        MODOBSERVER_REQUIRED = config.getBoolean(MODOBSERVER_REQUIRED_PATH);
         saveValues(ModObserverPlugin.CONFIG);
     }
 
@@ -104,6 +112,8 @@ public class Config {
         config.setComments(IGNORED_PLAYERS_PATH, List.of("Players that bypass the mod check. Use player names, not uuids."));
         config.setComments(ALLOW_VERIFICATION_TIMER_PATH, List.of("Checks online players consistently every x seconds"));
         config.setComments(ALLOW_COMMAND_INTERFACE_PATH, List.of("You can turn off commands used to configure this plugin. Updating this option requires server restart.", "If you turn this off, /modobserver will still show up in the commands list, but it won't do anything."));
+        config.setComments(MODOBSERVER_REQUIRED_PATH, List.of("If this setting is set to false, players don't need to have ModObserver installed"));
+        config.setComments(BLACKLISTED_PLAYERS_PATH, List.of("If modobserver_required is set to false, you can use this list to force specific players to use ModObserver"));
 
         //Values
         config.set(MODE_PATH, MODE.getName());
@@ -114,9 +124,11 @@ public class Config {
         config.set(PROHIBITED_MODS_FOUND_MESSAGE_PATH, PROHIBITED_MODS_FOUND_MESSAGE);
         config.set(MOD_OBSERVER_REQUIRED_MESSAGE_PATH, MOD_OBSERVER_REQUIRED_MESSAGE);
         config.set(IGNORED_PLAYERS_PATH, IGNORED_PLAYERS);
+        config.set(BLACKLISTED_PLAYERS_PATH, BLACKLISTED_PLAYERS);
         config.set(ALLOW_VERIFICATION_TIMER_PATH, ALLOW_VERIFICATION_TIMER);
         config.set(VERIFICATION_TIMER_VALUE_PATH, VERIFICATION_TIMER_DELAY);
         config.set(ALLOW_COMMAND_INTERFACE_PATH, ALLOW_COMMAND_INTERFACE);
+        config.set(MODOBSERVER_REQUIRED_PATH, MODOBSERVER_REQUIRED);
     }
 
 

@@ -11,7 +11,7 @@
 		"homepage": "https://modrinth.com/mod/mod-observer",
 		"issues": "https://curseforge.com/minecraft/mc-mods/mod-observer/issues"
 	},
-	"license": "All rights reserved",
+	"license": "MIT",
 	"icon": "assets/mod_observer/icon.png",
 	"environment": "client",
 	"entrypoints": {
@@ -24,7 +24,7 @@
 	],
 	"depends": {
 		"fabricloader": "*",
-		"minecraft": ">=1.21.4",
+		"minecraft": ">=1.21 <=1.21.6",
 		"java": "*",
 		"fabric-api": "*"
 	},

@@ -8,10 +8,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Utils {
     public static Set<String> getMods() throws TamperingErrorScreen.TamperingException {
@@ -56,7 +53,7 @@ public class Utils {
                 set.add(builder.getValidId());
             } else if (!builder.mixins.isEmpty()) {
                 if (!(builder.icon.contains(modid) || builder.hasMixinsWithId(modid)) && !(builder.name.toLowerCase().replace(" ", "").equals(modid) || builder.name.toLowerCase().replace(" ", "-").equals(modid) || builder.name.toLowerCase().replace(" ", "_").equals(modid))) {
-                    if (!builder.bl) {
+                    if (!builder.bl && !isFabricApi(modid) && !modid.equals("completedshieldfix"/*There is no way of detecting it otherwise*/)) {
                         throw new TamperingErrorScreen.TamperingException(modid);
                     }
                 }
@@ -66,5 +63,21 @@ public class Utils {
         }
 
         return set;
+    }
+
+    public static boolean isFabricApi(String modid) {
+        if (List.of("mixinextras", "minecraft", "fabric-api", "fabric-api-base", "fabricloader", "java", "fabric-renderer-indigo").contains(modid)) {
+            return true;
+        }
+
+        //fabric-[something]-v[number]
+        try {
+            Integer.parseInt(String.valueOf(modid.charAt(modid.length() - 1)));
+        } catch (NumberFormatException ignored) {
+            //last char is not a number
+            return false;
+        }
+
+        return modid.startsWith("fabric-") && modid.lastIndexOf("-v") == modid.length() - 3;
     }
 }

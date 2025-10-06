@@ -15,57 +15,60 @@ public class Utils {
         HashMap<String, EntrypointBuilder> containers = new HashMap<>(FabricLoader.getInstance().getAllMods().size());
 
         FabricLoaderImpl.INSTANCE.getModsInternal().forEach(modContainer -> {
-            EntrypointBuilder builder = new EntrypointBuilder().addIconPath(modContainer.getMetadata().getIconPath(128)).setName(modContainer.getMetadata().getName());
+            EntrypointBuilder builder = null;
 
-            try {
-                modContainer.getMetadata().getMixinConfigs(EnvType.CLIENT).forEach(builder::addMixin);
-                modContainer.getMetadata().getMixinConfigs(EnvType.SERVER).forEach(builder::addMixin);
-                modContainer.getMetadata().getCustomValue("modmenu").getAsObject().get("badges").getAsArray().forEach(builder::setBl);
-            } catch (Exception ignored) {
+            if (modContainer.getContainingMod().isEmpty()) {
+                builder = new EntrypointBuilder().addIconPath(modContainer.getMetadata().getIconPath(128)).setName(modContainer.getMetadata().getName());
+
+                try {
+                    modContainer.getMetadata().getMixinConfigs(EnvType.CLIENT).forEach(builder::addMixin);
+                    modContainer.getMetadata().getMixinConfigs(EnvType.SERVER).forEach(builder::addMixin);
+                    modContainer.getMetadata().getCustomValue("modmenu").getAsObject().get("badges").getAsArray().forEach(builder::checkLibraryBadge);
+                } catch (Exception ignored) {
+                }
             }
 
             containers.put(modContainer.getMetadata().getId(), builder);
         });
 
-        Class<?>[] classes = new Class<?>[]{DedicatedServerModInitializer.class, ClientModInitializer.class, ModInitializer.class};
-        String[] strings = new String[]{"server", "client", "main"};
+        Class<?>[] entryClasses = new Class<?>[]{DedicatedServerModInitializer.class, ClientModInitializer.class, ModInitializer.class};
+        String[] entryPoints = new String[]{"server", "client", "main"};
 
-        for (int i = 0; i < strings.length; i++) {
-            FabricLoader.getInstance().getEntrypointContainers(strings[i], classes[i]).forEach(modContainer -> {
-                EntrypointBuilder builder = containers.get(modContainer.getProvider().getMetadata().getId()) == null ? new EntrypointBuilder() : containers.get(modContainer.getProvider().getMetadata().getId());
-
-                try {
-                    builder.addId(Path.of(modContainer.getDefinition().split("::")[0].replace('.', '/') + ".class"));
-                } catch (Exception e) {
-                    ModObserver.LOGGER.info("You can pretty much ignore this.");
-                    e.printStackTrace();
+        for (int i = 0; i < entryPoints.length; i++) {
+            FabricLoader.getInstance().getEntrypointContainers(entryPoints[i], entryClasses[i]).forEach(modContainer -> {
+                EntrypointBuilder builder = containers.get(modContainer.getProvider().getMetadata().getId());
+                if (builder != null) {
+                    try {
+                        builder.addId(Path.of(modContainer.getDefinition().split("::")[0].replace('.', '/') + ".class"));
+                    } catch (Exception e) {
+                        ModObserver.LOGGER.info("You can pretty much ignore this.");
+                        e.printStackTrace();
+                    }
                 }
             });
         }
 
-        Set<String> set = new LinkedHashSet<>(containers.keySet().size());
-
         for (Map.Entry<String, EntrypointBuilder> entry : containers.entrySet()) {
-            EntrypointBuilder builder = entry.getValue();
             String modid = entry.getKey();
+            EntrypointBuilder builder = entry.getValue();
 
-            if (!builder.modids.isEmpty()) {
-                set.add(builder.getValidId());
-            } else if (!builder.mixins.isEmpty()) {
-                if (!(builder.icon.contains(modid) || builder.hasMixinsWithId(modid))
-                        && !(builder.name.toLowerCase().replace(" ", "").equals(modid)
+            if (builder != null && !builder.hasLibraryBadge() && !isFabricApi(modid)) {
+                boolean mainClassModid = builder.isValidId(modid); //The class contains a string field called MODID with the correct id
+                boolean mixins = (builder.mixins.isEmpty() || builder.hasMixinsWithId(modid)); //If the mod has mixins, search for it's modid in the class path
+                boolean iconPath = builder.icon.contains(modid); //modid in the mod's icon path
+
+                boolean matchesName = builder.name.toLowerCase().replace(" ", "").equals(modid)
                         || builder.name.toLowerCase().replace(" ", "-").equals(modid)
-                        || builder.name.toLowerCase().replace(" ", "_").equals(modid))) {
-                    if (!builder.bl && !isFabricApi(modid) && !modid.equals("completedshieldfix"/*There is no way of detecting it otherwise*/)) {
-                        throw new TamperingErrorScreen.TamperingException(modid);
-                    }
-                }
+                        || builder.name.toLowerCase().replace(" ", "_").equals(modid);
 
-                set.add(modid);
+                if (!(mainClassModid || mixins || iconPath || matchesName)
+                        && !modid.equals("completedshieldfix"/*There is no way of detecting it otherwise*/)) {
+                    throw new TamperingErrorScreen.TamperingException(modid);
+                }
             }
         }
 
-        return set;
+        return containers.keySet();
     }
 
     public static boolean isFabricApi(String modid) {

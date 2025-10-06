@@ -24,7 +24,7 @@
 	],
 	"depends": {
 		"fabricloader": "*",
-		"minecraft": ">=1.21.7",
+		"minecraft": ">=1.21",
 		"java": "*",
 		"fabric-api": "*"
 	},
@@ -38,7 +38,7 @@
 				"link.mod_observer.modrinth": "https://modrinth.com/mod/mod-observer",
 				"modmenu.discord": "https://discord.gg/nNYHDryaj3"
 			},
-			"update_checker": true
+			"update_checker": false
 		}
 	}
 }

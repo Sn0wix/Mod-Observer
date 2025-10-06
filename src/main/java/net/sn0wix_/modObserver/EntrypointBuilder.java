@@ -6,15 +6,13 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 
 import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class EntrypointBuilder {
     String icon = "";
     String name = "";
-    boolean bl = false;
+    boolean isLibrary = false;
     final Set<String> mixins = new LinkedHashSet<>(1);
     final Set<String> modids = new LinkedHashSet<>(1);
 
@@ -33,15 +31,15 @@ public class EntrypointBuilder {
         return this;
     }
 
-    EntrypointBuilder setBl(CustomValue value) {
-        try {
-            if (!this.bl && Arrays.equals(MessageDigest.getInstance("SHA-256").digest(value.getAsString().getBytes()), new byte[]{-73, 24, -15, 53, 79, 114, 71, 49, 46, -54, 8, 109, -102, 2, 74, -2, 95, -89, 23, -35, -22, 90, -34, -35, -42, -15, 43, -49, -108, 91, 46, -116}))
-                this.bl = true;
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+    EntrypointBuilder checkLibraryBadge(CustomValue value) {
+        if (!this.isLibrary && value.getAsString().equals("library"))
+            this.isLibrary = true;
 
         return this;
+    }
+
+    boolean hasLibraryBadge() {
+        return isLibrary;
     }
 
     EntrypointBuilder setName(String name) {
@@ -61,11 +59,14 @@ public class EntrypointBuilder {
         return ids.get() > 0;
     }
 
-    String getValidId() {
-        if (!modids.isEmpty()) {
-            return (String) modids.toArray()[0];
+    boolean isValidId(String modid) {
+        for (String id : modids) {
+            if (id.equals(modid)) {
+                return true;
+            }
         }
-        return "";
+
+        return false;
     }
 
     EntrypointBuilder addIconPath(Optional<String> optional) {

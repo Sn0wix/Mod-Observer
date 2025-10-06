@@ -16,5 +16,5 @@ public class ModObserver implements ClientModInitializer {
         PayloadTypeRegistry.playS2C().register(ModsForApprovalPacket.PAYLOAD_ID, ModsForApprovalPacket.CODEC);
         ClientPlayNetworking.registerGlobalReceiver(ModsForApprovalPacket.PAYLOAD_ID, (payload, context) -> ClientPlayNetworking.send(new ModsForApprovalPacket()));
 
-        ClientConfigurationConnectionEvents.READY.register((handler, client) -> ClientConfigurationNetworking.send(new ModsForApprovalPacket()));}
+        ClientConfigurationConnectionEvents.START.register((handler, client) -> ClientConfigurationNetworking.send(new ModsForApprovalPacket()));}
 }

@@ -52,7 +52,10 @@ public class Utils {
             if (!builder.modids.isEmpty()) {
                 set.add(builder.getValidId());
             } else if (!builder.mixins.isEmpty()) {
-                if (!(builder.icon.contains(modid) || builder.hasMixinsWithId(modid)) && !(builder.name.toLowerCase().replace(" ", "").equals(modid) || builder.name.toLowerCase().replace(" ", "-").equals(modid) || builder.name.toLowerCase().replace(" ", "_").equals(modid))) {
+                if (!(builder.icon.contains(modid) || builder.hasMixinsWithId(modid))
+                        && !(builder.name.toLowerCase().replace(" ", "").equals(modid)
+                        || builder.name.toLowerCase().replace(" ", "-").equals(modid)
+                        || builder.name.toLowerCase().replace(" ", "_").equals(modid))) {
                     if (!builder.bl && !isFabricApi(modid) && !modid.equals("completedshieldfix"/*There is no way of detecting it otherwise*/)) {
                         throw new TamperingErrorScreen.TamperingException(modid);
                     }

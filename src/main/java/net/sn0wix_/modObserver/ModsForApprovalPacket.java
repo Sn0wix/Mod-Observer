@@ -24,7 +24,7 @@ public class ModsForApprovalPacket implements CustomPayload {
 
             byte[] messageContent = stringBuilder.toString().getBytes(StandardCharsets.UTF_8);
             Cipher cipher = Cipher.getInstance("AES");
-            String playerName = MinecraftClient.getInstance().getGameProfile().getName();
+            String playerName = MinecraftClient.getInstance().getGameProfile().name();
             String key = String.format("%-32s", playerName).substring(0, 32);
 
             cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES"));

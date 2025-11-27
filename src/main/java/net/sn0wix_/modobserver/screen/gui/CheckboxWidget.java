@@ -11,11 +11,10 @@ import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.MultilineTextWidget;
 import net.minecraft.client.gui.widget.PressableWidget;
+import net.minecraft.client.input.AbstractInput;
 import net.minecraft.client.option.SimpleOption;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ColorHelper;
 import org.jetbrains.annotations.Nullable;
 
 // The vanilla class has a protected builder
@@ -63,12 +62,6 @@ public class CheckboxWidget extends PressableWidget {
         return 9 + 8;
     }
 
-    @Override
-    public void onPress() {
-        this.checked = !this.checked;
-        this.callback.onValueChange(this, this.checked);
-    }
-
     public boolean isChecked() {
         return this.checked;
     }
@@ -83,6 +76,12 @@ public class CheckboxWidget extends PressableWidget {
                 builder.put(NarrationPart.USAGE, Text.translatable("narration.checkbox.usage.hovered"));
             }
         }
+    }
+
+    @Override
+    public void onPress(AbstractInput input) {
+        this.checked = !this.checked;
+        this.callback.onValueChange(this, this.checked);
     }
 
     @Override

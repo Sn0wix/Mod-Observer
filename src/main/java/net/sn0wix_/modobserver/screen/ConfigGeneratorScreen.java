@@ -2,6 +2,7 @@ package net.sn0wix_.modobserver.screen;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.*;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import net.sn0wix_.modobserver.ModObserver;
@@ -45,7 +46,7 @@ public class ConfigGeneratorScreen extends Screen {
 
     protected void initHeader() {
         DirectionalLayoutWidget column = DirectionalLayoutWidget.vertical();
-        column.add(new TextWidget(textRenderer.getWidth(this.title), 9, this.title, this.textRenderer).alignCenter());
+        column.add(new TextWidget(textRenderer.getWidth(this.title), 9, this.title, this.textRenderer));
 
         this.layout.addHeader(column);
     }
@@ -56,10 +57,10 @@ public class ConfigGeneratorScreen extends Screen {
         fabricApiWidget = new CheckboxWidget.Builder(Text.translatable("text.mod_observer.include.fabric_api"), textRenderer).build();
         hashesWidget = new CheckboxWidget.Builder(Text.translatable("text.mod_observer.include.hashes"), textRenderer).build();
 
-        modmenuWidget.onPress();
-        childrenWidget.onPress();
-        fabricApiWidget.onPress();
-        hashesWidget.onPress();
+        modmenuWidget.onPress(new KeyInput(0, 0, 0)); //the values don't matter
+        childrenWidget.onPress(new KeyInput(0, 0, 0));
+        fabricApiWidget.onPress(new KeyInput(0, 0, 0));
+        hashesWidget.onPress(new KeyInput(0, 0, 0));
 
         grid.add(modmenuWidget);
         grid.add(hashesWidget);

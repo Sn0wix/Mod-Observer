@@ -3,7 +3,7 @@
   "id": "mod_observer",
   "version": "${version}",
   "name": "Mod Observer",
-  "description": "Monitors the mods you have installed and sends that information to the server when you join.",
+  "description": "Monitors the mods you have installed and sends that information to the server upon joining.",
   "authors": [
     "Sn0wix_"
   ],
@@ -28,7 +28,7 @@
   ],
   "depends": {
     "fabricloader": "*",
-    "minecraft": ">=1.21.7",
+    "minecraft": ">=1.21.9",
     "java": "*",
     "fabric-api": "*"
   },

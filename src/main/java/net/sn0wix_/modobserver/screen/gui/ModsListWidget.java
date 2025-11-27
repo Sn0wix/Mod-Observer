@@ -6,6 +6,7 @@ import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
@@ -16,7 +17,6 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
@@ -86,12 +86,11 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
         public TitleEntry(IllegalStates state) {
             title = new TextWidget(state.getTranslation(), client.textRenderer) {
                 @Override
-                public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                public boolean mouseClicked(Click click, boolean doubled) {
                     return false;
                 }
             };
 
-            title.alignCenter();
             title.setTooltip(state.getTooltip());
             title.setTextColor(Colors.YELLOW);
             title.active = true;
@@ -108,9 +107,9 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            title.setPosition(entryWidth / 2 - title.getWidth() / 2, y + entryHeight / 2 - 9 / 2);
-            title.render(context, mouseX, mouseY, tickProgress);
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float deltaTicks) {
+            title.setPosition(getContentWidth() / 2 - title.getWidth() / 2, getContentY() + getContentHeight() / 2 - 9 / 2);
+            title.render(context, mouseX, mouseY, deltaTicks);
         }
     }
 
@@ -140,7 +139,7 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
                 Path path = modContainer.get().getOrigin().getPaths().getFirst();
                 this.name = new TextWidget(Text.literal(container.name()), textRenderer) {
                     @Override
-                    public void onClick(double mouseX, double mouseY) {
+                    public void onClick(Click click, boolean doubled) {
                         try {
                             Util.getOperatingSystem().open(modContainer.get().getOrigin().getPaths().getFirst().getParent());
                         } catch (Exception e) {
@@ -183,28 +182,28 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float deltaTicks) {
             int resetButtonPos = ModsListWidget.this.getScrollbarX() - this.issuesButton.getWidth() - 8;
-            int j = y - 2;
+            int j = getContentY() - 2;
             int startPos = getWidth() / 2 - maxKeyNameLength;
 
             if (startPos < 10) {
                 startPos = 10;
             }
 
-            name.setPosition(startPos + (ModObserver.HAS_MODMENU ? 25 : 0), y + entryHeight / 2 - 9 / 2);
-            name.render(context, mouseX, mouseY, tickProgress);
+            name.setPosition(startPos + (ModObserver.HAS_MODMENU ? 25 : 0), getContentY() + getContentHeight() / 2 - 9 / 2);
+            name.render(context, mouseX, mouseY, deltaTicks);
 
             if (ModObserver.HAS_MODMENU) {
-                context.drawTexture(RenderPipelines.GUI_TEXTURED, getIconTexture(), startPos, y, 0, 0, 20, 20, 20, 20);
+                context.drawTexture(RenderPipelines.GUI_TEXTURED, getIconTexture(), startPos, getContentY(), 0, 0, 20, 20, 20, 20);
             }
 
             issuesButton.setPosition(resetButtonPos, j);
-            issuesButton.render(context, mouseX, mouseY, tickProgress);
+            issuesButton.render(context, mouseX, mouseY, deltaTicks);
 
             int editButtonPos = resetButtonPos - 8 - this.homepageButton.getWidth();
             homepageButton.setPosition(editButtonPos, j);
-            homepageButton.render(context, mouseX, mouseY, tickProgress);
+            homepageButton.render(context, mouseX, mouseY, deltaTicks);
         }
 
         public Identifier getIconTexture() {

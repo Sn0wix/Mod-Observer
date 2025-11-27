@@ -46,7 +46,7 @@ public class ModsScreen extends Screen {
 
     protected void initHeader() {
         DirectionalLayoutWidget column = DirectionalLayoutWidget.vertical().spacing(10);
-        column.add(new TextWidget(textRenderer.getWidth(this.title), 9, this.title, this.textRenderer).alignCenter());
+        column.add(new TextWidget(textRenderer.getWidth(this.title), 9, this.title, this.textRenderer));
 
         this.layout.addHeader(column);
     }

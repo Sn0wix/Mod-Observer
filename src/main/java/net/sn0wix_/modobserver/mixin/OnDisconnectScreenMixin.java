@@ -8,6 +8,7 @@ import net.minecraft.text.Text;
 import net.sn0wix_.modobserver.detection.IllegalStates;
 import net.sn0wix_.modobserver.screen.IncompatibleModsScreen;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -26,20 +27,38 @@ public class OnDisconnectScreenMixin {
         MutableText reasonCopy = reason.copy();
         List<Text> siblings = reasonCopy.getSiblings();
 
-        if (siblings.isEmpty()) {
-            return;
+        Text currentSibling = siblings.getLast();
+
+        while (currentSibling.getSiblings().toArray().length != 0) {
+            currentSibling = currentSibling.getSiblings().getLast();
         }
 
-        Text last = siblings.getLast();
-        String lastStr = last.getString();
+        String lastStr = currentSibling.getString();
 
         if (!lastStr.contains(IllegalStates.IDENTIFIER)) {
             return;
         }
 
         String jsonData = lastStr.replace(IllegalStates.IDENTIFIER, "");
-        siblings.removeLast();
+        cir.setReturnValue(new IncompatibleModsScreen(removeJsonData(reasonCopy), jsonData));
+    }
 
-        cir.setReturnValue(new IncompatibleModsScreen(reasonCopy, jsonData));
+    @Unique
+    private static MutableText removeJsonData(Text text) {
+        MutableText copy = text.copy();
+        copy.getSiblings().removeIf(text1 -> true);
+
+        List<Text> siblings = text.getSiblings();
+        for (Text sibling : siblings) {
+            MutableText mutableChild = removeJsonData(sibling);
+
+            if (mutableChild.getSiblings().isEmpty() && mutableChild.getString().contains(IllegalStates.IDENTIFIER)) {
+                continue;
+            }
+
+            copy.append(mutableChild);
+        }
+
+        return copy;
     }
 }

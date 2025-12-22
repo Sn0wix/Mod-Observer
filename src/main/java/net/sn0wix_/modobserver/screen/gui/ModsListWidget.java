@@ -84,7 +84,7 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
         private final TextWidget title;
 
         public TitleEntry(IllegalStates state) {
-            title = new TextWidget(state.getTranslation(), client.textRenderer) {
+            title = new TextWidget(state.getTranslation().copy().withColor(Colors.YELLOW), client.textRenderer) {
                 @Override
                 public boolean mouseClicked(Click click, boolean doubled) {
                     return false;
@@ -92,7 +92,6 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
             };
 
             title.setTooltip(state.getTooltip());
-            title.setTextColor(Colors.YELLOW);
             title.active = true;
         }
 
@@ -211,7 +210,6 @@ public class ModsListWidget extends ElementListWidget<ModsListWidget.Entry> {
                 if (this.iconLocation == null) {
                     this.iconLocation = Identifier.of(ModObserver.MOD_ID, container.modid() + "_icon");
                     NativeImageBackedTexture icon = ModMenuCompat.getIconImage(container.modid());
-                    icon.setFilter(false, false);
                     MinecraftClient.getInstance().getTextureManager().registerTexture(this.iconLocation, icon);
                 }
 

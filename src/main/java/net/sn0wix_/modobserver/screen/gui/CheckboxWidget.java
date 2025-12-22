@@ -36,7 +36,7 @@ public class CheckboxWidget extends PressableWidget {
     private CheckboxWidget(int x, int y, int maxWidth, Text message, TextRenderer textRenderer, boolean checked, CheckboxWidget.Callback callback) {
         super(x, y, 0, 0, message);
         this.width = this.calculateWidth(maxWidth, message, textRenderer);
-        this.textWidget = new MultilineTextWidget(message, textRenderer).setMaxWidth(this.width).setTextColor(-2039584);
+        this.textWidget = new MultilineTextWidget(message.copy().withColor(-2039584), textRenderer).setMaxWidth(this.width);
         this.height = this.calculateHeight(textRenderer);
         this.checked = checked;
         this.callback = callback;
@@ -85,7 +85,7 @@ public class CheckboxWidget extends PressableWidget {
     }
 
     @Override
-    public void renderWidget(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+    protected void drawIcon(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         MinecraftClient minecraftClient = MinecraftClient.getInstance();
         TextRenderer textRenderer = minecraftClient.textRenderer;
         Identifier identifier;
